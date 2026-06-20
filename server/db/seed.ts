@@ -31,6 +31,7 @@ const pilot10 = [
     path: 'Capital Access',
     products: [
       { name: 'Alliant Cashback Visa Signature', type: 'Unsecured Card', bureau_pulled: 'TransUnion', reports_to: 'Not verified — contact institution to confirm', inquiry_reuse_eligible: 'Yes', preapproval_available: 'No', minimum_credit_score: 690, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Pulls TransUnion. Inquiry reuse confirmed within 30 days.' },
+      { name: 'Visa Platinum', type: 'Unsecured Card', bureau_pulled: 'TransUnion', reports_to: 'Not verified — contact institution to confirm', inquiry_reuse_eligible: 'Yes', preapproval_available: 'No', minimum_credit_score: null, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Lower-tier Alliant card. Same TransUnion pull as Cashback Visa — stack both on one inquiry for lower-qualified profiles.' },
     ],
   },
   {
@@ -172,6 +173,42 @@ export async function seedDatabase(): Promise<void> {
     }
   }
   console.log(`Seeded ${pilot10.length} pilot institutions.`)
+}
+
+// Runs after initial seed to add products missing from already-deployed databases.
+// Each block is idempotent — checks by name before inserting.
+export async function seedProductUpdates(): Promise<void> {
+  const pool = getPool()
+
+  const missing: Array<{ institutionName: string; product: typeof pilot10[0]['products'][0] }> = [
+    {
+      institutionName: 'Alliant Credit Union',
+      product: { name: 'Visa Platinum', type: 'Unsecured Card', bureau_pulled: 'TransUnion', reports_to: 'Not verified — contact institution to confirm', inquiry_reuse_eligible: 'Yes', preapproval_available: 'No', minimum_credit_score: null, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Lower-tier Alliant card. Same TransUnion pull as Cashback Visa — stack both on one inquiry for lower-qualified profiles.' },
+    },
+  ]
+
+  for (const { institutionName, product: p } of missing) {
+    const { rows: instRows } = await pool.query('SELECT id FROM institutions WHERE name = $1', [institutionName])
+    if (!instRows[0]) continue
+    const institutionId = instRows[0].id as number
+    const { rows: existing } = await pool.query(
+      'SELECT id FROM products WHERE institution_id = $1 AND name = $2',
+      [institutionId, p.name]
+    )
+    if (existing.length > 0) continue
+    await pool.query(`
+      INSERT INTO products (institution_id, name, type, bureau_pulled, reports_to, inquiry_reuse_eligible,
+        preapproval_available, minimum_credit_score, deposit_amount, annual_fee, graduation_potential,
+        graduation_timeline, existing_customer_required, last_verified_date, strategy_notes)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+    `, [
+      institutionId, p.name, p.type, p.bureau_pulled, p.reports_to,
+      p.inquiry_reuse_eligible, p.preapproval_available, p.minimum_credit_score,
+      p.deposit_amount, p.annual_fee, p.graduation_potential, p.graduation_timeline,
+      p.existing_customer_required, VERIFIED_DATE, p.strategy_notes,
+    ])
+    console.log(`Added missing product: ${institutionName} — ${p.name}`)
+  }
 }
 
 export async function seedAdmin(): Promise<void> {

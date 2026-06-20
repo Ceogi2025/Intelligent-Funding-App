@@ -36,18 +36,12 @@ function ProductCard({ product }: { product: Product }) {
           <div className="detail-label">Bureau Pulled</div>
           <UnverifiedValue value={product.bureau_pulled} />
         </div>
-        <div>
-          <div className="detail-label">Reports To</div>
-          <UnverifiedValue value={product.reports_to} />
-        </div>
-        <div>
-          <div className="detail-label">Inquiry Reuse</div>
-          <div className="detail-value">{product.inquiry_reuse_eligible}</div>
-        </div>
-        <div>
-          <div className="detail-label">Preapproval</div>
-          <div className="detail-value">{product.preapproval_available}</div>
-        </div>
+        {(product.type === 'Secured Card' || product.type === 'Credit Builder Loan') && (
+          <div>
+            <div className="detail-label">Reports To</div>
+            <UnverifiedValue value={product.reports_to} />
+          </div>
+        )}
         {(product.type === 'Secured Card' || product.type === 'Credit Builder Loan') && (
           <>
             <div>

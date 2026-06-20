@@ -6,11 +6,12 @@ let pool: pg.Pool | null = null
 
 export function getPool(): pg.Pool {
   if (pool) return pool
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is required')
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL
+  if (!connectionString) {
+    throw new Error('DATABASE_URL or POSTGRES_URL environment variable is required')
   }
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     max: 10,
   })

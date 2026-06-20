@@ -18,7 +18,7 @@ export default function Landing() {
           Find institutions that pull from your strongest bureau and apply with confidence.
         </p>
         <button className="btn btn--primary btn--lg" onClick={() => navigate('/signup')}>
-          Start Free Trial — $1 for 7 Days
+          Get Started — $1 for 7 Days
         </button>
       </section>
 

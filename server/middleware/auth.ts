@@ -37,6 +37,8 @@ export function requireSubscription(req: AuthRequest, res: Response, next: NextF
   requireAuth(req, res, () => {
     if (!req.user) return
     if (req.user.role === 'admin') { next(); return }
+    // When Stripe is not configured, all authenticated users get full access
+    if (!process.env.STRIPE_SECRET_KEY) { next(); return }
 
     const pool = getPool()
     pool.query(

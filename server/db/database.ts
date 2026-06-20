@@ -6,14 +6,23 @@ let pool: pg.Pool | null = null
 
 export function getPool(): pg.Pool {
   if (pool) return pool
-  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL
+  // Vercel Neon integration creates POSTGRES_URL_NON_POOLING and POSTGRES_URL;
+  // non-pooling works better with pg.Pool in serverless environments
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.POSTGRES_URL
   if (!connectionString) {
-    throw new Error('DATABASE_URL or POSTGRES_URL environment variable is required')
+    throw new Error(
+      'No database URL found. Set DATABASE_URL, POSTGRES_URL_NON_POOLING, or POSTGRES_URL'
+    )
   }
   pool = new Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 10,
+    ssl: { rejectUnauthorized: false },
+    max: 3,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
   })
   return pool
 }

@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { getDb } from '../db/database.js'
+import { getPool } from '../db/database.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'if-dev-secret-change-in-production'
 
@@ -36,29 +36,28 @@ export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction
 export function requireSubscription(req: AuthRequest, res: Response, next: NextFunction): void {
   requireAuth(req, res, () => {
     if (!req.user) return
-    // Admin always passes
     if (req.user.role === 'admin') { next(); return }
 
-    const db = getDb()
-    const user = db.prepare('SELECT subscription_status, subscription_end_date FROM users WHERE id = ?').get(req.user.id) as {
-      subscription_status: string
-      subscription_end_date: string | null
-    } | undefined
-
-    if (!user || user.subscription_status === 'inactive') {
-      res.status(402).json({ error: 'Subscription required' })
-      return
-    }
-
-    if (user.subscription_status === 'trial' && user.subscription_end_date) {
-      const endDate = new Date(user.subscription_end_date)
-      if (new Date() > endDate) {
-        res.status(402).json({ error: 'Trial expired' })
+    const pool = getPool()
+    pool.query(
+      'SELECT subscription_status, subscription_end_date FROM users WHERE id = $1',
+      [req.user.id]
+    ).then(({ rows }) => {
+      const user = rows[0] as { subscription_status: string; subscription_end_date: string | null } | undefined
+      if (!user || user.subscription_status === 'inactive') {
+        res.status(402).json({ error: 'Subscription required' })
         return
       }
-    }
-
-    next()
+      if (user.subscription_status === 'trial' && user.subscription_end_date) {
+        if (new Date() > new Date(user.subscription_end_date)) {
+          res.status(402).json({ error: 'Trial expired' })
+          return
+        }
+      }
+      next()
+    }).catch(() => {
+      res.status(500).json({ error: 'Internal server error' })
+    })
   })
 }
 

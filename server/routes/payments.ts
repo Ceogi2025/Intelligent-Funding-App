@@ -1,14 +1,14 @@
-import { Router, Request, Response } from 'express'
+import { Router } from 'express'
+import type { Request, Response } from 'express'
 import Stripe from 'stripe'
-import { getDb } from '../db/database.js'
-import { requireAuth, AuthRequest } from '../middleware/auth.js'
+import { getPool } from '../db/database.js'
+import { requireAuth } from '../middleware/auth.js'
+import type { AuthRequest } from '../middleware/auth.js'
 
 const router = Router()
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY || ''
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || ''
-
-// Stripe price IDs — set these in .env after creating products in Stripe dashboard
 const PRICE_IDS = {
   trial: process.env.STRIPE_PRICE_TRIAL || '',
   monthly: process.env.STRIPE_PRICE_MONTHLY || '',
@@ -20,14 +20,12 @@ function getStripe(): Stripe {
   return new Stripe(STRIPE_SECRET)
 }
 
-// Create Stripe checkout session
 router.post('/create-checkout', requireAuth, async (req: AuthRequest, res: Response) => {
   const { plan } = req.body
   if (!['trial', 'monthly', 'annual'].includes(plan)) {
     res.status(400).json({ error: 'Invalid plan' })
     return
   }
-
   if (!STRIPE_SECRET) {
     res.status(503).json({ error: 'Payment processing not configured. Contact support.' })
     return
@@ -35,16 +33,15 @@ router.post('/create-checkout', requireAuth, async (req: AuthRequest, res: Respo
 
   try {
     const stripe = getStripe()
-    const db = getDb()
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as {
-      id: number; email: string; stripe_customer_id: string | null
-    }
+    const pool = getPool()
+    const { rows } = await pool.query('SELECT id, email, stripe_customer_id FROM users WHERE id = $1', [req.user!.id])
+    const user = rows[0] as { id: number; email: string; stripe_customer_id: string | null }
 
     let customerId = user.stripe_customer_id
     if (!customerId) {
       const customer = await stripe.customers.create({ email: user.email })
       customerId = customer.id
-      db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(customerId, user.id)
+      await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [customerId, user.id])
     }
 
     const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS]
@@ -57,7 +54,7 @@ router.post('/create-checkout', requireAuth, async (req: AuthRequest, res: Respo
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: plan === 'trial' ? 'subscription' : 'subscription',
+      mode: 'subscription',
       success_url: `${process.env.APP_URL || 'http://localhost:5173'}/home?payment=success`,
       cancel_url: `${process.env.APP_URL || 'http://localhost:5173'}/?payment=cancelled`,
       metadata: { user_id: String(user.id), plan },
@@ -70,70 +67,57 @@ router.post('/create-checkout', requireAuth, async (req: AuthRequest, res: Respo
   }
 })
 
-// Stripe webhook — handles subscription events
 router.post('/webhook', async (req: Request, res: Response) => {
-  if (!STRIPE_SECRET) {
-    res.status(200).send()
-    return
-  }
+  if (!STRIPE_SECRET) { res.status(200).send(); return }
 
   const stripe = getStripe()
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      req.headers['stripe-signature'] as string,
-      STRIPE_WEBHOOK_SECRET
-    )
-  } catch (err) {
+    event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'] as string, STRIPE_WEBHOOK_SECRET)
+  } catch {
     res.status(400).send()
     return
   }
 
-  const db = getDb()
+  const pool = getPool()
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.CheckoutSession
     const userId = session.metadata?.user_id
     const plan = session.metadata?.plan
-
     if (userId && plan) {
       const endDate = plan === 'trial'
         ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         : plan === 'monthly'
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-
-      db.prepare(`
-        UPDATE users SET subscription_status = ?, subscription_end_date = ?
-        WHERE id = ?
-      `).run(plan === 'trial' ? 'trial' : 'active', endDate, parseInt(userId))
+      await pool.query(
+        'UPDATE users SET subscription_status = $1, subscription_end_date = $2 WHERE id = $3',
+        [plan === 'trial' ? 'trial' : 'active', endDate, parseInt(userId)]
+      )
     }
   }
 
   if (event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription
-    const customer = db.prepare('SELECT id FROM users WHERE stripe_customer_id = ?').get(sub.customer as string)
-    if (customer) {
-      db.prepare("UPDATE users SET subscription_status = 'inactive' WHERE id = ?").run((customer as { id: number }).id)
+    const { rows } = await pool.query('SELECT id FROM users WHERE stripe_customer_id = $1', [sub.customer as string])
+    if (rows[0]) {
+      await pool.query("UPDATE users SET subscription_status = 'inactive' WHERE id = $1", [rows[0].id])
     }
   }
 
   res.status(200).send()
 })
 
-// Get customer portal link
 router.post('/portal', requireAuth, async (req: AuthRequest, res: Response) => {
-  if (!STRIPE_SECRET) {
-    res.status(503).json({ error: 'Payment not configured' })
-    return
-  }
+  if (!STRIPE_SECRET) { res.status(503).json({ error: 'Payment not configured' }); return }
 
   try {
     const stripe = getStripe()
-    const db = getDb()
-    const user = db.prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(req.user!.id) as { stripe_customer_id: string | null }
+    const pool = getPool()
+    const { rows } = await pool.query('SELECT stripe_customer_id FROM users WHERE id = $1', [req.user!.id])
+    const user = rows[0] as { stripe_customer_id: string | null }
 
     if (!user?.stripe_customer_id) {
       res.status(400).json({ error: 'No subscription found' })
@@ -147,6 +131,7 @@ router.post('/portal', requireAuth, async (req: AuthRequest, res: Response) => {
 
     res.json({ url: session.url })
   } catch (err) {
+    console.error('Portal error:', err)
     res.status(500).json({ error: 'Portal creation failed' })
   }
 })

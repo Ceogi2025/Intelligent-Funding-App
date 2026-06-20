@@ -21,7 +21,7 @@ export function getPool(): pg.Pool {
     connectionString,
     ssl: { rejectUnauthorized: false },
     max: 3,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 20000,
     idleTimeoutMillis: 30000,
   })
   return pool

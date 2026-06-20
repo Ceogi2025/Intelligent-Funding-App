@@ -3,20 +3,23 @@ import app from '../server/app.js'
 import { initSchema } from '../server/db/database.js'
 import { seedDatabase, seedAdmin } from '../server/db/seed.js'
 
-let dbInitError: Error | null = null
+let initialized = false
 
-const ready = initSchema()
-  .then(() => seedDatabase())
-  .then(() => seedAdmin())
-  .catch((err: Error) => {
-    dbInitError = err
-    console.error('DB init error:', err.message)
-  })
+async function ensureReady(): Promise<void> {
+  if (initialized) return
+  await initSchema()
+  await seedDatabase()
+  await seedAdmin()
+  initialized = true
+}
 
 export default async function handler(req: Request, res: Response) {
-  await ready
-  if (dbInitError) {
-    res.status(500).json({ error: 'Database connection failed', detail: dbInitError.message })
+  try {
+    await ensureReady()
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    console.error('DB init failed:', detail)
+    res.status(500).json({ error: 'Database connection failed', detail })
     return
   }
   app(req, res)

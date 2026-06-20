@@ -1,4 +1,4 @@
-import { X, Home, CreditCard, Building2, Target, BookOpen, Briefcase, LogOut } from 'lucide-react'
+import { X, Home, Building2, Target, BookOpen, Briefcase, LogOut } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -44,12 +44,6 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
         <div className="sidemenu__nav">
           <button className={active('/home')} onClick={() => go('/home')}>
             <Home size={16} /> Home
-          </button>
-          <button className={active('/capital-access')} onClick={() => go('/home')}>
-            <CreditCard size={16} /> Capital Access
-          </button>
-          <button className={active('/credit-builder')} onClick={() => go('/home')}>
-            <Building2 size={16} /> Credit Builder Products
           </button>
 
           <div className="sidemenu__divider" />

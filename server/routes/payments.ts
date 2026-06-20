@@ -83,7 +83,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
   const pool = getPool()
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.CheckoutSession
+    const session = event.data.object as Stripe.Checkout.Session
     const userId = session.metadata?.user_id
     const plan = session.metadata?.plan
     if (userId && plan) {

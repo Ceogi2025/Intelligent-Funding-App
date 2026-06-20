@@ -59,22 +59,22 @@ export default function Landing() {
       <section className="pricing-section">
         <div className="container">
           <h2 className="pricing-section__title">Simple Pricing</h2>
-          <p className="pricing-section__sub">Start for $1. Cancel anytime.</p>
+          <p className="pricing-section__sub">Get full access for $1. Cancel anytime.</p>
           <div className="pricing__cards">
             {/* Trial */}
             <div className="pricing-card">
-              <div className="pricing-card__plan">Trial</div>
+              <div className="pricing-card__plan">7-Day Access</div>
               <div className="pricing-card__price">
                 $1 <span>/ 7 days</span>
               </div>
               <ul className="pricing-card__features" style={{ marginTop: 16 }}>
-                <li>Full access during trial</li>
+                <li>Full access for 7 days</li>
                 <li>All institution data</li>
                 <li>All education guides</li>
-                <li>Cancels anytime</li>
+                <li>Cancel anytime</li>
               </ul>
               <button className="btn btn--primary btn--full" onClick={() => navigate('/signup?plan=trial')}>
-                Start Trial
+                Get Started
               </button>
             </div>
 

@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import type { Institution } from '../types'
 
 interface Props {
@@ -66,7 +66,12 @@ export default function InstitutionCard({ institution, onView, path }: Props) {
         <span className="badge badge--gray">{institution.type}</span>
       </div>
 
-      <div className="institution-card__footer">
+      <div className="institution-card__footer" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+        {institution.last_verified_date && (
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <ShieldCheck size={12} style={{ color: 'var(--teal)' }} /> Verified {institution.last_verified_date}
+          </span>
+        )}
         <button className="institution-card__link" onClick={() => onView(institution.id)}>
           View products <ArrowRight size={14} />
         </button>

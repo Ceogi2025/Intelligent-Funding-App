@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import { useInstitution } from '../hooks/useInstitutions'
@@ -121,7 +121,7 @@ export default function InstitutionDetail() {
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>{institution.name}</h1>
                 {institution.application_url && (
                   <a
-                    href={institution.application_url}
+                    href={`/api/go/${institution.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn--teal btn--sm"
@@ -165,9 +165,19 @@ export default function InstitutionDetail() {
                   <div className="detail-value">{institution.geographic_restrictions}</div>
                 </div>
                 <div>
-                  <div className="detail-label">Last Verified</div>
-                  <div className="detail-value">{institution.last_verified_date}</div>
+                  <div className="detail-label">Verification</div>
+                  <div className="detail-value" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <ShieldCheck size={14} style={{ color: 'var(--teal)' }} />
+                    {institution.last_verified_date} · Official website
+                  </div>
                 </div>
+              </div>
+
+              {/* Verification standard banner */}
+              <div style={{ marginTop: 16, background: 'var(--badge-gray-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '12px 16px', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+                <strong style={{ color: 'var(--text-primary)' }}>How we verify:</strong> Every data point is checked against the institution's official website — never assumed. Fields marked{' '}
+                <span style={{ color: 'var(--unverified-color)', fontWeight: 600 }}>"Not Verified — contact institution"</span>{' '}
+                are policies the institution does not publish publicly. We flag them honestly rather than guess — a wrong bureau or reuse detail can cost you an inquiry and points.
               </div>
             </div>
 
@@ -178,9 +188,34 @@ export default function InstitutionDetail() {
               <h2 style={{ marginBottom: 16 }}>
                 Products ({institution.products.length})
               </h2>
-              {institution.products.map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+              {(() => {
+                const capitalTypes = ['Unsecured Card', 'Line of Credit', 'Personal Loan']
+                const builderTypes = ['Secured Card', 'Credit Builder Loan', 'Alternative Tradeline']
+                const capitalProducts = institution.products.filter(p => capitalTypes.includes(p.type))
+                const builderProducts = institution.products.filter(p => builderTypes.includes(p.type))
+                const showSections = capitalProducts.length > 0 && builderProducts.length > 0
+                return (
+                  <>
+                    {showSections && capitalProducts.length > 0 && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--navy)', marginBottom: 12 }}>
+                          Capital Access Products
+                        </div>
+                        {capitalProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                      </div>
+                    )}
+                    {showSections && builderProducts.length > 0 && (
+                      <div style={{ marginTop: capitalProducts.length > 0 ? 24 : 0 }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: 12 }}>
+                          Credit Builder Products
+                        </div>
+                        {builderProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                      </div>
+                    )}
+                    {!showSections && institution.products.map(p => <ProductCard key={p.id} product={p} />)}
+                  </>
+                )
+              })()}
             </div>
           </>
         )}

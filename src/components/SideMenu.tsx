@@ -1,4 +1,4 @@
-import { X, Home, Building2, Target, BookOpen, Briefcase, LogOut } from 'lucide-react'
+import { X, Home, Building2, Target, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -56,6 +56,24 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           </button>
           <button className={active('/education/wealthy-playbook')} onClick={() => go('/education/wealthy-playbook')}>
             <Briefcase size={16} /> The Wealthy Person's Playbook
+          </button>
+          <button className={active('/education/acc-blueprint')} onClick={() => go('/education/acc-blueprint')}>
+            <Award size={16} /> The ACC Blueprint
+          </button>
+
+          <div className="sidemenu__divider" />
+
+          <button className={active('/resources')} onClick={() => go('/resources')}>
+            <LifeBuoy size={16} /> Resources
+          </button>
+          <button className={active('/share')} onClick={() => go('/share')}>
+            <Users size={16} /> Share a Datapoint
+          </button>
+
+          <div className="sidemenu__divider" />
+
+          <button className={active('/account')} onClick={() => go('/account')}>
+            <UserCircle size={16} /> Account & Billing
           </button>
 
           <div className="sidemenu__divider" />

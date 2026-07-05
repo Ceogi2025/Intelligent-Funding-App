@@ -49,7 +49,7 @@ export default function Home() {
     navigate('/results/capital-access')
   }
 
-  function handleProductTypeSelect(type: 'card' | 'loan') {
+  function handleProductTypeSelect(type: 'card' | 'loan' | 'other') {
     setFilters({
       bureau: null,
       inquiryReuse: null,
@@ -164,6 +164,9 @@ export default function Home() {
               </button>
               <button className="modal__option-btn modal__option-btn--full" onClick={() => handleProductTypeSelect('loan')}>
                 🏦 Credit Builder Loans
+              </button>
+              <button className="modal__option-btn modal__option-btn--full" onClick={() => handleProductTypeSelect('other')}>
+                📈 Alternative Tradelines (rent reporting & more)
               </button>
             </div>
           </div>

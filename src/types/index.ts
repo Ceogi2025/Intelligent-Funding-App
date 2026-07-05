@@ -44,6 +44,6 @@ export interface FilterState {
   bureau: 'Experian' | 'Equifax' | 'TransUnion' | null
   inquiryReuse: 'yes' | 'no' | null
   preapproval: 'yes' | 'no' | null
-  productType: 'card' | 'loan' | null
+  productType: 'card' | 'loan' | 'other' | null
   path: 'capital-access' | 'credit-builder' | null
 }

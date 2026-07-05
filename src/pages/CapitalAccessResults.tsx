@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import Header from '../components/Header'
@@ -6,12 +6,39 @@ import SideMenu from '../components/SideMenu'
 import InstitutionCard from '../components/InstitutionCard'
 import { useFilters } from '../context/FilterContext'
 import { useInstitutions } from '../hooks/useInstitutions'
+import type { Institution } from '../types'
+
+type SortOption = 'alpha' | 'inquiry-reuse' | 'preapproval'
+
+function sortInstitutions(list: Institution[], sort: SortOption): Institution[] {
+  const copy = [...list]
+  if (sort === 'inquiry-reuse') {
+    return copy.sort((a, b) => {
+      const aReuse = a.inquiry_reuse === 'Yes' ? 0 : 1
+      const bReuse = b.inquiry_reuse === 'Yes' ? 0 : 1
+      if (aReuse !== bReuse) return aReuse - bReuse
+      return a.name.localeCompare(b.name)
+    })
+  }
+  if (sort === 'preapproval') {
+    return copy.sort((a, b) => {
+      const aPre = a.preapproval_available === 'Yes' ? 0 : 1
+      const bPre = b.preapproval_available === 'Yes' ? 0 : 1
+      if (aPre !== bPre) return aPre - bPre
+      return a.name.localeCompare(b.name)
+    })
+  }
+  return copy.sort((a, b) => a.name.localeCompare(b.name))
+}
 
 export default function CapitalAccessResults() {
   const navigate = useNavigate()
   const { filters, resetFilters } = useFilters()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sort, setSort] = useState<SortOption>('alpha')
   const { institutions, loading, error } = useInstitutions(filters)
+
+  const sorted = useMemo(() => sortInstitutions(institutions, sort), [institutions, sort])
 
   function buildTitle() {
     const parts = [filters.bureau || 'Bureau']
@@ -45,6 +72,31 @@ export default function CapitalAccessResults() {
             <ArrowLeft size={14} /> New Search
           </button>
         </div>
+
+        {!loading && !error && institutions.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Sort:</span>
+            {(['alpha', 'inquiry-reuse', 'preapproval'] as SortOption[]).map(opt => (
+              <button
+                key={opt}
+                onClick={() => setSort(opt)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  border: `1px solid ${sort === opt ? 'var(--navy)' : 'var(--border)'}`,
+                  background: sort === opt ? 'var(--navy)' : 'transparent',
+                  color: sort === opt ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  fontWeight: sort === opt ? 600 : 400,
+                  transition: 'all 0.15s',
+                }}
+              >
+                {opt === 'alpha' ? 'A–Z' : opt === 'inquiry-reuse' ? 'Inquiry Reuse First' : 'Soft Pull Preapproval First'}
+              </button>
+            ))}
+          </div>
+        )}
 
         {loading && (
           <div className="loading-page">
@@ -82,7 +134,7 @@ export default function CapitalAccessResults() {
 
         {!loading && !error && institutions.length > 0 && (
           <div className="results-list">
-            {institutions.map(inst => (
+            {sorted.map(inst => (
               <InstitutionCard
                 key={inst.id}
                 institution={inst}

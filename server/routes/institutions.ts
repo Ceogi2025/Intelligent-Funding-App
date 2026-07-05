@@ -13,10 +13,10 @@ router.get('/', requireSubscription, async (req: AuthRequest, res: Response) => 
     const pool = getPool()
 
     if (pathFilter === 'credit-builder') {
-      const allowedTypes: Record<string, string> = { card: 'Secured Card', loan: 'Credit Builder Loan' }
+      const allowedTypes: Record<string, string> = { card: 'Secured Card', loan: 'Credit Builder Loan', other: 'Alternative Tradeline' }
       const type = allowedTypes[productType]
       if (!type) {
-        res.status(400).json({ error: 'productType must be card or loan' })
+        res.status(400).json({ error: 'productType must be card, loan, or other' })
         return
       }
 

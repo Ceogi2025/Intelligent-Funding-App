@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /home
+Disallow: /results
+Disallow: /admin
+Disallow: /account
+
+Sitemap: https://intelligentfunding.org/sitemap.xml

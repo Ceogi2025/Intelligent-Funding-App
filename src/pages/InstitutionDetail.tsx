@@ -4,7 +4,8 @@ import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import { useInstitution } from '../hooks/useInstitutions'
-import type { Product } from '../types'
+import { productInsights } from '../utils/insights'
+import type { Product, Institution } from '../types'
 
 function UnverifiedValue({ value }: { value: string | null | undefined }) {
   if (!value || value === 'Not verified — contact institution to confirm') {
@@ -16,12 +17,42 @@ function UnverifiedValue({ value }: { value: string | null | undefined }) {
   return <span className="detail-value">{value}</span>
 }
 
-function ProductCard({ product }: { product: Product }) {
+function InsightRows({ product, institution }: { product: Product; institution?: Institution }) {
+  const { highlights, watchouts } = productInsights(product, institution)
+  if (highlights.length === 0 && watchouts.length === 0) return null
+  return (
+    <div style={{ gridColumn: '1 / -1', display: 'grid', gap: 6 }}>
+      {highlights.length > 0 && (
+        <div>
+          <div className="detail-label" style={{ color: 'var(--teal)' }}>Highlights</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            {highlights.map(h => (
+              <span key={h} style={{ fontSize: '0.76rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>✓ {h}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {watchouts.length > 0 && (
+        <div>
+          <div className="detail-label" style={{ color: 'var(--unverified-color, #b45309)' }}>Watch-outs</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            {watchouts.map(w => (
+              <span key={w} style={{ fontSize: '0.76rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999, background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}>⚠ {w}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProductCard({ product, institution }: { product: Product; institution?: Institution }) {
   return (
     <div className="product-card">
       <div className="product-card__name">{product.name}</div>
       <div className="product-card__type">{product.type}</div>
       <div className="product-card__grid">
+        <InsightRows product={product} institution={institution} />
         <div>
           <div className="detail-label">Min Score</div>
           <div className="detail-value">
@@ -201,7 +232,7 @@ export default function InstitutionDetail() {
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--navy)', marginBottom: 12 }}>
                           Capital Access Products
                         </div>
-                        {capitalProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                        {capitalProducts.map(p => <ProductCard key={p.id} product={p} institution={institution} />)}
                       </div>
                     )}
                     {showSections && builderProducts.length > 0 && (
@@ -209,10 +240,10 @@ export default function InstitutionDetail() {
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: 12 }}>
                           Credit Builder Products
                         </div>
-                        {builderProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                        {builderProducts.map(p => <ProductCard key={p.id} product={p} institution={institution} />)}
                       </div>
                     )}
-                    {!showSections && institution.products.map(p => <ProductCard key={p.id} product={p} />)}
+                    {!showSections && institution.products.map(p => <ProductCard key={p.id} product={p} institution={institution} />)}
                   </>
                 )
               })()}

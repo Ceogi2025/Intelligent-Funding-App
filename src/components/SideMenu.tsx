@@ -45,6 +45,9 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           <button className={active('/home')} onClick={() => go('/home')}>
             <Home size={16} /> Home
           </button>
+          <button className={active('/browse')} onClick={() => go('/browse')}>
+            <Building2 size={16} /> Browse All Institutions
+          </button>
 
           <div className="sidemenu__divider" />
 

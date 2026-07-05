@@ -2,7 +2,7 @@ export interface Product {
   id: number
   institution_id: number
   name: string
-  type: 'Unsecured Card' | 'Line of Credit' | 'Personal Loan' | 'Secured Card' | 'Credit Builder Loan'
+  type: 'Unsecured Card' | 'Line of Credit' | 'Personal Loan' | 'Secured Card' | 'Credit Builder Loan' | 'Alternative Tradeline'
   bureau_pulled: 'Experian' | 'Equifax' | 'TransUnion' | 'All 3' | 'None' | 'Not Verified'
   reports_to: string
   inquiry_reuse_eligible: 'Yes' | 'No' | 'Not Verified'

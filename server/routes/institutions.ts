@@ -12,6 +12,27 @@ router.get('/', requireSubscription, async (req: AuthRequest, res: Response) => 
   try {
     const pool = getPool()
 
+    // Browse All: the full catalog, unfiltered — client filters locally.
+    if (pathFilter === 'all') {
+      const { rows } = await pool.query(`
+        SELECT
+          i.id, i.name, i.type, i.inquiry_reuse, i.inquiry_reuse_window,
+          i.preapproval_available, i.soft_pull_available, i.geographic_restrictions,
+          i.application_url, i.path, i.last_verified_date,
+          p.id as product_id, p.name as product_name, p.type as product_type,
+          p.bureau_pulled, p.reports_to, p.inquiry_reuse_eligible,
+          p.preapproval_available as product_preapproval, p.minimum_credit_score,
+          p.deposit_amount, p.annual_fee, p.graduation_potential, p.graduation_timeline,
+          p.last_verified_date as product_verified_date, p.strategy_notes,
+          p.existing_customer_required
+        FROM institutions i
+        JOIN products p ON p.institution_id = i.id
+        ORDER BY i.name
+      `)
+      res.json(groupByInstitution(rows))
+      return
+    }
+
     if (pathFilter === 'credit-builder') {
       const allowedTypes: Record<string, string> = { card: 'Secured Card', loan: 'Credit Builder Loan', other: 'Alternative Tradeline' }
       const type = allowedTypes[productType]
@@ -122,7 +143,7 @@ function groupByInstitution(rows: Record<string, unknown>[]): unknown[] {
       minimum_credit_score: row.minimum_credit_score, deposit_amount: row.deposit_amount,
       annual_fee: row.annual_fee, graduation_potential: row.graduation_potential,
       graduation_timeline: row.graduation_timeline, last_verified_date: row.product_verified_date,
-      strategy_notes: row.strategy_notes,
+      strategy_notes: row.strategy_notes, existing_customer_required: row.existing_customer_required ?? 'No',
     })
   }
   return Array.from(map.values())

@@ -7,6 +7,7 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import Home from './pages/Home'
+import BrowseAll from './pages/BrowseAll'
 import CapitalAccessResults from './pages/CapitalAccessResults'
 import CreditBuilderResults from './pages/CreditBuilderResults'
 import InstitutionDetail from './pages/InstitutionDetail'
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/share" element={<ShareExperience />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/browse" element={<ProtectedRoute><BrowseAll /></ProtectedRoute>} />
             <Route path="/results/capital-access" element={<ProtectedRoute><CapitalAccessResults /></ProtectedRoute>} />
             <Route path="/results/credit-builder" element={<ProtectedRoute><CreditBuilderResults /></ProtectedRoute>} />
             <Route path="/institution/:id" element={<ProtectedRoute><InstitutionDetail /></ProtectedRoute>} />

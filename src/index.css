@@ -152,8 +152,9 @@ h3{font-size:1.25rem;font-weight:600}
 .home-page__hero{text-align:center;margin-bottom:48px}
 .home-page__title{font-size:1.75rem;font-weight:700;color:var(--text-primary);margin-bottom:8px}
 .home-page__sub{font-size:.95rem;color:var(--text-secondary)}
-.path-tiles{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:600px;margin:0 auto}
-@media(max-width:480px){.path-tiles{grid-template-columns:1fr}}
+.path-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:920px;margin:0 auto 18px}
+@media(max-width:860px){.path-tiles{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.path-tiles{grid-template-columns:1fr}}
 .path-tile{border:2px solid var(--navy);border-radius:var(--radius-lg);padding:32px 20px;background:var(--white);cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:12px}
 .path-tile:hover{border-color:var(--teal);box-shadow:0 0 0 3px rgba(8,145,178,.15);transform:translateY(-2px)}
 .path-tile__icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:#eff6ff;border-radius:50%;color:var(--navy)}

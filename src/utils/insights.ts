@@ -28,6 +28,7 @@ export function productInsights(p: Product, inst?: Institution): Insights {
 
   if (p.inquiry_reuse_eligible === 'Yes') highlights.push('Inquiry reuse — one pull can open multiple accounts here')
   if (p.preapproval_available === 'Yes') highlights.push('Soft-pull preapproval — check your odds first')
+  if (notes.includes('reuse your last soft pull') || notes.includes('reuse your last soft')) highlights.push('Existing cardholders: later cards may skip the hard pull entirely')
 
   if (p.bureau_pulled === 'None') highlights.push('No hard credit check')
   if (p.minimum_credit_score === null && (p.type === 'Secured Card' || p.type === 'Credit Builder Loan' || p.type === 'Alternative Tradeline')) {

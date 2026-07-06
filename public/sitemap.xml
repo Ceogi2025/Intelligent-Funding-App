@@ -8,7 +8,9 @@
   <url><loc>https://intelligentfunding.org/terms</loc></url>
   <url><loc>https://intelligentfunding.org/privacy</loc></url>
   <url><loc>https://intelligentfunding.org/refunds</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/aod-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/affinity-federal-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/agfed-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/alliant-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/america-first-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/american-express</loc></url>
@@ -17,6 +19,7 @@
   <url><loc>https://intelligentfunding.org/banks/apple-card</loc></url>
   <url><loc>https://intelligentfunding.org/banks/armed-forces-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/arro-community-federal-savings-bank</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/arvest-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/bcu</loc></url>
   <url><loc>https://intelligentfunding.org/banks/bmo-harris-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/bank-of-america</loc></url>
@@ -40,14 +43,19 @@
   <url><loc>https://intelligentfunding.org/banks/lake-michigan-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/langley-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/lendingclub</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/lightstream-truist</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/m-t-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/nasa-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/nih-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/navy-federal-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/northwest-federal-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/onemain-financial</loc></url>
   <url><loc>https://intelligentfunding.org/banks/opensky-capital-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/psecu</loc></url>
   <url><loc>https://intelligentfunding.org/banks/patelco-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/penair-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/penfed-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/prosper</loc></url>
   <url><loc>https://intelligentfunding.org/banks/randolph-brooks-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/regions-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/rentreporters</loc></url>
@@ -55,14 +63,20 @@
   <url><loc>https://intelligentfunding.org/banks/seedfi</loc></url>
   <url><loc>https://intelligentfunding.org/banks/self-financial</loc></url>
   <url><loc>https://intelligentfunding.org/banks/service-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/signal-financial-federal-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/skypoint-federal-credit-union</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/sofi</loc></url>
   <url><loc>https://intelligentfunding.org/banks/state-department-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/synchrony-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/td-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/tdecu</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/tilt</loc></url>
   <url><loc>https://intelligentfunding.org/banks/tower-federal-credit-union</loc></url>
   <url><loc>https://intelligentfunding.org/banks/truist-bank</loc></url>
   <url><loc>https://intelligentfunding.org/banks/u-s-bank</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/usaa</loc></url>
   <url><loc>https://intelligentfunding.org/banks/upgrade</loc></url>
+  <url><loc>https://intelligentfunding.org/banks/upstart</loc></url>
   <url><loc>https://intelligentfunding.org/banks/wells-fargo</loc></url>
   <url><loc>https://intelligentfunding.org/banks/woodforest-national-bank</loc></url>
 </urlset>

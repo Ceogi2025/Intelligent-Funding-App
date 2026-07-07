@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ShieldCheck, Zap, Users, ArrowRight, Sparkles, FileText, Search } from 'lucide-react'
+import { ShieldCheck, Zap, Users, ArrowRight, Sparkles, FileText, Search, Trophy, MessagesSquare } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
@@ -20,18 +20,18 @@ const edges = [
   {
     icon: Zap,
     title: 'Built for Inquiry Reuse',
-    text: 'We map which institutions let one hard pull open multiple accounts — and the window to do it. No other directory tracks this.',
+    text: 'We map which institutions let one hard pull open multiple accounts, and the window to do it. No other directory tracks this.',
   },
   {
     icon: Users,
     title: 'For the Underserved',
-    text: 'Built for the communities the big comparison sites overlook. Real access, real strategy, real wealth-building — by design.',
+    text: 'Built for the communities the big comparison sites overlook. Real access, real strategy, real wealth-building, by design.',
   },
 ]
 
 export default function Landing() {
   const navigate = useNavigate()
-  // Live counts from the DB — the landing page can never go stale as the directory grows
+  // Live counts from the DB, the landing page can never go stale as the directory grows
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
   useEffect(() => {
     fetch('/api/public/institutions')
@@ -58,8 +58,9 @@ export default function Landing() {
             Stack by Bureau.<br /><span className="accent">Get Funded by Design.</span>
           </h1>
           <p className="lp-hero__sub">
-            The only bureau mapping tool built for strategic credit stacking. Target your strongest bureau,
-            reuse inquiries, and apply with a plan — not a guess.
+            The only bureau-stacking app with a community behind it. Map your strongest bureau, reuse
+            inquiries, and apply with a plan, not a guess. Members trade real approvals and live strategy
+            in a members-only room.
           </p>
           <div className="lp-hero__ctas">
             <button className="btn btn--teal btn--lg" onClick={() => navigate('/signup')}>
@@ -70,9 +71,9 @@ export default function Landing() {
             </button>
           </div>
           <div className="lp-hero__trust">
-            <span><ShieldCheck size={13} /> {counts ? `${Math.floor(counts.inst / 10) * 10}+ verified institutions` : '50+ verified institutions'} — growing weekly</span>
+            <span><ShieldCheck size={13} /> {counts ? `${Math.floor(counts.inst / 10) * 10}+ verified institutions` : '50+ verified institutions'}</span>
             <span>·</span>
-            <span>Updated monthly</span>
+            <span>A live member community</span>
             <span>·</span>
             <span>Cancel anytime</span>
           </div>
@@ -87,11 +88,42 @@ export default function Landing() {
         <div className="lp-stat"><div className="lp-stat__num">0</div><div className="lp-stat__label">Guesswork</div></div>
       </div>
 
+      {/* Community, the core reframe: this is a room, not a directory */}
+      <section className="lp-section" style={{ background: 'linear-gradient(180deg, #f8faff 0%, #ffffff 100%)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>
+          <Users size={14} /> This isn't an app. It's a room.
+        </div>
+        <h2 className="lp-section__title">You're not getting funded alone anymore</h2>
+        <p className="lp-section__sub">
+          Most funding sites hand you a list and wish you luck. We hand you a community, a live room where
+          members post real approvals, real denials, and the strategy behind them, as it happens. You move
+          faster because you're not guessing by yourself.
+        </p>
+        <div className="lp-edge-grid" style={{ marginTop: 24 }}>
+          <div className="lp-edge-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/wins')}>
+            <div className="lp-edge-card__icon"><Trophy size={22} /></div>
+            <div className="lp-edge-card__title">The Wins Wall</div>
+            <div className="lp-edge-card__text">
+              Real approvals from members, which bureau pulled, what limit came through, whether the inquiry
+              got reused. Dated, so you always know how fresh it is. <span style={{ color: 'var(--teal)', fontWeight: 600 }}>See the wall →</span>
+            </div>
+          </div>
+          <div className="lp-edge-card">
+            <div className="lp-edge-card__icon"><MessagesSquare size={22} /></div>
+            <div className="lp-edge-card__title">The Community Room</div>
+            <div className="lp-edge-card__text">
+              A live, members-only room where people trade strategy and wins in real time. No selling, no
+              spam, just people getting funded, helping the next person do the same.
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bureau tiles */}
       <section className="lp-section">
         <h2 className="lp-section__title">Start With Your Bureau</h2>
         <p className="lp-section__sub">
-          Pick the bureau where your credit is strongest. We’ll show you every institution that pulls it —
+          Pick the bureau where your credit is strongest. We’ll show you every institution that pulls it,
           and which ones let you stack on a single inquiry.
         </p>
         <div className="lp-bureau-grid">
@@ -112,11 +144,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Why IF — differentiators */}
+      {/* Why IF, differentiators */}
       <section className="lp-section" style={{ paddingTop: 0 }}>
         <h2 className="lp-section__title">Why Intelligent Funding</h2>
         <p className="lp-section__sub">
-          Other sites tell you which card has the best rewards. We tell you how to actually get approved — in sequence, by bureau.
+          Other sites tell you which card has the best rewards. We tell you how to actually get approved, in sequence, by bureau.
         </p>
         <div className="lp-edge-grid">
           {edges.map(e => {
@@ -167,7 +199,7 @@ export default function Landing() {
               <div className="step__number">2</div>
               <div className="step__title">Target Your Bureau</div>
               <p className="step__text">
-                Select your strongest bureau — Experian, Equifax, or TransUnion.
+                Select your strongest bureau, Experian, Equifax, or TransUnion.
                 Filter by inquiry reuse and soft pull preapproval to protect your inquiry count.
               </p>
             </div>
@@ -176,7 +208,7 @@ export default function Landing() {
               <div className="step__title">Apply With Strategy</div>
               <p className="step__text">
                 Get matched to verified institutions. See every product, every requirement,
-                and every bureau pull — before you apply.
+                and every bureau pull, before you apply.
               </p>
             </div>
           </div>
@@ -187,7 +219,7 @@ export default function Landing() {
       <section className="pricing-section">
         <div className="container">
           <h2 className="pricing-section__title">Simple Pricing</h2>
-          <p className="pricing-section__sub">Get full access for $1. Cancel anytime.</p>
+          <p className="pricing-section__sub">Start for $1. Unlock the full community for $29, cancel anytime.</p>
           <div className="pricing__cards">
             {/* Trial */}
             <div className="pricing-card">
@@ -196,10 +228,10 @@ export default function Landing() {
                 $1 <span>/ 7 days</span>
               </div>
               <ul className="pricing-card__features" style={{ marginTop: 16 }}>
-                <li>Full access for 7 days</li>
-                <li>All institution data</li>
-                <li>All education guides</li>
-                <li>Cancel anytime</li>
+                <li>The full bureau directory (85+ institutions)</li>
+                <li>The Wins Wall, real member approvals</li>
+                <li>2 starter strategy guides</li>
+                <li>A preview of the live Community Room</li>
               </ul>
               <button className="btn btn--primary btn--full" onClick={() => navigate('/signup?plan=trial')}>
                 Get Started
@@ -213,9 +245,9 @@ export default function Landing() {
                 $29 <span>/ month</span>
               </div>
               <ul className="pricing-card__features" style={{ marginTop: 16 }}>
-                <li>Full institution database</li>
-                <li>All education guides</li>
-                <li>All filtering tools</li>
+                <li>Everything in the 7-day trial</li>
+                <li>★ The live Community Room</li>
+                <li>All 4 strategy playbooks + post your wins</li>
                 <li>Cancel anytime</li>
               </ul>
               <button className="btn btn--primary btn--full" onClick={() => navigate('/signup?plan=monthly')}>

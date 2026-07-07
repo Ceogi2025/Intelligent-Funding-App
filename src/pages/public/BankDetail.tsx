@@ -18,12 +18,12 @@ type PublicInstitution = {
 }
 
 const lockedItems = [
-  'Inquiry reuse policy — can one hard pull open multiple accounts here?',
-  'The reuse window — same day? 30 days?',
-  'Soft-pull preapproval — check your odds with zero score impact?',
-  'Every product mapped — cards, credit lines, loans, with per-product bureau',
+  'Inquiry reuse policy, can one hard pull open multiple accounts here?',
+  'The reuse window, same day? 30 days?',
+  'Soft-pull preapproval, check your odds with zero score impact?',
+  'Every product mapped, cards, credit lines, loans, with per-product bureau',
   'Minimum scores, fees, graduation timelines',
-  'Strategy notes — how this institution fits a stacking sequence',
+  'Strategy notes, how this institution fits a stacking sequence',
 ]
 
 export default function BankDetail() {
@@ -66,7 +66,7 @@ export default function BankDetail() {
           <>
             <h1 style={{ marginBottom: 12 }}>Which bureau does {inst.name} pull?</h1>
 
-            {/* The free answer — the SEO payload */}
+            {/* The free answer, the SEO payload */}
             <div style={{ background: 'var(--badge-teal-bg)', border: '1px solid var(--teal)', borderRadius: 'var(--radius-lg)', padding: 20, marginBottom: 20 }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--teal)', marginBottom: 8 }}>
                 Verified answer
@@ -74,7 +74,7 @@ export default function BankDetail() {
               <p style={{ fontSize: '1.05rem', lineHeight: 1.65, color: 'var(--text-primary)' }}>
                 {inst.name} pulls from{' '}
                 <strong>{inst.bureaus.length > 0 ? inst.bureaus.join(' and ') : 'no bureau (soft-pull products)'}</strong>
-                {inst.bureaus.length > 1 && ' — the bureau can differ by product type'}.
+                {inst.bureaus.length > 1 && ', the bureau can differ by product type'}.
                 {inst.product_count > 0 && <> We've mapped <strong>{inst.product_count} credit product{inst.product_count !== 1 ? 's' : ''}</strong> at this institution.</>}
               </p>
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
@@ -90,7 +90,7 @@ export default function BankDetail() {
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.65, marginBottom: 24 }}>
               Why it matters: your three credit reports are three separate files. Applying where your strongest
-              bureau gets pulled — and reusing inquiries where policies allow it — is the difference between
+              bureau gets pulled, and reusing inquiries where policies allow it, is the difference between
               building a stack and burning your profile. Policies change; always confirm with the institution before applying.
             </p>
 
@@ -108,7 +108,7 @@ export default function BankDetail() {
                 ))}
                 <div style={{ padding: '16px 0', textAlign: 'center' }}>
                   <button className="btn btn--primary" onClick={() => navigate('/signup')}>
-                    Unlock Full Access — $1 for 7 Days <ArrowRight size={14} />
+                    Unlock Full Access, $1 for 7 Days <ArrowRight size={14} />
                   </button>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 8 }}>
                     {instFloor} institutions · growing weekly · cancel anytime
@@ -118,7 +118,7 @@ export default function BankDetail() {
             </div>
 
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Educational content only. Not financial advice. Bureau pulls can vary by state, product, and applicant —
+              Educational content only. Not financial advice. Bureau pulls can vary by state, product, and applicant,
               confirm directly with {inst.name} before applying. Have a datapoint from your own application?{' '}
               <Link to="/share" style={{ color: 'var(--teal)', fontWeight: 600 }}>Share it</Link> and help the community map.
             </div>

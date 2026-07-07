@@ -55,7 +55,7 @@ export default function CreditBuilderResults() {
       <div className="results-page">
         <div className="results-top-bar">
           <div className="results-header">
-            <span className="results-title">{typeLabel} — All Institutions</span>
+            <span className="results-title">{typeLabel}, All Institutions</span>
             {!loading && !error && (
               <span className="results-count">{institutions.length} match{institutions.length !== 1 ? 'es' : ''}</span>
             )}

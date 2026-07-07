@@ -1,4 +1,4 @@
-import { X, Home, Building2, Target, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut } from 'lucide-react'
+import { X, Home, Building2, Target, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut, MessagesSquare, Trophy } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -50,6 +50,13 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           </button>
 
           <div className="sidemenu__divider" />
+
+          <button className={active('/community')} onClick={() => go('/community')}>
+            <MessagesSquare size={16} /> The Community Room
+          </button>
+          <button className={active('/wins')} onClick={() => go('/wins')}>
+            <Trophy size={16} /> The Wins Wall
+          </button>
 
           <button className={active('/education/profile-positioning')} onClick={() => go('/education/profile-positioning')}>
             <Target size={16} /> Profile Positioning

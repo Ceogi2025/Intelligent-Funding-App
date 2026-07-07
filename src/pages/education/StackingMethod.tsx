@@ -22,7 +22,7 @@ const priorities = [
   {
     number: 'PRIORITY 4',
     title: 'Regular Unsecured Products',
-    text: 'No preapproval and no inquiry reuse available. Standard unsecured cards — rewards cards, cash back cards, standard credit lines. Still worth applying if your profile is strong.',
+    text: 'No preapproval and no inquiry reuse available. Standard unsecured cards, rewards cards, cash back cards, standard credit lines. Still worth applying if your profile is strong.',
   },
 ]
 
@@ -31,7 +31,7 @@ const executionSteps = [
   'Open three browser tabs. Do not submit anything yet.',
   'Fill out applications for three institutions without hitting submit. Option A: all three institutions pull from the same bureau. Option B: one pulls Experian, one pulls Equifax, one pulls TransUnion.',
   'Before you hit submit on any application, confirm all three are open and filled out completely.',
-  'Hit submit on all three applications at the exact same time — within seconds of each other.',
+  'Hit submit on all three applications at the exact same time, within seconds of each other.',
   'Check your email for decisions. Approvals typically come within minutes to 24 hours.',
   'Repeat this same process two more times using different institutions on the same bureaus.',
 ]
@@ -61,7 +61,7 @@ export default function StackingMethod() {
 
         {/* Prerequisites */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 1 — Prerequisites: Your Profile Must Be Positioned First</h2>
+          <h2 className="guide__section-title">Section 1, Prerequisites: Your Profile Must Be Positioned First</h2>
           <div className="guide__body">
             <p><strong>Before you execute a single application, confirm you meet the Profile Positioning standards.</strong></p>
             <p>Check the Profile Positioning guide. Your profile needs:</p>
@@ -79,10 +79,10 @@ export default function StackingMethod() {
 
         {/* Execution */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 2 — The Execution Method: Three Institutions, Simultaneous Submission</h2>
+          <h2 className="guide__section-title">Section 2, The Execution Method: Three Institutions, Simultaneous Submission</h2>
           <div className="guide__body">
             <p><strong>The core principle: Everything happens at the same time.</strong></p>
-            <p style={{ marginBottom: 16 }}>When you submit within the same window, lenders pulling your report see one inquiry count on that bureau — not three separate inquiries spread over days or weeks. This protects your inquiry count and maximizes approval odds.</p>
+            <p style={{ marginBottom: 16 }}>When you submit within the same window, lenders pulling your report see one inquiry count on that bureau, not three separate inquiries spread over days or weeks. This protects your inquiry count and maximizes approval odds.</p>
           </div>
           <ol className="guide__numbered-list">
             {executionSteps.map((step, i) => <li key={i}>{step}</li>)}
@@ -94,7 +94,7 @@ export default function StackingMethod() {
 
         {/* Priority Hierarchy */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 3 — The Priority Hierarchy</h2>
+          <h2 className="guide__section-title">Section 3, The Priority Hierarchy</h2>
           <div className="guide__body" style={{ marginBottom: 20 }}>
             <p>When identifying institutions for each round, prioritize in this exact order. Each priority tier is only explored when the tier above it is exhausted.</p>
           </div>
@@ -109,9 +109,9 @@ export default function StackingMethod() {
 
         {/* Product Selection */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 4 — Product Selection: Unsecured Only</h2>
+          <h2 className="guide__section-title">Section 4, Product Selection: Unsecured Only</h2>
           <div className="guide__body">
-            <p>Every product you apply for during stacking must be unsecured — credit cards with actual credit lines, personal lines of credit, or unsecured personal loans.</p>
+            <p>Every product you apply for during stacking must be unsecured, credit cards with actual credit lines, personal lines of credit, or unsecured personal loans.</p>
             <p><strong>No secured cards. No credit builder loans. No deposit-required products.</strong></p>
             <p>You have already passed the credit builder phase. Stacking is exclusively for unsecured product access.</p>
           </div>
@@ -119,9 +119,9 @@ export default function StackingMethod() {
 
         {/* Account Age */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 5 — Account Age Management</h2>
+          <h2 className="guide__section-title">Section 5, Account Age Management</h2>
           <div className="guide__body">
-            <p>Opening nine to fifteen new accounts will lower your average account age. This is expected and temporary — but it needs to be managed.</p>
+            <p>Opening nine to fifteen new accounts will lower your average account age. This is expected and temporary, but it needs to be managed.</p>
             <p><strong>The fix:</strong> Before you begin stacking or during the first round, become an authorized user on an established account with: 5+ years of account history, high credit limit, low or zero balance, and perfect payment history.</p>
             <p>That single aged account on your report counterbalances the age impact of your new accounts.</p>
             <p>Ask the primary cardholder which bureaus the account reports to. Not all card issuers report authorized user accounts to all three bureaus.</p>
@@ -130,7 +130,7 @@ export default function StackingMethod() {
 
         {/* Utilization */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 6 — Utilization During Stacking</h2>
+          <h2 className="guide__section-title">Section 6, Utilization During Stacking</h2>
           <div className="guide__body">
             <p>During the stacking rounds, keep all new accounts at zero or near-zero balance.</p>
             <p><strong>Do not use them yet. Do not run balances. Do not test the limits.</strong></p>
@@ -140,14 +140,14 @@ export default function StackingMethod() {
 
         {/* Post-stack */}
         <div className="guide__section">
-          <h2 className="guide__section-title">Section 7 — Post-Stacking Execution: The Six-Month Window</h2>
+          <h2 className="guide__section-title">Section 7, Post-Stacking Execution: The Six-Month Window</h2>
           <div className="guide__body">
             <p>After your three rounds are complete, you now have nine to fifteen new unsecured accounts. The next six months determine whether this stack builds into lasting capital access or stagnates.</p>
-            <p><strong>Months 1–6:</strong> Use all accounts, but keep balances low. Put small recurring charges on each card. Make every payment on time, <em>before the statement closing date</em> — not just before the due date.</p>
+            <p><strong>Months 1–6:</strong> Use all accounts, but keep balances low. Put small recurring charges on each card. Make every payment on time, <em>before the statement closing date</em>, not just before the due date.</p>
             <p style={{ background: '#eff6ff', padding: 16, borderRadius: 8, marginBottom: 16 }}>
               <strong>Why statement closing date matters:</strong> Your card issuer reports your balance on your statement closing date. If you carry a $2,000 balance and pay it before the due date, it may still be reported as $2,000. Pay down balances before your statement closes. Your reported balance will be zero or minimal.
             </p>
-            <p><strong>Month 6 — Credit Line Increase Requests:</strong> After six consecutive months of on-time payments, request a credit line increase on each account. Ask the issuer: "Will this require a hard pull or a soft pull?" If hard pull required — decline. If soft pull or internal — request it.</p>
+            <p><strong>Month 6, Credit Line Increase Requests:</strong> After six consecutive months of on-time payments, request a credit line increase on each account. Ask the issuer: "Will this require a hard pull or a soft pull?" If hard pull required, decline. If soft pull or internal, request it.</p>
           </div>
         </div>
 

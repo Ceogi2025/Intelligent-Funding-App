@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 // Live counts from the free public endpoint, floored to the nearest 10 for
-// evergreen "N+" copy — pages using this can never go stale as the directory grows.
+// evergreen "N+" copy, pages using this can never go stale as the directory grows.
 export function useLiveCounts() {
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
   useEffect(() => {

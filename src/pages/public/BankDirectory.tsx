@@ -31,7 +31,7 @@ export default function BankDirectory() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    document.title = 'Which Credit Bureau Does Each Bank Pull? — Free Directory | Intelligent Funding'
+    document.title = 'Which Credit Bureau Does Each Bank Pull?, Free Directory | Intelligent Funding'
     fetch('/api/public/institutions')
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setInstitutions(data) })
@@ -47,9 +47,9 @@ export default function BankDirectory() {
       <div className="page" style={{ flex: 1 }}>
         <h1 style={{ marginBottom: 8 }}>Which bureau does each bank pull?</h1>
         <p style={{ color: 'var(--text-secondary)', maxWidth: 620, lineHeight: 1.6, marginBottom: 8 }}>
-          Every lender pulls your credit from Experian, Equifax, or TransUnion — usually just one, and it's knowable.
+          Every lender pulls your credit from Experian, Equifax, or TransUnion, usually just one, and it's knowable.
           This free directory shows the verified pull for {institutions.length || '50+'} institutions.
-          The full strategy layer — inquiry-reuse windows, soft-pull preapproval paths, every product mapped — lives inside the app.
+          The full strategy layer, inquiry-reuse windows, soft-pull preapproval paths, every product mapped, lives inside the app.
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
           <ShieldCheck size={14} style={{ color: 'var(--teal)' }} />
@@ -103,10 +103,10 @@ export default function BankDirectory() {
         <div style={{ background: '#0f1f4d', borderRadius: 'var(--radius-lg)', padding: '26px 24px', textAlign: 'center', color: '#fff', marginBottom: 8 }}>
           <div style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: 6 }}>The bureau is step one. The strategy is the product.</div>
           <div style={{ color: '#c7d2e8', fontSize: '0.9rem', marginBottom: 16, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>
-            Inquiry-reuse windows, soft-pull preapproval paths, credit-builder graduation timelines, and every product mapped — that's what turns one hard pull into a stack.
+            Inquiry-reuse windows, soft-pull preapproval paths, credit-builder graduation timelines, and every product mapped, that's what turns one hard pull into a stack.
           </div>
           <button className="btn btn--teal" onClick={() => navigate('/signup')}>
-            Unlock the Full Strategy — $1 for 7 Days <ArrowRight size={14} />
+            Unlock the Full Strategy, $1 for 7 Days <ArrowRight size={14} />
           </button>
         </div>
       </div>

@@ -121,4 +121,63 @@ router.get('/users', async (_req: AuthRequest, res: Response) => {
   res.json(rows)
 })
 
+// ── Wins Wall moderation ─────────────────────────────────────────────────────
+// Datapoint submissions land as 'pending'. Nothing shows on the wall until an
+// admin flips it to 'approved'. This is the pre-moderation gate — the whole reason
+// the Wins Wall carries zero live-chat legal exposure.
+router.get('/submissions', async (req: AuthRequest, res: Response) => {
+  const pool = getPool()
+  const status = req.query.status ? String(req.query.status) : null
+  const { rows } = status
+    ? await pool.query('SELECT * FROM submissions WHERE status = $1 ORDER BY id DESC', [status])
+    : await pool.query('SELECT * FROM submissions ORDER BY id DESC')
+  res.json(rows)
+})
+
+router.put('/submissions/:id', async (req: AuthRequest, res: Response) => {
+  const status = String(req.body.status || '')
+  if (!['pending', 'approved', 'rejected'].includes(status)) {
+    res.status(400).json({ error: 'status must be pending, approved, or rejected' })
+    return
+  }
+  const pool = getPool()
+  await pool.query('UPDATE submissions SET status = $1 WHERE id = $2', [status, req.params.id])
+  res.json({ success: true })
+})
+
+router.delete('/submissions/:id', async (req: AuthRequest, res: Response) => {
+  const pool = getPool()
+  await pool.query('DELETE FROM submissions WHERE id = $1', [req.params.id])
+  res.json({ success: true })
+})
+
+// ── Community chat moderation ────────────────────────────────────────────────
+// Held messages (auto-flagged by the filter or by member reports) land here for
+// a human. Approve → visible; Remove → hidden but kept; Delete → gone.
+router.get('/messages', async (req: AuthRequest, res: Response) => {
+  const pool = getPool()
+  const status = req.query.status ? String(req.query.status) : null
+  const { rows } = status
+    ? await pool.query('SELECT * FROM messages WHERE status = $1 ORDER BY id DESC LIMIT 500', [status])
+    : await pool.query('SELECT * FROM messages ORDER BY id DESC LIMIT 500')
+  res.json(rows)
+})
+
+router.put('/messages/:id', async (req: AuthRequest, res: Response) => {
+  const status = String(req.body.status || '')
+  if (!['visible', 'held', 'removed'].includes(status)) {
+    res.status(400).json({ error: 'status must be visible, held, or removed' })
+    return
+  }
+  const pool = getPool()
+  await pool.query('UPDATE messages SET status = $1 WHERE id = $2', [status, req.params.id])
+  res.json({ success: true })
+})
+
+router.delete('/messages/:id', async (req: AuthRequest, res: Response) => {
+  const pool = getPool()
+  await pool.query('DELETE FROM messages WHERE id = $1', [req.params.id])
+  res.json({ success: true })
+})
+
 export default router

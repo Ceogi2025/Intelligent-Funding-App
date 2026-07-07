@@ -52,14 +52,14 @@ const govResources = [
   {
     icon: FileText,
     name: 'AnnualCreditReport.com',
-    desc: 'The only federally authorized source for your free credit reports from all three bureaus. You are entitled to free reports — never pay for them here.',
+    desc: 'The only federally authorized source for your free credit reports from all three bureaus. You are entitled to free reports, never pay for them here.',
     phone: '877-322-8228',
     url: 'https://www.annualcreditreport.com',
     cta: 'Get Free Reports',
   },
   {
     icon: Shield,
-    name: 'CFPB — Consumer Financial Protection Bureau',
+    name: 'CFPB, Consumer Financial Protection Bureau',
     desc: 'Federal agency that handles complaints against lenders, banks, and credit bureaus. If a dispute is ignored or you are treated unfairly, file here. They get results.',
     phone: '855-411-2372',
     url: 'https://www.consumerfinance.gov/complaint/',
@@ -67,7 +67,7 @@ const govResources = [
   },
   {
     icon: AlertTriangle,
-    name: 'FTC — IdentityTheft.gov',
+    name: 'FTC, IdentityTheft.gov',
     desc: 'The official government resource for reporting identity theft and getting a personal recovery plan. Start here if accounts are opened in your name.',
     phone: '877-438-4338',
     url: 'https://www.identitytheft.gov',
@@ -88,7 +88,7 @@ export default function Resources() {
         <h1 className="guide__title">Resources</h1>
         <p className="guide__subtitle">
           The official numbers, links, and tools you need to monitor, dispute, and protect your credit.
-          Every link goes to the source — no middlemen.
+          Every link goes to the source, no middlemen.
         </p>
 
         {/* Free reports + government */}
@@ -152,7 +152,7 @@ export default function Resources() {
           <h2 className="guide__section-title">The Three Credit Bureaus</h2>
           <div className="guide__body" style={{ marginBottom: 16 }}>
             <p>
-              Freeze your credit when you are not actively applying — it blocks new accounts and stops fraud cold.
+              Freeze your credit when you are not actively applying, it blocks new accounts and stops fraud cold.
               Unfreeze in minutes when you are ready to stack. Disputes are free and a federal right.
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function Resources() {
           <div className="guide__body">
             <p>
               Knowing which bureau each institution pulls is only half the strategy. The other half is controlling
-              what those bureaus show. Pull your free reports first. Dispute errors before you apply — a single
+              what those bureaus show. Pull your free reports first. Dispute errors before you apply, a single
               inaccurate late payment can drop you below an approval threshold.
             </p>
             <p>

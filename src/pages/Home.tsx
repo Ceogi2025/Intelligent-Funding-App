@@ -20,7 +20,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
 
-  // Live catalog stats — the home screen shows real depth, never claims
+  // Live catalog stats, the home screen shows real depth, never claims
   const [stats, setStats] = useState<{ inst: number; builder: number; capital: number; noCheck: number; reuse: number } | null>(null)
   useEffect(() => {
     fetch('/api/institutions?path=all', { headers: { Authorization: `Bearer ${token}` } })
@@ -120,7 +120,7 @@ export default function Home() {
               <Building2 size={24} />
             </div>
             <span className="path-tile__label">Credit Builder</span>
-            <span className="path-tile__desc">Building or rebuilding — start here. Secured cards, builder loans &amp; rent reporting{stats ? ` · ${stats.builder} products` : ''}</span>
+            <span className="path-tile__desc">Building or rebuilding, start here. Secured cards, builder loans &amp; rent reporting{stats ? ` · ${stats.builder} products` : ''}</span>
             <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}>
               <span className="badge badge--teal">No-credit-check options</span>
               <span className="badge badge--gray">Graduation paths</span>
@@ -133,7 +133,7 @@ export default function Home() {
               <CreditCard size={24} />
             </div>
             <span className="path-tile__label">Capital Access</span>
-            <span className="path-tile__desc">Profile established — stack by bureau. Unsecured cards &amp; credit lines{stats ? ` · ${stats.capital} products` : ''}</span>
+            <span className="path-tile__desc">Profile established, stack by bureau. Unsecured cards &amp; credit lines{stats ? ` · ${stats.capital} products` : ''}</span>
             <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}>
               <span className="badge badge--navy">3 bureaus mapped</span>
               <span className="badge badge--green">Inquiry-reuse lenders</span>
@@ -146,7 +146,7 @@ export default function Home() {
               <Search size={24} />
             </div>
             <span className="path-tile__label">Browse All Institutions</span>
-            <span className="path-tile__desc">Know what you want? The full catalog — search any bank, filter by anything</span>
+            <span className="path-tile__desc">Know what you want? The full catalog, search any bank, filter by anything</span>
             <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}>
               <span className="badge badge--gray">Highlights &amp; watch-outs</span>
               <span className="badge badge--gray">Regional coverage</span>
@@ -155,7 +155,7 @@ export default function Home() {
         </div>
 
         <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '6px auto 26px', maxWidth: 920 }}>
-          Business Funding — the third step of the journey — is in the works. Personal profile first: that's the foundation it builds on.
+          Business Funding, the third step of the journey, is in the works. Personal profile first: that's the foundation it builds on.
         </div>
 
         {/* The knowledge layer */}
@@ -178,7 +178,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Capital Access Modal 1 — Bureau */}
+      {/* Capital Access Modal 1, Bureau */}
       {activeModal === 'bureau' && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -195,7 +195,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Capital Access Modal 2 — Inquiry Reuse */}
+      {/* Capital Access Modal 2, Inquiry Reuse */}
       {activeModal === 'inquiry' && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -203,17 +203,17 @@ export default function Home() {
             <p className="modal__subtext">One hard pull, multiple products from the same institution.</p>
             <div className="modal__options modal__options--vertical">
               <button className="modal__option-btn modal__option-btn--full" onClick={() => handleInquirySelect('yes')}>
-                ✓ Yes — Show inquiry reuse lenders only
+                ✓ Yes, Show inquiry reuse lenders only
               </button>
               <button className="modal__option-btn modal__option-btn--full" onClick={() => handleInquirySelect('no')}>
-                No — Show all lenders on this bureau
+                No, Show all lenders on this bureau
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Capital Access Modal 3 — Preapproval */}
+      {/* Capital Access Modal 3, Preapproval */}
       {activeModal === 'preapproval' && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -221,17 +221,17 @@ export default function Home() {
             <p className="modal__subtext">Check your approval odds without a hard inquiry hit.</p>
             <div className="modal__options modal__options--vertical">
               <button className="modal__option-btn modal__option-btn--full" onClick={() => handlePreapprovalSelect('yes')}>
-                ✓ Yes — Show preapproval lenders only
+                ✓ Yes, Show preapproval lenders only
               </button>
               <button className="modal__option-btn modal__option-btn--full" onClick={() => handlePreapprovalSelect('no')}>
-                No — Show all available lenders
+                No, Show all available lenders
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Credit Builder Modal — Product Type */}
+      {/* Credit Builder Modal, Product Type */}
       {activeModal === 'product' && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>

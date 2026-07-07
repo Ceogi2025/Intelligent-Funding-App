@@ -8,8 +8,8 @@ import { productInsights } from '../utils/insights'
 import type { Product, Institution } from '../types'
 
 function UnverifiedValue({ value }: { value: string | null | undefined }) {
-  if (!value || value === 'Not verified — contact institution to confirm') {
-    return <span className="detail-value detail-value--unverified">Not verified — contact institution to confirm</span>
+  if (!value || value === 'Not verified, contact institution to confirm') {
+    return <span className="detail-value detail-value--unverified">Not verified, contact institution to confirm</span>
   }
   if (value === 'Not Found' || value === 'Not Verified') {
     return <span className="detail-value detail-value--muted">{value}</span>
@@ -206,9 +206,9 @@ export default function InstitutionDetail() {
 
               {/* Verification standard banner */}
               <div style={{ marginTop: 16, background: 'var(--badge-gray-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '12px 16px', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-                <strong style={{ color: 'var(--text-primary)' }}>How we verify:</strong> Every data point is checked against the institution's official website — never assumed. Fields marked{' '}
-                <span style={{ color: 'var(--unverified-color)', fontWeight: 600 }}>"Not Verified — contact institution"</span>{' '}
-                are policies the institution does not publish publicly. We flag them honestly rather than guess — a wrong bureau or reuse detail can cost you an inquiry and points.
+                <strong style={{ color: 'var(--text-primary)' }}>How we verify:</strong> Every data point is checked against the institution's official website, never assumed. Fields marked{' '}
+                <span style={{ color: 'var(--unverified-color)', fontWeight: 600 }}>"Not Verified, contact institution"</span>{' '}
+                are policies the institution does not publish publicly. We flag them honestly rather than guess, a wrong bureau or reuse detail can cost you an inquiry and points.
               </div>
             </div>
 

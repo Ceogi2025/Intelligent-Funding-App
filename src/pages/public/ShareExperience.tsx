@@ -45,7 +45,7 @@ export default function ShareExperience() {
       if (!res.ok) { setError(data.error || 'Try again'); return }
       setDone(true)
     } catch {
-      setError('Connection error — try again.')
+      setError('Connection error, try again.')
     } finally {
       setLoading(false)
     }
@@ -61,7 +61,7 @@ export default function ShareExperience() {
             <h1 style={{ marginBottom: 10 }}>Datapoint received. Respect.</h1>
             <p style={{ color: 'var(--text-secondary)', maxWidth: 440, margin: '0 auto', lineHeight: 1.65 }}>
               Every report like yours makes the map more accurate for the next person.
-              Your datapoint goes through verification before anything is published — that's the standard
+              Your datapoint goes through verification before anything is published, that's the standard
               that keeps this data trustworthy.
             </p>
           </div>
@@ -74,9 +74,9 @@ export default function ShareExperience() {
               <h1>Share your datapoint</h1>
             </div>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, marginBottom: 22 }}>
-              Applied somewhere recently? Which bureau they pulled, whether they reused your inquiry —
+              Applied somewhere recently? Which bureau they pulled, whether they reused your inquiry,
               your two minutes makes the map real for the whole community. Everything is reviewed and
-              verified before publication. No names, no account numbers — never share those.
+              verified before publication. No names, no account numbers, never share those.
             </p>
 
             {error && <div className="error-message">{error}</div>}
@@ -125,8 +125,8 @@ export default function ShareExperience() {
                   <label className="form-label">Did they reuse an inquiry?</label>
                   <select className="form-input" value={form.inquiry_reuse_observed} onChange={e => set('inquiry_reuse_observed', e.target.value)}>
                     <option value="">Select…</option>
-                    <option value="Yes">Yes — 2nd product, no new pull</option>
-                    <option value="No">No — new hard pull</option>
+                    <option value="Yes">Yes, 2nd product, no new pull</option>
+                    <option value="No">No, new hard pull</option>
                     <option value="N/A">Didn't try</option>
                   </select>
                 </div>
@@ -136,7 +136,7 @@ export default function ShareExperience() {
                 <textarea className="form-input" rows={3} placeholder="Timing, phone rep info, membership path used…" value={form.notes} onChange={e => set('notes', e.target.value)} />
               </div>
               <div className="form-group">
-                <label className="form-label">Your email (optional — only if we can follow up)</label>
+                <label className="form-label">Your email (optional, only if we can follow up)</label>
                 <input type="email" className="form-input" placeholder="you@example.com" value={form.email} onChange={e => set('email', e.target.value)} />
               </div>
               <button type="submit" className="btn btn--primary btn--full" disabled={loading}>

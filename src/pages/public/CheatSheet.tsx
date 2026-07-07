@@ -33,7 +33,7 @@ export default function CheatSheet() {
       localStorage.setItem('if_cheatsheet', '1')
       setUnlocked(true)
     } catch {
-      setError('Connection error — try again.')
+      setError('Connection error, try again.')
     } finally {
       setLoading(false)
     }
@@ -51,7 +51,7 @@ export default function CheatSheet() {
             <h1 style={{ marginBottom: 10 }}>The Bureau Cheat Sheet</h1>
             <p style={{ color: 'var(--text-secondary)', maxWidth: 460, margin: '0 auto 24px', lineHeight: 1.65 }}>
               The 3 questions to ask before ANY credit application, the free tools to check all three of your reports,
-              and the bureau phone numbers that matter. Free — drop your email and it's yours.
+              and the bureau phone numbers that matter. Free, drop your email and it's yours.
             </p>
             {error && <div className="error-message" style={{ maxWidth: 380, margin: '0 auto 14px' }}>{error}</div>}
             <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, maxWidth: 420, margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -69,20 +69,20 @@ export default function CheatSheet() {
               </button>
             </form>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 12 }}>
-              No spam. Educational content only — unsubscribe anytime.
+              No spam. Educational content only, unsubscribe anytime.
             </p>
           </div>
         ) : (
           <>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#15803d', fontWeight: 700, fontSize: '0.85rem', marginBottom: 14 }}>
-              <CheckCircle2 size={16} /> Unlocked — bookmark this page
+              <CheckCircle2 size={16} /> Unlocked, bookmark this page
             </div>
             <h1 style={{ marginBottom: 24 }}>The Bureau Cheat Sheet</h1>
 
             <div className="guide__section">
               <h2 className="guide__section-title">The one fact that changes everything</h2>
               <div className="guide__body">
-                <p>You don't have one credit report — you have <strong>three</strong> (Experian, Equifax, TransUnion), and they are NOT identical. Most lenders pull just ONE of them. Which one is knowable. So every application is a choice: walk into the room where your file is strongest, or the room where it's weakest.</p>
+                <p>You don't have one credit report, you have <strong>three</strong> (Experian, Equifax, TransUnion), and they are NOT identical. Most lenders pull just ONE of them. Which one is knowable. So every application is a choice: walk into the room where your file is strongest, or the room where it's weakest.</p>
               </div>
             </div>
 
@@ -90,17 +90,17 @@ export default function CheatSheet() {
               <h2 className="guide__section-title">The 3 questions before ANY application</h2>
               <div className="guide__body">
                 <p><strong>1. Which bureau does this institution pull?</strong> Apply where your strongest report lives. (Our free <a href="/banks" style={{ color: 'var(--teal)', fontWeight: 600 }}>directory</a> answers this for {instFloor} institutions (growing weekly).)</p>
-                <p><strong>2. Do they allow inquiry reuse?</strong> Some institutions approve multiple products off a single hard pull inside a window — same day at some, 30 days at others. One inquiry, two or three accounts.</p>
+                <p><strong>2. Do they allow inquiry reuse?</strong> Some institutions approve multiple products off a single hard pull inside a window, same day at some, 30 days at others. One inquiry, two or three accounts.</p>
                 <p><strong>3. Is there a soft-pull preapproval?</strong> Check your approval odds with zero impact before committing the hard inquiry.</p>
                 <p>If you can't answer all three, you're not ready to apply. That discipline is the whole game.</p>
               </div>
             </div>
 
             <div className="guide__section">
-              <h2 className="guide__section-title">Check all 3 reports — free, the official way</h2>
+              <h2 className="guide__section-title">Check all 3 reports, free, the official way</h2>
               <div className="guide__body">
-                <p><strong>AnnualCreditReport.com</strong> — the only federally authorized source. Free weekly reports from all three bureaus. Never pay for your own reports.</p>
-                <p>Dispute every error BEFORE you apply anywhere — one wrong late payment can sit below an approval threshold. Disputes are free and a federal right.</p>
+                <p><strong>AnnualCreditReport.com</strong>, the only federally authorized source. Free weekly reports from all three bureaus. Never pay for your own reports.</p>
+                <p>Dispute every error BEFORE you apply anywhere, one wrong late payment can sit below an approval threshold. Disputes are free and a federal right.</p>
               </div>
             </div>
 

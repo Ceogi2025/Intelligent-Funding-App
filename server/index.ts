@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import app from './app.js'
 import { initSchema } from './db/database.js'
-import { seedDatabase, seedAdmin, seedProductUpdates } from './db/seed.js'
+import { seedDatabase, seedAdmin, seedProductUpdates, seedWins } from './db/seed.js'
 
 const PORT = process.env.PORT || 3001
 
@@ -10,6 +10,7 @@ async function start() {
   await seedDatabase()
   await seedAdmin()
   await seedProductUpdates()
+  await seedWins()
   app.listen(PORT, () => {
     console.log(`Intelligent Funding API running on http://localhost:${PORT}`)
   })

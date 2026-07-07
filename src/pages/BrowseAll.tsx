@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { productInsights } from '../utils/insights'
 import type { Institution } from '../types'
 
-// Browse All — the full lending catalog with strategy filters.
+// Browse All, the full lending catalog with strategy filters.
 // The guided paths (Home) stay the hero flow; this view serves the user who
 // already knows what they want: a specific bank, a product type, or "just
 // show me everything with no annual fee."
@@ -97,7 +97,7 @@ export default function BrowseAll() {
       <div className="page" style={{ flex: 1 }}>
         <h1 style={{ marginBottom: 6 }}>Browse all institutions</h1>
         <p style={{ color: 'var(--text-secondary)', maxWidth: 640, lineHeight: 1.6, marginBottom: 18 }}>
-          The full catalog — every institution and product we've mapped, with the strategy data on each.
+          The full catalog, every institution and product we've mapped, with the strategy data on each.
           Prefer a guided path? <a href="/home" style={{ color: 'var(--teal)', fontWeight: 600 }}>Start with bureau mapping</a>.
         </p>
 
@@ -185,7 +185,7 @@ export default function BrowseAll() {
             })}
             {shown.length === 0 && (
               <div className="results-empty" style={{ gridColumn: '1 / -1' }}>
-                <h3>No matches</h3><p>Loosen a filter — or tell us what's missing via Share a Datapoint.</p>
+                <h3>No matches</h3><p>Loosen a filter, or tell us what's missing via Share a Datapoint.</p>
               </div>
             )}
           </div>

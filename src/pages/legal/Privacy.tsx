@@ -22,7 +22,7 @@ export default function Privacy() {
         <div className="guide__section">
           <h2 className="guide__section-title">What We Do NOT Collect</h2>
           <div className="guide__body">
-            <p>We never collect or ask for: your Social Security number, your credit report, your credit score, your bank account credentials, or your card numbers. <strong>We never pull your credit — using this platform has zero effect on your credit report.</strong></p>
+            <p>We never collect or ask for: your Social Security number, your credit report, your credit score, your bank account credentials, or your card numbers. <strong>We never pull your credit, using this platform has zero effect on your credit report.</strong></p>
           </div>
         </div>
 
@@ -31,7 +31,7 @@ export default function Privacy() {
           <div className="guide__body">
             <p>We use your information to run your account, deliver the product, send you service emails, and (if you opted in) educational content you can unsubscribe from with one click.</p>
             <p><strong>We do not sell your personal information. Period.</strong></p>
-            <p><strong>Affiliate disclosure:</strong> some "Apply" links may become affiliate links, meaning an institution may pay us if you apply through them. This never changes our data or rankings — the same information is shown whether or not a link pays us. Affiliate partners receive no personal information from us beyond what the click itself carries.</p>
+            <p><strong>Affiliate disclosure:</strong> some "Apply" links may become affiliate links, meaning an institution may pay us if you apply through them. This never changes our data or rankings, the same information is shown whether or not a link pays us. Affiliate partners receive no personal information from us beyond what the click itself carries.</p>
           </div>
         </div>
 

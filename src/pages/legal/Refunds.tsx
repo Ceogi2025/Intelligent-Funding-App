@@ -20,14 +20,14 @@ export default function Refunds() {
         <div className="guide__section">
           <h2 className="guide__section-title">The $1 Trial</h2>
           <div className="guide__body">
-            <p>The $1 gets you 7 days of full access and is not refundable. <strong>If you don't cancel before the 7 days end, the subscription continues at $29/month automatically</strong> — we say this everywhere on purpose, because surprise charges are how other companies operate, not us. Cancel on day 6 and you pay exactly $1 total.</p>
+            <p>The $1 gets you 7 days of full access and is not refundable. <strong>If you don't cancel before the 7 days end, the subscription continues at $29/month automatically</strong>, we say this everywhere on purpose, because surprise charges are how other companies operate, not us. Cancel on day 6 and you pay exactly $1 total.</p>
           </div>
         </div>
 
         <div className="guide__section">
           <h2 className="guide__section-title">Monthly Plan ($29/month)</h2>
           <div className="guide__body">
-            <p>Cancel anytime to stop the next renewal. We don't refund partial months — you keep access through the end of the paid month instead.</p>
+            <p>Cancel anytime to stop the next renewal. We don't refund partial months, you keep access through the end of the paid month instead.</p>
           </div>
         </div>
 
@@ -41,7 +41,7 @@ export default function Refunds() {
         <div className="guide__section">
           <h2 className="guide__section-title">Billing Mistakes</h2>
           <div className="guide__body">
-            <p>Charged in error (duplicate charge, charged after cancelling)? Email support@intelligentfunding.org with the details — we refund genuine billing errors in full, fast.</p>
+            <p>Charged in error (duplicate charge, charged after cancelling)? Email support@intelligentfunding.org with the details, we refund genuine billing errors in full, fast.</p>
           </div>
         </div>
       </div>

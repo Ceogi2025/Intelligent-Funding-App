@@ -203,5 +203,19 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── Community chat (the paid-tier member room) ───────────────────────────
+  // status: visible | held (auto-flagged, awaiting review) | removed
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id ${pk},
+      user_id INTEGER,
+      display_name TEXT,
+      body TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'visible',
+      flagged_count INTEGER DEFAULT 0,
+      created_at ${now}
+    )
+  `)
+
   schemaInitialized = true
 }

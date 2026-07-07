@@ -123,6 +123,26 @@ router.post('/public/submissions', async (req: Request, res: Response) => {
   }
 })
 
+// The Wins Wall — approved community approval reports, PII stripped (never returns email).
+// Public + trial visible: this is the community-proof surface that converts trial → paid.
+router.get('/wins', async (_req: Request, res: Response) => {
+  try {
+    const pool = getPool()
+    const { rows } = await pool.query(`
+      SELECT id, institution_name, product_name, bureau_pulled, credit_score_band,
+        credit_limit, state, inquiry_reuse_observed, notes, created_at
+      FROM submissions
+      WHERE status = 'approved'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 100
+    `)
+    res.json(rows)
+  } catch (err) {
+    console.error('Wins load error:', err)
+    res.status(500).json({ error: 'Failed to load wins' })
+  }
+})
+
 // Apply-click redirect: logs the click, then forwards to the institution's site.
 // When affiliate links land, swapping application_url per institution is the ONLY change needed.
 router.get('/go/:id', async (req: Request, res: Response) => {

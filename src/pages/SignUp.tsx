@@ -10,9 +10,9 @@ const planInfo: Record<string, { badge: string; benefits: string[] }> = {
     badge: '$1 for 7 Days',
     benefits: [
       'Full access for 7 days',
-      'Every verified institution — {COUNT} and growing',
+      'Every verified institution, {COUNT} and growing',
       'All 4 education guides + Resources',
-      'Cancel anytime — no commitment',
+      'Cancel anytime, no commitment',
     ],
   },
   monthly: {
@@ -90,7 +90,7 @@ export default function SignUp() {
             return
           }
         } catch {
-          // Stripe not configured — proceed to home
+          // Stripe not configured, proceed to home
         }
       }
 
@@ -161,7 +161,7 @@ export default function SignUp() {
               />
             </div>
             <button type="submit" className="btn btn--primary btn--full" disabled={loading}>
-              {loading ? 'Creating account...' : `Continue — ${info.badge}`}
+              {loading ? 'Creating account...' : `Continue, ${info.badge}`}
             </button>
           </form>
 
@@ -171,7 +171,7 @@ export default function SignUp() {
               : plan === 'annual'
               ? '$278 billed today, renews yearly until cancelled. Full refund within 14 days. Cancel anytime from your Account page.'
               : '$29 billed monthly until cancelled. Cancel anytime in 2 clicks from your Account page.'}
-            {' '}By continuing you agree to the <Link to="/terms" style={{ color: 'var(--teal)', fontWeight: 600 }}>Terms</Link>, <Link to="/privacy" style={{ color: 'var(--teal)', fontWeight: 600 }}>Privacy Policy</Link>, and <Link to="/refunds" style={{ color: 'var(--teal)', fontWeight: 600 }}>Refund Policy</Link>. Educational platform — not financial advice.
+            {' '}By continuing you agree to the <Link to="/terms" style={{ color: 'var(--teal)', fontWeight: 600 }}>Terms</Link>, <Link to="/privacy" style={{ color: 'var(--teal)', fontWeight: 600 }}>Privacy Policy</Link>, and <Link to="/refunds" style={{ color: 'var(--teal)', fontWeight: 600 }}>Refund Policy</Link>. Educational platform, not financial advice.
           </p>
 
           <p style={{ marginTop: 12, fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center' }}>

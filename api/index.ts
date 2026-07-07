@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import app from '../server/app.js'
 import { initSchema } from '../server/db/database.js'
-import { seedDatabase, seedAdmin, seedProductUpdates } from '../server/db/seed.js'
+import { seedDatabase, seedAdmin, seedProductUpdates, seedWins } from '../server/db/seed.js'
 
 let initialized = false
 
@@ -11,6 +11,7 @@ async function ensureReady(): Promise<void> {
   await seedDatabase()
   await seedAdmin()
   await seedProductUpdates()
+  await seedWins()
   initialized = true
 }
 

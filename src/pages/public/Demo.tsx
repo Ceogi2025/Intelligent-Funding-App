@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 // Self-playing cinematic product demo. 20-second loop, four scenes.
 // Built to be screen-recorded (QuickTime, Cmd+Shift+5) → CapCut → socials.
-// No auth, no data fetch — pure choreography, so it never breaks on camera.
+// No auth, no data fetch, pure choreography, so it never breaks on camera.
 
 const css = `
 .demo-stage{position:fixed;inset:0;background:linear-gradient(160deg,#1e3a8a 0%,#152a63 55%,#0d1b40 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
@@ -82,7 +82,7 @@ const css = `
 export default function Demo() {
   const navigate = useNavigate()
   useEffect(() => {
-    document.title = 'Intelligent Funding — Product Demo'
+    document.title = 'Intelligent Funding, Product Demo'
   }, [])
 
   return (
@@ -92,7 +92,7 @@ export default function Demo() {
       <button className="demo-exit" onClick={() => navigate('/')}>Exit demo</button>
 
       <div className="demo-loop">
-        {/* Scene 1 — pick your bureau */}
+        {/* Scene 1, pick your bureau */}
         <div className="scene scene-1">
           <div className="demo-caption">Every lender pulls <span className="teal">one bureau.</span></div>
           <div className="demo-sub">Pick where your credit is strongest.</div>
@@ -105,7 +105,7 @@ export default function Demo() {
           </div>
         </div>
 
-        {/* Scene 2 — inquiry reuse */}
+        {/* Scene 2, inquiry reuse */}
         <div className="scene scene-2">
           <div className="demo-caption">One hard pull. <span className="teal">Multiple approvals.</span></div>
           <div className="demo-sub">Filter for institutions that reuse your inquiry.</div>
@@ -120,7 +120,7 @@ export default function Demo() {
           </div>
         </div>
 
-        {/* Scene 3 — verified results */}
+        {/* Scene 3, verified results */}
         <div className="scene scene-3">
           <div className="demo-caption">Verified. <span className="teal">Not guessed.</span></div>
           <div className="demo-sub">50+ institutions · growing weekly · checked against official sources</div>
@@ -130,7 +130,7 @@ export default function Demo() {
               <div>
                 <div className="name">Bank of America</div>
                 <div className="badges">
-                  <span className="demo-badge b-green">✓ Inquiry Reuse — 30 Days</span>
+                  <span className="demo-badge b-green">✓ Inquiry Reuse, 30 Days</span>
                   <span className="demo-badge b-teal">✓ Soft Pull</span>
                   <span className="demo-badge b-navy">Experian</span>
                 </div>
@@ -141,7 +141,7 @@ export default function Demo() {
               <div>
                 <div className="name">Patelco Credit Union</div>
                 <div className="badges">
-                  <span className="demo-badge b-green">✓ Inquiry Reuse — 30 Days</span>
+                  <span className="demo-badge b-green">✓ Inquiry Reuse, 30 Days</span>
                   <span className="demo-badge b-navy">Experian</span>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function Demo() {
               <div>
                 <div className="name">Service Credit Union</div>
                 <div className="badges">
-                  <span className="demo-badge b-green">✓ Inquiry Reuse — 30 Days</span>
+                  <span className="demo-badge b-green">✓ Inquiry Reuse, 30 Days</span>
                   <span className="demo-badge b-navy">Experian</span>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function Demo() {
           </div>
         </div>
 
-        {/* Scene 4 — close */}
+        {/* Scene 4, close */}
         <div className="scene scene-4">
           <div className="demo-caption">Stack by Bureau.<br /><span className="teal">Get Funded by Design.</span></div>
           <button className="demo-cta-btn" onClick={() => navigate('/signup')}>Start for $1</button>

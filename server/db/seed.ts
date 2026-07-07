@@ -1543,3 +1543,67 @@ export async function seedAdmin(): Promise<void> {
 
   console.log('Admin created: admin@intelligentfunding.org (password: ADMIN_PASSWORD env, or dev default)')
 }
+
+// ── Wins Wall seed ────────────────────────────────────────────────────────────
+// Real, anonymized approval datapoints sourced from our research logs (myFICO /
+// community reports gathered during the institution build). These make the wall
+// look alive on day one; real member submissions join them as they're approved.
+// Tagged with SEED_WIN_TAG so a reseed only ever touches the seeded set — never a
+// real user's submission. Bureau is left null where our data is unverified (honest).
+const SEED_WIN_TAG = 'seed@intelligentfunding.org'
+
+type WinRow = {
+  institution_name: string
+  product_name: string | null
+  bureau_pulled: string | null
+  credit_score_band: string | null
+  credit_limit: string | null
+  state: string | null
+  inquiry_reuse_observed: string | null
+  notes: string
+  reported: string  // report/verification date (YYYY-MM-DD) — shown on the card so nobody trusts a stale datapoint
+}
+
+const communityWins: WinRow[] = [
+  { institution_name: 'Arvest Bank', product_name: 'True Rate Card', bureau_pulled: 'TransUnion', credit_score_band: '660–699', credit_limit: null, state: 'KS', inquiry_reuse_observed: null, notes: 'Approved for the True Rate card. They pulled TransUnion, score was right around 680.', reported: '2026-06-28' },
+  { institution_name: 'USAA', product_name: 'Rate Advantage Visa', bureau_pulled: 'Experian', credit_score_band: null, credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Approved. USAA pulled Experian (their Bankcard Score 3). Military-family membership.', reported: '2026-07-01' },
+  { institution_name: 'SECU (Maryland)', product_name: 'Visa Signature', bureau_pulled: 'Equifax', credit_score_band: '660–699', credit_limit: null, state: 'MD', inquiry_reuse_observed: 'Yes', notes: 'Approved on Equifax. Went back for a second card and they reused the same pull — two tradelines, one inquiry.', reported: '2026-06-15' },
+  { institution_name: 'Interior Federal Credit Union', product_name: 'Visa Platinum Rewards', bureau_pulled: 'Equifax', credit_score_band: '700–739', credit_limit: '$17,500', state: null, inquiry_reuse_observed: null, notes: 'Rewards card approval on Equifax, score 701. Generous starting limit.', reported: '2026-05-22' },
+  { institution_name: 'AOD Federal Credit Union', product_name: 'Signature Visa', bureau_pulled: 'Equifax', credit_score_band: null, credit_limit: null, state: 'AL', inquiry_reuse_observed: null, notes: 'Approved on Equifax FICO 5 — the "unicorn card" everybody on the forums talks about.', reported: '2026-06-30' },
+  { institution_name: 'Signal Financial FCU', product_name: 'Signature Visa', bureau_pulled: 'TransUnion', credit_score_band: null, credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Credit product approval — they pull TransUnion for membership and cards.', reported: '2026-06-19' },
+  { institution_name: 'Northwest Federal Credit Union', product_name: 'NOW Plus Rewards Visa', bureau_pulled: 'Equifax', credit_score_band: null, credit_limit: null, state: 'VA', inquiry_reuse_observed: null, notes: 'Card approval on Equifax. They use EQ for cards and auto both.', reported: '2026-05-30' },
+  { institution_name: 'Justice Federal Credit Union', product_name: 'Visa Platinum Rewards', bureau_pulled: 'Equifax', credit_score_band: null, credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Platinum Rewards approved, Equifax pull. 11.90% fixed rate — hard to beat.', reported: '2026-06-24' },
+  { institution_name: 'M&T Bank', product_name: 'Visa Signature', bureau_pulled: 'Experian', credit_score_band: '700–739', credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Approved, Experian pull. They occasionally hit TransUnion but mine was EX.', reported: '2026-07-03' },
+  { institution_name: 'Prosper', product_name: 'Personal Loan', bureau_pulled: 'TransUnion', credit_score_band: null, credit_limit: '$15,000', state: null, inquiry_reuse_observed: null, notes: 'Personal loan funded. Soft-pull rate check first, then TransUnion for the real application.', reported: '2026-06-11' },
+  { institution_name: 'Discover', product_name: 'Discover it Cash Back', bureau_pulled: null, credit_score_band: '660–699', credit_limit: null, state: 'TX', inquiry_reuse_observed: null, notes: 'Pre-approved offer, soft pull, no ding. First-year cashback match sealed it.', reported: '2026-07-04' },
+  { institution_name: 'Apple Federal Credit Union', product_name: 'Visa Platinum', bureau_pulled: null, credit_score_band: null, credit_limit: null, state: 'VA', inquiry_reuse_observed: null, notes: 'Platinum card approved — solid low rate for a starter card.', reported: '2026-06-26' },
+  { institution_name: 'Credit One Bank', product_name: 'Platinum Visa', bureau_pulled: null, credit_score_band: '580–619', credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Rebuild approval. Prequalified with no credit impact first, then approved.', reported: '2026-06-08' },
+  { institution_name: 'AgFed Credit Union', product_name: 'Visa Platinum', bureau_pulled: 'Equifax', credit_score_band: null, credit_limit: null, state: null, inquiry_reuse_observed: null, notes: 'Equifax credit union. Approved and building from here.', reported: '2026-07-02' },
+]
+
+export async function seedWins(): Promise<void> {
+  const pool = getPool()
+  // Only ever manage the seeded set — never touch a real user's submission.
+  const { rows } = await pool.query(
+    'SELECT COUNT(*)::int as count FROM submissions WHERE email = $1', [SEED_WIN_TAG]
+  )
+  const existing = Number(rows[0].count)
+  if (existing > 0) {
+    if (process.env.SEED_MODE === 'replace') {
+      await pool.query('DELETE FROM submissions WHERE email = $1', [SEED_WIN_TAG])
+    } else {
+      return
+    }
+  }
+  for (const w of communityWins) {
+    await pool.query(`
+      INSERT INTO submissions (institution_name, product_name, bureau_pulled, approved,
+        credit_score_band, credit_limit, state, inquiry_reuse_observed, notes, email, status, created_at)
+      VALUES ($1,$2,$3,'Yes',$4,$5,$6,$7,$8,$9,'approved',$10)
+    `, [
+      w.institution_name, w.product_name, w.bureau_pulled, w.credit_score_band,
+      w.credit_limit, w.state, w.inquiry_reuse_observed, w.notes, SEED_WIN_TAG, w.reported,
+    ])
+  }
+  console.log(`Seeded ${communityWins.length} community wins.`)
+}

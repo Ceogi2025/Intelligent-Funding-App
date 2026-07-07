@@ -7,7 +7,7 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 
 const statusLabels: Record<string, string> = {
-  trial: '7-Day Trial — active',
+  trial: '7-Day Trial, active',
   active: 'Active subscription',
   inactive: 'No active subscription',
 }
@@ -33,7 +33,7 @@ export default function Account() {
       }
       setError(data.error === 'Payment not configured'
         ? 'Billing portal opens once payments go live. Need help now? Email support@intelligentfunding.org.'
-        : data.error || 'Could not open the billing portal — email support@intelligentfunding.org and we will handle it.')
+        : data.error || 'Could not open the billing portal, email support@intelligentfunding.org and we will handle it.')
     } catch {
       setError('Connection error. Try again, or email support@intelligentfunding.org.')
     } finally {
@@ -78,7 +78,7 @@ export default function Account() {
         </button>
 
         <p style={{ marginTop: 14, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          Update your card, switch plans, or <strong>cancel anytime</strong> — no phone calls, no hoops.
+          Update your card, switch plans, or <strong>cancel anytime</strong>, no phone calls, no hoops.
           Cancelling stops future charges; you keep access through the period you've paid for.
           Full details in the <Link to="/refunds" style={{ color: 'var(--teal)', fontWeight: 600 }}>Refund Policy</Link>.
         </p>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CreditCard, Building2, Search, BookOpen, LifeBuoy, ShieldCheck, ArrowRight } from 'lucide-react'
+import { CreditCard, Building2, Search, BookOpen, LifeBuoy, ShieldCheck, ArrowRight, Briefcase } from 'lucide-react'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import { useFilters } from '../context/FilterContext'
@@ -140,6 +140,19 @@ export default function Home() {
             </span>
           </button>
 
+          <button className="path-tile" onClick={() => navigate('/business')} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: 12, left: 14, fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em', color: 'var(--teal)' }}>STEP 3 · SCALE</span>
+            <div className="path-tile__icon">
+              <Briefcase size={24} />
+            </div>
+            <span className="path-tile__label">Business Funding</span>
+            <span className="path-tile__desc">Fund the business, not just the person. No-doc lines, 0% business cards &amp; builder products, filtered to your level</span>
+            <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}>
+              <span className="badge badge--navy">New-LLC options</span>
+              <span className="badge badge--green">EIN-only lenders</span>
+            </span>
+          </button>
+
           <button className="path-tile" onClick={() => navigate('/browse')} style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', top: 12, left: 14, fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em', color: 'var(--teal)' }}>EXPLORE</span>
             <div className="path-tile__icon">
@@ -155,7 +168,7 @@ export default function Home() {
         </div>
 
         <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '6px auto 26px', maxWidth: 920 }}>
-          Business Funding, the third step of the journey, is in the works. Personal profile first: that's the foundation it builds on.
+          The journey in order: build the profile, stack by bureau, then fund the business. Access is leverage. Leverage is opportunity.
         </div>
 
         {/* The knowledge layer */}

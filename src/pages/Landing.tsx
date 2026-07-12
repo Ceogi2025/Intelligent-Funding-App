@@ -31,14 +31,14 @@ const edges = [
 
 export default function Landing() {
   const navigate = useNavigate()
-  // Live counts from the DB, the landing page can never go stale as the directory grows
+  // Live counts (consumer + business combined), the landing page can never go stale as the directory grows
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
   useEffect(() => {
-    fetch('/api/public/institutions')
+    fetch('/api/public/stats')
       .then(r => r.json())
       .then(d => {
-        if (Array.isArray(d) && d.length > 0) {
-          setCounts({ inst: d.length, prod: d.reduce((s, i) => s + (i.product_count || 0), 0) })
+        if (d && typeof d.inst === 'number' && d.inst > 0) {
+          setCounts({ inst: d.inst, prod: d.prod })
         }
       })
       .catch(() => {})
@@ -57,6 +57,9 @@ export default function Landing() {
           <h1 className="lp-hero__headline">
             Stack by Bureau.<br /><span className="accent">Get Funded by Design.</span>
           </h1>
+          <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '0.005em', color: 'var(--bright, #22d3ee)', margin: '2px 0 14px' }}>
+            Access is leverage. Leverage is opportunity.
+          </div>
           <p className="lp-hero__sub">
             The only bureau-stacking app with a community behind it. Map your strongest bureau, reuse
             inquiries, and apply with a plan, not a guess. Members trade real approvals and live strategy
@@ -71,7 +74,7 @@ export default function Landing() {
             </button>
           </div>
           <div className="lp-hero__trust">
-            <span><ShieldCheck size={13} /> {counts ? `${Math.floor(counts.inst / 10) * 10}+ verified institutions` : '50+ verified institutions'}</span>
+            <span><ShieldCheck size={13} /> {counts ? `${Math.floor(counts.inst / 10) * 10}+ verified institutions` : '90+ verified institutions'}</span>
             <span>·</span>
             <span>A live member community</span>
             <span>·</span>
@@ -82,8 +85,8 @@ export default function Landing() {
 
       {/* Stats strip */}
       <div className="lp-stats">
-        <div className="lp-stat"><div className="lp-stat__num">{counts ? `${Math.floor(counts.inst / 10) * 10}+` : '50+'}</div><div className="lp-stat__label">Verified Institutions</div></div>
-        <div className="lp-stat"><div className="lp-stat__num">{counts ? `${Math.floor(counts.prod / 10) * 10}+` : '80+'}</div><div className="lp-stat__label">Products Mapped</div></div>
+        <div className="lp-stat"><div className="lp-stat__num">{counts ? `${Math.floor(counts.inst / 10) * 10}+` : '90+'}</div><div className="lp-stat__label">Verified Institutions</div></div>
+        <div className="lp-stat"><div className="lp-stat__num">{counts ? `${Math.floor(counts.prod / 10) * 10}+` : '220+'}</div><div className="lp-stat__label">Products Mapped</div></div>
         <div className="lp-stat"><div className="lp-stat__num">3</div><div className="lp-stat__label">Credit Bureaus</div></div>
         <div className="lp-stat"><div className="lp-stat__num">0</div><div className="lp-stat__label">Guesswork</div></div>
       </div>

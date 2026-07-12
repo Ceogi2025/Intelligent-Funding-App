@@ -48,7 +48,7 @@ export default function BankDirectory() {
         <h1 style={{ marginBottom: 8 }}>Which bureau does each bank pull?</h1>
         <p style={{ color: 'var(--text-secondary)', maxWidth: 620, lineHeight: 1.6, marginBottom: 8 }}>
           Every lender pulls your credit from Experian, Equifax, or TransUnion, usually just one, and it's knowable.
-          This free directory shows the verified pull for {institutions.length || '50+'} institutions.
+          This free directory shows the verified pull for {institutions.length || '80+'} institutions.
           The full strategy layer, inquiry-reuse windows, soft-pull preapproval paths, every product mapped, lives inside the app.
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 20 }}>

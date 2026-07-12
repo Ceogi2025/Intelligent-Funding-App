@@ -5,16 +5,17 @@ import { useEffect, useState } from 'react'
 export function useLiveCounts() {
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
   useEffect(() => {
-    fetch('/api/public/institutions')
+    // Combined consumer + business counts
+    fetch('/api/public/stats')
       .then(r => r.json())
       .then(d => {
-        if (Array.isArray(d) && d.length > 0) {
-          setCounts({ inst: d.length, prod: d.reduce((s, i) => s + (i.product_count || 0), 0) })
+        if (d && typeof d.inst === 'number' && d.inst > 0) {
+          setCounts({ inst: d.inst, prod: d.prod })
         }
       })
       .catch(() => {})
   }, [])
-  const instFloor = counts ? `${Math.floor(counts.inst / 10) * 10}+` : '50+'
-  const prodFloor = counts ? `${Math.floor(counts.prod / 10) * 10}+` : '80+'
+  const instFloor = counts ? `${Math.floor(counts.inst / 10) * 10}+` : '90+'
+  const prodFloor = counts ? `${Math.floor(counts.prod / 10) * 10}+` : '220+'
   return { counts, instFloor, prodFloor }
 }

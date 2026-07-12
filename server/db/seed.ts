@@ -1607,3 +1607,188 @@ export async function seedWins(): Promise<void> {
   }
   console.log(`Seeded ${communityWins.length} community wins.`)
 }
+
+// ── Business funding seed (the third path) ────────────────────────────────────
+// Institution → products, mirroring the consumer model. All criteria verified
+// against each institution's OWN official site 2026-07-11 (BUSINESS-VERIFIED-TIER-A.md
+// + BANKS-TO-CHECK-2026-07.md). "Not published" = the lender does not state it.
+type BizProductRow = {
+  name: string; product_type: string
+  docs_required?: string; personal_guarantee?: string; time_in_business?: string
+  min_fico?: string; credit_pull?: string; reports_to?: string
+  funding_amount?: string; revenue_required?: string; notes?: string
+}
+type BizInstitutionRow = {
+  name: string; type: string; access: string; geographic_restrictions: string
+  application_url: string; strategy_notes?: string; products: BizProductRow[]
+}
+
+const businessInstitutions: BizInstitutionRow[] = [
+  {
+    name: 'Bluevine', type: 'Fintech', access: 'Open apply', geographic_restrictions: 'US except NV, ND, SD',
+    application_url: 'https://app.bluevine.com/signup/',
+    strategy_notes: 'LOC issued by Celtic Bank; banking by Coastal Community Bank. For established businesses, not brand-new LLCs.',
+    products: [
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', docs_required: 'Low-doc (3 months bank statements or bank connection)', personal_guarantee: 'PG required', time_in_business: '12+ months', min_fico: '625+', credit_pull: 'Soft at application (hard only if you accept an offer)', reports_to: 'Experian (business)', funding_amount: 'Up to $250,000', revenue_required: '$10,000/month' },
+    ],
+  },
+  {
+    name: 'Novo', type: 'Fintech', access: 'Existing Novo checking customers (account active 6+ months)', geographic_restrictions: 'US',
+    application_url: 'https://app.novo.co/login',
+    strategy_notes: 'Funding eligibility is earned through Novo checking activity, open the account first and run your deposits through it.',
+    products: [
+      { name: 'Novo Business Funding', product_type: 'Merchant Cash Advance', docs_required: 'None (based on Novo account activity)', time_in_business: 'Novo account held 6+ months', funding_amount: 'Based on account activity', notes: 'CAUTION: this is a Merchant Cash Advance repaid within ~6 months, so cost of capital runs high. Know the terms before you draw.' },
+      { name: 'Novo Business Credit Card', product_type: 'Business Credit Card', credit_pull: 'Soft / no-impact eligibility check', funding_amount: 'Limit set at approval', notes: 'Up to 2% cash back, $0 annual fee Mastercard.' },
+    ],
+  },
+  {
+    name: 'Grasshopper Bank', type: 'Bank', access: 'Existing Grasshopper clients (open an account, season it 6 months)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://start.grasshopper.bank/product/innovatorTermLoan',
+    strategy_notes: 'A true relationship-lending play: open the business checking now, feed it deposits, and the loan pre-fills from your account data.',
+    products: [
+      { name: 'Innovator Term Loan', product_type: 'Term Loan', docs_required: 'No/low-doc (pre-filled from your deposit account)', personal_guarantee: 'PG required', time_in_business: '1+ year AND a Grasshopper account held 6+ months', credit_pull: 'Soft pull', funding_amount: '$10,000 to $200,000', notes: 'Fixed 36-month term, no prepayment penalty, 1% origination.' },
+    ],
+  },
+  {
+    name: 'Backd', type: 'Fintech', access: 'Open apply', geographic_restrictions: 'US',
+    application_url: 'https://www.backd.com/',
+    strategy_notes: 'Fast (about 1 business day) but higher cost of capital. Term loan originated by FinWise Bank.',
+    products: [
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', docs_required: 'Low-doc (bank-statement model)', time_in_business: '2 years (per Backd)', credit_pull: 'Soft pull (no impact)', funding_amount: '$50,000 to $1,000,000' },
+      { name: 'Business Term Loan', product_type: 'Term Loan', docs_required: 'Low-doc (bank-statement model)', credit_pull: 'Soft pull (no impact)', funding_amount: '$50,000 to $2,000,000', notes: 'Terms up to 24 months.' },
+    ],
+  },
+  {
+    name: 'Highbeam', type: 'Fintech', access: 'Open apply (ecommerce / DTC brands)', geographic_restrictions: 'US',
+    application_url: 'https://www.highbeam.com/capital',
+    strategy_notes: 'Built for ecommerce brands. The standout: business credit with NO personal guarantee and no hard pull, sized from your store payout revenue.',
+    products: [
+      { name: 'Revolving Line of Credit', product_type: 'Line of Credit', docs_required: 'Low-doc (connect your online stores)', personal_guarantee: 'EIN-only (NO personal guarantee)', credit_pull: 'No hard credit pull', funding_amount: 'Sized from ecommerce payout revenue', notes: 'Flat daily-calculated APR, no prepayment penalty.' },
+      { name: 'Highbeam Advance', product_type: 'Cash Advance', docs_required: 'Low-doc (connect your online stores)', personal_guarantee: 'EIN-only (NO personal guarantee)', credit_pull: 'No hard credit pull', funding_amount: 'Flexible draws against payouts' },
+    ],
+  },
+  {
+    name: 'Loot', type: 'Fintech', access: 'Open apply (~5 minutes)', geographic_restrictions: 'US',
+    application_url: 'https://app.getloot.com/sign-up',
+    strategy_notes: 'Reads your business cash flow through a connected bank account. On-time repayment earns rewards and a 50% early-payoff fee discount.',
+    products: [
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', docs_required: 'Low-doc (connect your bank account)', time_in_business: '1 year', min_fico: 'None', credit_pull: 'Soft pull (no impact)', funding_amount: 'Up to $100,000', revenue_required: '$200,000/year' },
+    ],
+  },
+  {
+    name: 'Jumpstart Finance', type: 'Fintech', access: 'Submit a deal for review', geographic_restrictions: 'US',
+    application_url: 'https://www.jumpstartfinance.com/submit-deal',
+    strategy_notes: 'Finances buying an existing business or launching a franchise, not a revolving line. Lender of record: Little Horn State Bank. Underwrites around the operator and the target business.',
+    products: [
+      { name: 'SMB Acquisition Loan', product_type: 'Acquisition Loan', personal_guarantee: 'Not published (primarily unsecured)', funding_amount: '$50,000 to $500,000 (to $2M structured)', notes: 'For purchasing existing cash-flowing businesses. Non-SBA.' },
+      { name: 'SMB Startup Loan', product_type: 'Startup Loan', time_in_business: 'Pre-revenue friendly (startups)', funding_amount: '$50,000 to $500,000', notes: 'Franchises and new business launches.' },
+    ],
+  },
+  {
+    name: 'QuickBooks Capital', type: 'Fintech', access: 'Active QuickBooks users (apply inside QuickBooks)', geographic_restrictions: 'US',
+    application_url: 'https://quickbooks.intuit.com/business-banking/loans/',
+    strategy_notes: 'Loans issued by WebBank, underwritten from your QuickBooks data. No origination, prepayment, or late fees. No bankruptcies in the last 2 years.',
+    products: [
+      { name: 'QuickBooks Term Loan', product_type: 'Term Loan', docs_required: 'Low/no-doc (uses your QuickBooks data)', credit_pull: 'Soft pull (personal)' },
+      { name: 'QuickBooks Line of Credit', product_type: 'Line of Credit', docs_required: 'Low/no-doc (uses your QuickBooks data)', credit_pull: 'Soft pull (personal)', notes: 'Can also advance against eligible outstanding invoices ($258+, sent through QuickBooks).' },
+    ],
+  },
+  {
+    name: 'South End Capital', type: 'Bank', access: 'Open apply / prequalify online', geographic_restrictions: 'Nationwide (all 50 states + DC)',
+    application_url: 'https://southendcapital.com/',
+    strategy_notes: 'A division of Stearns Bank. Six programs, each with its own rules, the Revolving Credit Line and Fast Capital are the accessible doors (no FICO minimum).',
+    products: [
+      { name: 'Revolving Business Credit Line', product_type: 'Line of Credit', docs_required: 'Low-doc (tax returns usually not required)', time_in_business: '6+ months', min_fico: 'No minimum', credit_pull: 'Prequalify available (pull type not stated)', funding_amount: '$1,000 to $500,000+', revenue_required: '$14,000/month' },
+      { name: 'Fast Capital (Working Capital)', product_type: 'Working Capital', time_in_business: '6+ months', min_fico: 'No minimum', funding_amount: '$1,000 to $500,000+', revenue_required: '$14,000/month' },
+      { name: 'Business Term Loan', product_type: 'Term Loan', docs_required: 'Low-doc', time_in_business: '2+ years', min_fico: '660', funding_amount: '$20,000 to $500,000', revenue_required: '$20,000/month', notes: 'Fixed 12-year term, not SBA.' },
+      { name: 'Equipment Financing', product_type: 'Equipment Financing', min_fico: 'No set minimum', funding_amount: '$30,000 to $5,000,000', notes: 'App-only up to $350K; 0%/100% financing options; startups OK with 3 months bank statements.' },
+      { name: 'No/Low-Doc Commercial Real Estate', product_type: 'Commercial Real Estate', docs_required: 'No income doc', min_fico: '690', funding_amount: '$50,000 to $1,000,000', notes: '50% max LTV; app-only up to $500K; investment property only.' },
+      { name: 'SBA 7(a)', product_type: 'SBA Loan', docs_required: 'Full-doc (personal + business tax returns)', min_fico: '680', funding_amount: '$150,000 to $5,000,000', notes: 'Startup financing available.' },
+    ],
+  },
+  {
+    name: 'Fundbox', type: 'Fintech', access: 'Open apply (~3 minutes)', geographic_restrictions: 'US',
+    application_url: 'https://fundbox.com/signup',
+    strategy_notes: 'One of the most accessible doors on this list: 3 months in business, no published FICO minimum, soft pull. Needs a business checking account. Integrates with Stripe, QuickBooks, FreshBooks, Nav.',
+    products: [
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', docs_required: 'Low/no-doc (connect your business bank account)', time_in_business: '3+ months', min_fico: 'None published', credit_pull: 'Soft pull (no impact)', funding_amount: 'Up to $250,000', revenue_required: '$30,000+/year' },
+    ],
+  },
+  {
+    name: 'Ascendus', type: 'CDFI', access: 'Open apply (connect with a local partner first)', geographic_restrictions: 'Nationwide except Vermont (49 states)',
+    application_url: 'https://www.ascendus.org/apply/',
+    strategy_notes: 'Nonprofit CDFI, mission-aligned (formerly Accion East). Files a UCC lien on the LOC. The Get Ready line is a Special Purpose Credit Program built for startups and credit-building.',
+    products: [
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', docs_required: 'Low-doc (minimum paperwork)', time_in_business: '1+ year', min_fico: '575+', funding_amount: 'Up to $50,000', notes: '9.99% to 15.99%. Debt conditions: under $3,000 past-due, bankruptcy discharged 1-2+ years, no repo/foreclosure in 2 years.' },
+      { name: 'Business Term Loan', product_type: 'Term Loan', docs_required: 'Low-doc', min_fico: '575+', funding_amount: 'Up to $100,000', notes: 'Nationwide except Vermont.' },
+      { name: 'Get Ready Line of Credit', product_type: 'Credit Builder', time_in_business: 'Startups OK (6 months of consistent revenue)', min_fico: 'None (no FICO minimum)', funding_amount: 'Starts at $500, grows to $5,000', notes: 'Special Purpose Credit Program: builds business credit with on-time repayment plus a credit action plan.' },
+    ],
+  },
+  {
+    name: 'Community Bank NA', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Bank footprint NY/PA/VT/NH; card applications online',
+    application_url: 'https://cbna.com/business/credit-cards',
+    strategy_notes: 'Business Edition cards are FNBO-issued. The secured card is a rare business credit-BUILDER, deposit-backed like a consumer secured card, but for your LLC.',
+    products: [
+      { name: 'Business Edition Mastercard with Absolute Rewards', product_type: 'Business Credit Card', funding_amount: 'Limit set at approval', notes: '0% intro APR for 12 billing cycles, 1.5x points per $1, no annual fee.' },
+      { name: 'Business Edition Mastercard (Ultra-Low Intro)', product_type: 'Business Credit Card', funding_amount: 'Limit set at approval', notes: '0% intro APR for 18 BILLING CYCLES, no annual fee. The longest 0% runway we have verified on a business card.' },
+      { name: 'Business Edition Secured Mastercard', product_type: 'Credit Builder', funding_amount: 'Deposit $2,000 to $10,000 sets the limit', notes: 'Secured business credit-builder card, 1x points, no annual fee.' },
+    ],
+  },
+  {
+    name: 'Verity Credit Union', type: 'Credit Union', access: 'Membership: live/work/worship in Washington state; WA-formed business', geographic_restrictions: 'Washington state only',
+    application_url: 'https://www.veritycu.com/business-credit-cards',
+    products: [
+      { name: 'Visa Business Signature Rewards', product_type: 'Business Credit Card', funding_amount: 'Limit set at approval', notes: '0% intro APR for 12 months, then 13.99% to 17.99%. No annual fee, 1.5 points per dollar, 10,000 bonus points ($1,000 spend in 90 days).' },
+    ],
+  },
+  {
+    name: 'Fulton Bank', type: 'Bank', access: 'Open apply', geographic_restrictions: 'PA/NJ/MD/DE/VA regional footprint',
+    application_url: 'https://www.fultonbank.com/Small-Business/Banking/Small-Business-Credit-Cards',
+    strategy_notes: 'Card suite is issued through the Elan agent-card program. Intro-rate lengths are not published on the site, confirm the current offer before applying.',
+    products: [
+      { name: 'Visa Business Cash Preferred', product_type: 'Business Credit Card', notes: '3% cash back on gas, EV charging, cell service, office supplies, and dining; 1% everything else. $25 cash back after first purchase; $100 annual software credit. Low intro rate advertised (length not published).' },
+      { name: 'Visa Business Zero+ Card', product_type: 'Business Credit Card', notes: '"Great low introductory rate for an extended time" (exact 0% length not published, confirm before applying). 5% cash back on travel booked in the Rewards Center.' },
+      { name: 'Smart Business Rewards Visa', product_type: 'Business Credit Card', notes: '2x points in your top two spend categories, 20,000 bonus points ($500 spend in 90 days).' },
+      { name: 'Visa Business Real Rewards', product_type: 'Business Credit Card', notes: '1.5x points per $1, no caps, 2,500 bonus points after first purchase.' },
+      { name: 'Visa Business Card', product_type: 'Business Credit Card', funding_amount: 'Credit limits $1,000 to $500,000', notes: 'The straightforward card: company-level limit controls, online program management.' },
+    ],
+  },
+]
+
+export async function seedBusinessLenders(): Promise<void> {
+  const pool = getPool()
+  const { rows } = await pool.query('SELECT COUNT(*)::int as count FROM business_institutions')
+  const existing = Number(rows[0].count)
+  if (existing > 0) {
+    if (process.env.SEED_MODE === 'replace') {
+      await pool.query('DELETE FROM business_products')
+      await pool.query('DELETE FROM business_institutions')
+    } else {
+      return
+    }
+  }
+  const vdate = '2026-07-11'
+  let productCount = 0
+  for (const inst of businessInstitutions) {
+    const { rows: instRows } = await pool.query(`
+      INSERT INTO business_institutions (name, type, access, geographic_restrictions, application_url, strategy_notes, source, verified_date)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id
+    `, [inst.name, inst.type, inst.access, inst.geographic_restrictions, inst.application_url, inst.strategy_notes || null, 'Official site, verified', vdate])
+    const instId = instRows[0].id
+    for (const p of inst.products) {
+      await pool.query(`
+        INSERT INTO business_products (institution_id, name, product_type, docs_required, personal_guarantee,
+          time_in_business, min_fico, credit_pull, reports_to, funding_amount, revenue_required, notes)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      `, [
+        instId, p.name, p.product_type,
+        p.docs_required || 'Not published', p.personal_guarantee || 'Not published',
+        p.time_in_business || 'Not published', p.min_fico || 'Not published',
+        p.credit_pull || 'Not published', p.reports_to || 'Not published',
+        p.funding_amount || null, p.revenue_required || 'Not published', p.notes || null,
+      ])
+      productCount++
+    }
+  }
+  console.log(`Seeded ${businessInstitutions.length} business institutions / ${productCount} products.`)
+}

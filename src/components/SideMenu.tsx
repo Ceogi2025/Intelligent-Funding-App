@@ -1,4 +1,4 @@
-import { X, Home, Building2, Target, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut, MessagesSquare, Trophy } from 'lucide-react'
+import { X, Home, Building2, Target, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut, MessagesSquare, Trophy, Landmark } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -47,6 +47,9 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           </button>
           <button className={active('/browse')} onClick={() => go('/browse')}>
             <Building2 size={16} /> Browse All Institutions
+          </button>
+          <button className={active('/business')} onClick={() => go('/business')}>
+            <Landmark size={16} /> Business Funding
           </button>
 
           <div className="sidemenu__divider" />

@@ -217,5 +217,44 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── Business funding (the third path) ────────────────────────────────────
+  // Mirrors the consumer institutions/products relational model: one institution,
+  // many products, each product carrying its own criteria so Highlights and
+  // Watch-outs derive per product. Load-all philosophy: time_in_business and
+  // personal_guarantee are FILTER fields (levels of funding), never exclusions.
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS business_institutions (
+      id ${pk},
+      name TEXT NOT NULL,
+      type TEXT,
+      access TEXT DEFAULT 'Open apply',
+      geographic_restrictions TEXT DEFAULT 'Nationwide',
+      application_url TEXT,
+      strategy_notes TEXT,
+      source TEXT,
+      verified_date TEXT,
+      created_at ${now}
+    )
+  `)
+
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS business_products (
+      id ${pk},
+      institution_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      product_type TEXT,
+      docs_required TEXT DEFAULT 'Not published',
+      personal_guarantee TEXT DEFAULT 'Not published',
+      time_in_business TEXT DEFAULT 'Not published',
+      min_fico TEXT DEFAULT 'Not published',
+      credit_pull TEXT DEFAULT 'Not published',
+      reports_to TEXT DEFAULT 'Not published',
+      funding_amount TEXT,
+      revenue_required TEXT DEFAULT 'Not published',
+      notes TEXT,
+      created_at ${now}
+    )
+  `)
+
   schemaInitialized = true
 }

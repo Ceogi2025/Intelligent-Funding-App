@@ -24,6 +24,7 @@ import CheatSheet from './pages/public/CheatSheet'
 import ShareExperience from './pages/public/ShareExperience'
 import WinsWall from './pages/public/WinsWall'
 import ChatRoom from './pages/ChatRoom'
+import BusinessFunding from './pages/BusinessFunding'
 import ProfilePositioning from './pages/education/ProfilePositioning'
 import StackingMethod from './pages/education/StackingMethod'
 import WealthyPlaybook from './pages/education/WealthyPlaybook'
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/browse" element={<ProtectedRoute><BrowseAll /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+            <Route path="/business" element={<ProtectedRoute><BusinessFunding /></ProtectedRoute>} />
             <Route path="/results/capital-access" element={<ProtectedRoute><CapitalAccessResults /></ProtectedRoute>} />
             <Route path="/results/credit-builder" element={<ProtectedRoute><CreditBuilderResults /></ProtectedRoute>} />
             <Route path="/institution/:id" element={<ProtectedRoute><InstitutionDetail /></ProtectedRoute>} />

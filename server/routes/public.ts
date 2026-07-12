@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
 import { getPool } from '../db/database.js'
+import { requireSubscription } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -65,6 +66,27 @@ router.get('/public/institutions/:slug', async (req: Request, res: Response) => 
   } catch (err) {
     console.error('Public institution error:', err)
     res.status(500).json({ error: 'Failed to load institution' })
+  }
+})
+
+// Combined live stats (consumer + business) for the public marketing surfaces.
+// Counts only, no strategy data leaks here.
+router.get('/public/stats', async (_req: Request, res: Response) => {
+  try {
+    const pool = getPool()
+    const [ci, cp, bi, bp] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int as c FROM institutions'),
+      pool.query('SELECT COUNT(*)::int as c FROM products'),
+      pool.query('SELECT COUNT(*)::int as c FROM business_institutions'),
+      pool.query('SELECT COUNT(*)::int as c FROM business_products'),
+    ])
+    res.json({
+      inst: Number(ci.rows[0].c) + Number(bi.rows[0].c),
+      prod: Number(cp.rows[0].c) + Number(bp.rows[0].c),
+    })
+  } catch (err) {
+    console.error('Stats error:', err)
+    res.status(500).json({ error: 'Failed to load stats' })
   }
 })
 
@@ -140,6 +162,23 @@ router.get('/wins', async (_req: Request, res: Response) => {
   } catch (err) {
     console.error('Wins load error:', err)
     res.status(500).json({ error: 'Failed to load wins' })
+  }
+})
+
+// Business funding lenders (the third path). Verified, load-all: TIB and PG are
+// filter fields the front end sorts on, never exclusions.
+router.get('/business-lenders', requireSubscription, async (_req: Request, res: Response) => {
+  try {
+    const pool = getPool()
+    const { rows: institutions } = await pool.query('SELECT * FROM business_institutions ORDER BY name')
+    const { rows: products } = await pool.query('SELECT * FROM business_products ORDER BY institution_id, id')
+    res.json(institutions.map(i => ({
+      ...i,
+      products: products.filter(p => p.institution_id === i.id),
+    })))
+  } catch (err) {
+    console.error('Business lenders load error:', err)
+    res.status(500).json({ error: 'Failed to load business lenders' })
   }
 })
 

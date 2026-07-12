@@ -1753,6 +1753,182 @@ const businessInstitutions: BizInstitutionRow[] = [
       { name: 'Visa Business Card', product_type: 'Business Credit Card', funding_amount: 'Credit limits $1,000 to $500,000', notes: 'The straightforward card: company-level limit controls, online program management.' },
     ],
   },
+  // ── Batch 1 from our own consumer catalog (verified 2026-07-12, BUSINESS-FROM-OUR-85.md) ──
+  {
+    name: 'U.S. Bank', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.usbank.com/business-banking/business-credit-cards.html',
+    strategy_notes: 'The strongest 0% business-card lineup we have verified: two $0-fee cards with 0% on purchases AND balance transfers for 12 billing cycles.',
+    products: [
+      { name: 'Business Triple Cash Rewards Visa', product_type: 'Business Credit Card', funding_amount: 'Limit set at approval', notes: '0% intro APR on purchases and balance transfers for 12 billing cycles, then 17.24% to 26.24%. No annual fee. 3% cash back on gas/EV, office supplies, cell service, restaurants; $750 bonus ($6,000 in 180 days); $100 annual software credit.' },
+      { name: 'Business Shield Visa', product_type: 'Business Credit Card', funding_amount: 'Limit set at approval', notes: '0% intro APR on purchases and balance transfers for 12 billing cycles, then 16.24% to 25.24%. No annual fee. 5% back on Travel Center bookings, purchase security coverage.' },
+      { name: 'Business Altitude Connect Visa Signature', product_type: 'Business Credit Card', notes: '$0 intro annual fee first year (then $95). 4X on travel and gas up to $150k/yr, 2X dining and cell; 75,000-point bonus ($6,000 in 180 days).' },
+      { name: 'Business Leverage Visa Signature', product_type: 'Business Credit Card', notes: '$0 first year (then $95). 2X points automatically in your top two spend categories; 60,000-point bonus ($6,000 in 120 days).' },
+      { name: 'Business Altitude Power Visa Signature', product_type: 'Business Credit Card', notes: '$195 annual fee. 2X on everything, 2.5X mobile wallet, 6X Travel Center hotels/cars; 75,000-point bonus ($10,000 in 120 days).' },
+    ],
+  },
+  {
+    name: 'M&T Bank', type: 'Bank', access: 'Open apply', geographic_restrictions: 'East Coast footprint',
+    application_url: 'https://www.mtb.com/business/business-financing/business-credit-card-options',
+    strategy_notes: 'Lowest post-intro APR floor we have verified on a business card (13.74%). Also offers SBA loans, business LOCs, term loans, and equipment financing.',
+    products: [
+      { name: 'M&T Business Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR for 12 billing cycles, then 13.74% to 20.74% variable. No annual fee, no rewards, employee cards. The low-rate workhorse.' },
+      { name: 'M&T Business Rewards Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR for 9 billing cycles, then 16.74% to 23.74%. No annual fee, unlimited 1.5% cash back plus $250 bonus.' },
+    ],
+  },
+  {
+    name: 'PNC Bank', type: 'Bank', access: 'Open apply (online for Cash Rewards)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.pnc.com/en/small-business/borrowing/business-credit-cards.html',
+    strategy_notes: 'Also offers business LOCs, business loans, SBA, vehicle finance, and commercial real estate (details pending a deeper pass).',
+    products: [
+      { name: 'PNC Cash Rewards Visa Signature Business', product_type: 'Business Credit Card', notes: '0% intro APR on purchases for 9 billing cycles. No annual fee, unlimited 1.5% cash back, $400 statement credit after only $3,000 in the first 3 cycles. Free employee cards.' },
+      { name: 'PNC BusinessOptions Visa Signature', product_type: 'Business Credit Card', notes: 'Revolving or pay-in-full options, 3 rewards choices, no program fees. $800 statement credit after $15,000 in the first 3 cycles. Contact-based application.' },
+    ],
+  },
+  {
+    name: 'Huntington Bank', type: 'Bank', access: 'Branch / business banker application (no online apply)', geographic_restrictions: 'Midwest footprint',
+    application_url: 'https://www.huntington.com/SmallBusiness/voice-business-credit-card',
+    products: [
+      { name: 'Voice Business Credit Card', product_type: 'Business Credit Card', notes: '4% cash back in one category you choose (from 10) on the first $7,000/quarter, 1% after. No annual fee, no foreign transaction fees, Late Fee Grace, free employee cards with spend controls.' },
+    ],
+  },
+  {
+    name: 'Arvest Bank', type: 'Bank', access: 'Open apply', geographic_restrictions: 'AR / KS / MO / OK',
+    application_url: 'https://www.arvest.com/business/borrow/credit-cards/disclosure',
+    products: [
+      { name: 'Arvest Business Visa (Elite / Premier)', product_type: 'Business Credit Card', notes: '0% intro APR for 6 billing cycles on purchases AND balance transfers with $0 balance-transfer fee, then 13.74% (Elite) or 17.74% (Premier), Prime-based. No annual fee, no penalty APR.' },
+    ],
+  },
+  {
+    name: 'Navy Federal Credit Union', type: 'Credit Union', access: 'Membership: military/veterans/DoD + family; business membership required first', geographic_restrictions: 'Nationwide (membership-gated)',
+    application_url: 'https://www.navyfederal.org/services/business/credit-cards.html',
+    products: [
+      { name: 'GO BIZ Rewards Card (Visa or Mastercard)', product_type: 'Business Credit Card', personal_guarantee: 'Owner/guarantor income and credit reviewed (PG terms verify)', notes: 'No annual fee, unusually tight 16.65% to 18.00% APR range (a real ceiling), 1X points unlimited, no foreign transaction fees. Single owner applies online; multi-owner is a paper form with 7-10 day decision.' },
+    ],
+  },
+  {
+    name: 'SECU Maryland', type: 'Credit Union', access: 'Membership (open beyond MD via association); business banker application', geographic_restrictions: 'Maryland-based',
+    application_url: 'https://www.secumd.org/business/business-lending/business-credit/',
+    products: [
+      { name: 'Business Cash Back Visa', product_type: 'Business Credit Card', notes: 'No annual fee, 3% cash back on gas and office supplies, 2% restaurants, 1% everything else, cash back never expires. NO cash advance, balance transfer, or foreign transaction fees.' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', notes: 'Revolving, open-ended access to a predetermined amount. Terms not published.' },
+      { name: 'Business Term Loans', product_type: 'Term Loan', docs_required: 'Full-doc (2 years business AND personal tax returns)', personal_guarantee: 'PG required from all 20%+ owners', time_in_business: '24+ consecutive months under current ownership', notes: 'Secured or unsecured, fixed or variable.' },
+    ],
+  },
+  {
+    name: 'Andrews Federal Credit Union', type: 'Credit Union', access: 'Business address within 50 miles of an Andrews location (stricter than their consumer path)', geographic_restrictions: 'DC / MD / VA / NJ areas',
+    application_url: 'https://www.andrewsfcu.org/credit-cards/visa-business-credit-card',
+    products: [
+      { name: 'Business Visa Credit Card', product_type: 'Business Credit Card', funding_amount: 'Unsecured line up to $50,000', notes: '$99 annual fee WAIVED the first year, low intro rate for the first 12 months, employee authorized-user cards.' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', funding_amount: 'Unsecured up to $75,000 (secured also available)', notes: 'One of the larger unsecured business LOCs we have seen at a credit union.' },
+    ],
+  },
+  {
+    name: 'NIH Federal Credit Union', type: 'Credit Union', access: 'Membership required (healthcare/biomedical focus; business lending nationwide)', geographic_restrictions: 'Nationwide (membership-gated)',
+    application_url: 'https://www.nihfcu.org/business/loans/',
+    strategy_notes: 'Minimum business loan is $100,000. Inquiry form includes a "None" option for years of tax returns, a signal that startups are considered.',
+    products: [
+      { name: 'Business Visa Rewards Card', product_type: 'Business Credit Card', notes: 'Positioned for continuous credit needs of $25,000 or lower; low variable APR and rewards points. Full terms pending.' },
+      { name: 'Working Capital Line', product_type: 'Line of Credit', funding_amount: '$100,000 to $500,000', notes: 'No prepayment penalties, no annual rest period requirement.' },
+      { name: 'SBA Loans', product_type: 'SBA Loan', funding_amount: '$100,000 to $5,000,000', notes: 'Terms up to 25 years, fully amortized, low down payment. Authorized SBA lender.' },
+      { name: 'Growth & Expansion Loans', product_type: 'Term Loan', funding_amount: '$100,000 to $350,000', notes: '5 to 10 year terms, fully amortized.' },
+    ],
+  },
+  {
+    name: 'AOD Federal Credit Union', type: 'Credit Union', access: 'Membership (SEG + community); contact the member business lender', geographic_restrictions: 'Alabama',
+    application_url: 'https://www.aodfcu.com/business-loans/',
+    products: [
+      { name: 'Visa Business Credit Card', product_type: 'Business Credit Card', notes: 'Offered; terms via their member business lender (256-241-8228).' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', notes: 'Offered; terms not published.' },
+    ],
+  },
+  {
+    name: 'Signal Financial FCU', type: 'Credit Union', access: 'Membership; commercial department application', geographic_restrictions: 'DC / MD / VA area',
+    application_url: 'https://www.signalfinancialfcu.org/credit-union-business-loan',
+    products: [
+      { name: 'Working Capital Credit Line', product_type: 'Line of Credit', docs_required: 'Full-doc (3 years business + personal financials)', notes: 'Revolving 12-month term, interest-only payments, secured by receivables/inventory/assets. Rate discount if Signal business checking is your primary operating account (relationship lending in action).' },
+      { name: 'Business Installment Loans', product_type: 'Term Loan', notes: 'Fully amortized up to 5 years, for equipment, vehicles, and capex. No prepayment penalties.' },
+    ],
+  },
+  {
+    name: 'Northwest Federal Credit Union', type: 'Credit Union', access: 'Membership via 600+ partner organizations nationwide', geographic_restrictions: 'Nationwide (membership-gated)',
+    application_url: 'https://www.nwfcu.org/business/business-solutions/business-loans/',
+    products: [
+      { name: 'Visa Business Credit Card', product_type: 'Business Credit Card', notes: 'Offered with online application via the member portal; rates pending.' },
+      { name: 'Business Lines of Credit', product_type: 'Line of Credit', notes: 'Revolving and closed-end programs; terms via the lending department.' },
+      { name: 'SBA 504 Loans', product_type: 'SBA Loan', funding_amount: 'Up to $5,000,000', notes: 'SBA 504 program with origination support.' },
+    ],
+  },
+  {
+    name: 'Apple Federal Credit Union', type: 'Credit Union', access: 'Business membership; Rapid Request 15-minute application', geographic_restrictions: 'VA / MD / DC / PA / WV / DE',
+    application_url: 'https://www.applefcu.org/commercial-banking/small-business-loans',
+    strategy_notes: 'Rapid Request is the standout: bank statements instead of tax returns, 48-hour decisions. The published bar is real (2 years in business, 680+), but the doc burden is the lightest we have seen at a credit union.',
+    products: [
+      { name: 'Rapid Request Small Business Lending', product_type: 'Line of Credit', docs_required: 'Low-doc (12 months of business bank statements, no tax returns for this track)', time_in_business: '2+ years', min_fico: '680+', funding_amount: 'Up to $100,000', notes: 'Covers term loans, lines of credit, vehicles, and the business credit card. Decision in 48 hours or less, no prepayment penalty.' },
+      { name: 'Visa Business Rewards Credit Card', product_type: 'Business Credit Card', notes: 'Applied for through Rapid Request; card-specific rates pending.' },
+    ],
+  },
+  {
+    name: 'VyStar Credit Union', type: 'Credit Union', access: 'Membership; in-branch/appointment application', geographic_restrictions: 'Florida-based',
+    application_url: 'https://vystarcu.org/business/borrow/business-credit-cards',
+    products: [
+      { name: 'Business Platinum Rewards Visa', product_type: 'Business Credit Card', personal_guarantee: 'FULL personal guarantee from ALL owners (published)', time_in_business: '1 year (nonprofits: 3 years + financials)', funding_amount: 'Limits up to $50,000', notes: 'No annual fee, no foreign transaction fees, 1.5 points per $1, $500 bonus after $5,000 spend in 60 days. VyStar publishes its PG requirement plainly, credit where due.' },
+    ],
+  },
+  {
+    name: 'Security Service FCU', type: 'Credit Union', access: 'Membership', geographic_restrictions: 'Texas / Colorado / Utah',
+    application_url: 'https://www.ssfcu.org/business/credit-cards/services',
+    products: [
+      { name: 'Power Business Mastercard', product_type: 'Business Credit Card', notes: 'Low-interest positioning, no annual fee; APR pending.' },
+      { name: 'Power Business Cash Back Mastercard', product_type: 'Business Credit Card', notes: 'Cash back; rate pending.' },
+      { name: 'Business Travel Rewards Mastercard', product_type: 'Business Credit Card', notes: 'Travel points; all three cards include ID theft resolution, zero liability, extended warranty.' },
+    ],
+  },
+  {
+    name: 'Redstone Federal Credit Union', type: 'Credit Union', access: 'Membership + business share account; branch visit to complete setup', geographic_restrictions: 'Alabama / Tennessee valley',
+    application_url: 'https://www.redfcu.org/business/loans/',
+    strategy_notes: 'The Business Assistance Microloans are the rare TRUE startup option: capital for brand-new businesses through The Catalyst Center and the North Alabama Revolving Loan Fund partnership.',
+    products: [
+      { name: 'Business Assistance Microloans', product_type: 'Startup Loan', time_in_business: 'Startup capital (no time-in-business bar published)', notes: 'Partnership-funded startup microloans, the only true no-TIB program found in this batch.' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', notes: 'Revolving, borrow as needed; terms pending.' },
+      { name: 'Business Term Loans', product_type: 'Term Loan', notes: 'Tailored repayment, no prepayment penalties.' },
+    ],
+  },
+  {
+    name: 'TruMark Financial', type: 'Credit Union', access: 'Qualifying TruMark business account; PDF application', geographic_restrictions: 'Philadelphia area',
+    application_url: 'https://www.trumarkonline.org/business-loans/',
+    products: [
+      { name: 'Business Credit Cards', product_type: 'Business Credit Card', notes: 'Rewards, spending controls, detailed reporting; rates pending.' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', notes: 'Draw as needed, interest only on what you use. Low origination fees, local decisioning.' },
+      { name: 'Equipment & Term Loans', product_type: 'Term Loan', notes: 'Repayment structured to your cash flow; no prepayment penalties on select loans.' },
+    ],
+  },
+  {
+    name: 'Liberty Federal Credit Union', type: 'Credit Union', access: 'Membership; contact-us application', geographic_restrictions: 'Evansville IN-based, multi-state',
+    application_url: 'https://www.libertyfcu.org/business/credit',
+    products: [
+      { name: 'Platinum Business Rewards Card', product_type: 'Business Credit Card', notes: 'Rewards in travel, gift cards, and cash back; APR pending.' },
+      { name: 'Platinum Business Prime Plus Card', product_type: 'Business Credit Card', notes: 'Lowest-rate positioning (Prime-plus pricing), no rewards, no annual fee.' },
+    ],
+  },
+  {
+    name: 'Langley Federal Credit Union', type: 'Credit Union', access: 'Community membership; business card applied for in branch', geographic_restrictions: 'Virginia (Hampton Roads)',
+    application_url: 'https://www.langleyfcu.org/business-credit-cards',
+    products: [
+      { name: 'Langley Platinum Visa Business', product_type: 'Business Credit Card', notes: 'Per-employee card limits, online monitoring; savings via the Visa SavingsEdge merchant network. APR at langleyfcu.org/rates.' },
+      { name: 'Small Business Line of Credit', product_type: 'Line of Credit', notes: 'APR scales with loan amount and credit history up to 18.00%; minimum payment 2% of balance.' },
+      { name: 'SBA Loans', product_type: 'SBA Loan', notes: 'Offered; details pending.' },
+    ],
+  },
+  {
+    name: 'America First Credit Union', type: 'Credit Union', access: 'Membership; online application', geographic_restrictions: 'Utah / Nevada / Idaho / Arizona',
+    application_url: 'https://www.americafirst.com/business/business-loans.html',
+    strategy_notes: 'A top-ranked SBA-lending credit union. The Unsecured Capital Loans are notable for our audience: built for when collateral is not available.',
+    products: [
+      { name: 'Unsecured Capital Loans', product_type: 'Term Loan', notes: 'Explicitly for businesses without collateral, a genuine low-barrier door. Terms pending.' },
+      { name: 'Business Line of Credit', product_type: 'Line of Credit', notes: 'Attached to AFCU business checking; payments as low as $25 or 3.5% of balance.' },
+      { name: 'SBA Loans', product_type: 'SBA Loan', notes: 'Top-ranked SBA lending credit union, online application.' },
+    ],
+  },
 ]
 
 export async function seedBusinessLenders(): Promise<void> {

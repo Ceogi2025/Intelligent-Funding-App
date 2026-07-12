@@ -1929,6 +1929,166 @@ const businessInstitutions: BizInstitutionRow[] = [
       { name: 'SBA Loans', product_type: 'SBA Loan', notes: 'Top-ranked SBA lending credit union, online application.' },
     ],
   },
+  // ── Batch 2 chunk A: the majors + national banks (verified 2026-07-12) ──
+  {
+    name: 'Chase', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://creditcards.chase.com/business-credit-cards',
+    strategy_notes: 'The Ink family, the most-searched business cards in America. Remember the 5/24 velocity rule on the personal side when sequencing Chase applications. Also offers business LOCs, term loans, and SBA.',
+    products: [
+      { name: 'Ink Business Unlimited', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then ~16.74% to 24.74%. No annual fee, unlimited 1.5% cash back, $750 bonus ($8,000 in 4 months).' },
+      { name: 'Ink Business Cash', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases. No annual fee, 5% on office supplies and internet/cable/phone (to $25K/yr), $750 bonus ($8,000 in 4 months).' },
+      { name: 'Ink Business Preferred', product_type: 'Business Credit Card', notes: '$95 annual fee, 3X on travel and select business categories (first $150K/yr), 100,000-point bonus ($8,000 in 3 months). No intro APR.' },
+      { name: 'Ink Business Premier', product_type: 'Business Credit Card', notes: '$195 annual fee, 2.5% on purchases $5,000+, 2% everything else, $1,000 bonus ($10,000 in 3 months). Pay-in-full card.' },
+    ],
+  },
+  {
+    name: 'American Express', type: 'Bank', access: 'Open apply (online); sole proprietors and freelancers accepted', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.americanexpress.com/us/credit-cards/business/',
+    strategy_notes: 'The largest business card family. Sole props can apply without an entity. Insider note from our research: existing Amex cardholders often reuse the last soft pull on later cards. Also offers Delta, Marriott, and Hilton business co-brands.',
+    products: [
+      { name: 'Blue Business Cash', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then 16.74% to 28.49%. No annual fee, 2% cash back on first $50K/yr, $250 bonus at only $3,000 in 3 months. The flagship starter business card.' },
+      { name: 'Blue Business Plus', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases. No annual fee, 2X Membership Rewards points on first $50K/yr, 15,000-point bonus ($3,000 in 3 months).' },
+      { name: 'Business Gold Card', product_type: 'Charge Card', notes: '$375 annual fee, 4X on your top two spend categories monthly, bonus up to 200,000 points ($15,000 in 3 months). Pay-over-time charge card.' },
+      { name: 'Business Platinum Card', product_type: 'Charge Card', notes: '$895 annual fee, 5X on flights and prepaid hotels via AmexTravel, bonus up to 300,000 points ($20,000 in 3 months). The premium travel workhorse.' },
+      { name: 'Graphite Business Cash Unlimited', product_type: 'Business Credit Card', notes: '$295 annual fee, unlimited 2% cash back, $1,500 bonus ($50,000 in 6 months).' },
+    ],
+  },
+  {
+    name: 'Bank of America', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://business.bankofamerica.com/en/credit-cards',
+    strategy_notes: 'Preferred Rewards for Business boosts card rewards 25% to 75% if you bank there, a relationship play. Mind the 3/12 velocity rule from the personal side. Also offers business LOCs, term loans, and SBA.',
+    products: [
+      { name: 'Business Advantage Unlimited Cash Rewards', product_type: 'Business Credit Card', notes: '0% intro APR 7 billing cycles, then 16.74% to 26.74%. No annual fee, unlimited 1.5% cash back, $500 bonus ($5,000 in 90 days), free employee cards.' },
+      { name: 'Business Advantage Customized Cash Rewards', product_type: 'Business Credit Card', notes: '0% intro APR 7 billing cycles. No annual fee, 3% in a category you choose plus 2% dining (first $50K/yr), $500 bonus ($5,000 in 90 days).' },
+      { name: 'Business Advantage Travel Rewards', product_type: 'Business Credit Card', notes: '0% intro APR 7 billing cycles. No annual fee, 3X travel via BofA Travel Center, 50,000-point bonus, no foreign transaction fees.' },
+      { name: 'Platinum Plus Mastercard Business', product_type: 'Business Credit Card', notes: '0% intro APR 7 billing cycles, then 14.74% to 25.74% (the low-rate option). No annual fee, no rewards, $300 credit ($3,000 in 90 days).' },
+    ],
+  },
+  {
+    name: 'Capital One', type: 'Bank', access: 'Open apply (online); Venture family publishes "Excellent credit" requirement', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.capitalone.com/small-business/credit-cards/',
+    products: [
+      { name: 'VentureOne Business', product_type: 'Business Credit Card', min_fico: 'Excellent credit (published)', notes: 'No annual fee, 1.5X miles on everything, 50,000-mile bonus ($4,500 in 3 months). 16.74% to 22.74% variable.' },
+      { name: 'Venture Business', product_type: 'Business Credit Card', min_fico: 'Excellent credit (published)', notes: '$95 annual fee, 2X miles on everything, 100,000-mile bonus ($10,000 in 3 months).' },
+      { name: 'Venture X Business', product_type: 'Charge Card', min_fico: 'Excellent credit (published)', notes: '$395 annual fee, no preset limit, 2X everything and 10X hotels/rentals via Capital One Travel, 150,000-mile bonus ($30,000 in 3 months).' },
+      { name: 'Spark Cash', product_type: 'Business Credit Card', notes: '$0 first year then $95, unlimited 2% cash back plus 5% on hotels/rentals via Capital One Travel.' },
+      { name: 'Spark 2% Cash Plus', product_type: 'Charge Card', notes: '$150 annual fee, refunded every year you spend $150K+. Unlimited 2% cash back, pay-in-full.' },
+    ],
+  },
+  {
+    name: 'Wells Fargo', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://creditcards.wellsfargo.com/business-credit-cards/signify-business-cash-credit-card/',
+    strategy_notes: 'Signify is their one open-application business card. Business lines of credit exist but their pages were unreachable this pass, pending a follow-up.',
+    products: [
+      { name: 'Signify Business Cash', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then 16.74% to 24.74%. No annual fee, unlimited 2% cash rewards with no caps or categories, $500 bonus ($5,000 in 3 months), free employee cards.' },
+    ],
+  },
+  {
+    name: 'Citi', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.citi.com/credit-cards/citi-aadvantage-business-credit-card',
+    strategy_notes: 'Thin business family (two co-branded cards). Mind Citi’s 8-day/65-day velocity rules from the personal side.',
+    products: [
+      { name: 'Citi / AAdvantage Business World Elite', product_type: 'Business Credit Card', notes: '$99 annual fee waived first year, 2X AA miles on American, rentals, gas, telecom; 65,000-mile bonus ($4,000 in 4 months), no foreign transaction fees.' },
+      { name: 'Costco Anywhere Visa Business', product_type: 'Business Credit Card', notes: 'No annual fee with a paid Costco membership (that is the gate). Tiered cash back at Costco, gas, EV charging, and travel. "No minimum business size" per Citi.' },
+    ],
+  },
+  {
+    name: 'TD Bank', type: 'Bank', access: 'Open apply (online; verify state eligibility)', geographic_restrictions: 'East Coast footprint bank',
+    application_url: 'https://www.td.com/us/en/personal-banking/credit-cards/business',
+    products: [
+      { name: 'TD Business Solutions Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR 12 billing cycles on purchases, then 17.49%, 22.49%, or 27.49% by creditworthiness. No annual fee, unlimited 2% cash back with no caps.' },
+    ],
+  },
+  {
+    name: 'Truist', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Southeast / Mid-Atlantic footprint',
+    application_url: 'https://www.truist.com/small-business/credit-cards/compare',
+    products: [
+      { name: 'Truist Business Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then 13.74% to 22.74%, tied for the lowest published floor of the entire sweep. No annual fee, no rewards, the rate card.' },
+      { name: 'Truist Business Cash Rewards', product_type: 'Business Credit Card', notes: '0% intro APR 9 months, then 15.74% to 24.74%. No annual fee, cash back on every purchase, $300 bonus ($3,000 in 90 days).' },
+      { name: 'Truist Business Travel Rewards', product_type: 'Business Credit Card', notes: '$49 annual fee waived first year, 2X miles on airfare/rentals/hotels, 20,000-mile bonus ($2,000 in 90 days).' },
+    ],
+  },
+  {
+    name: 'Citizens Bank', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Northeast footprint',
+    application_url: 'https://www.citizensbank.com/small-business/business-credit-cards/overview.aspx',
+    products: [
+      { name: 'Business Platinum Mastercard', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then 11.74% to 22.74%, the LOWEST post-intro floor found in the entire sweep. No annual fee, no rewards.' },
+      { name: 'Everyday Points Business Mastercard', product_type: 'Business Credit Card', notes: '0% intro APR 6 months. No annual fee, unlimited 1.5% in points, $325 bonus ($5,000 in 90 days).' },
+    ],
+  },
+  {
+    name: 'Fifth Third Bank', type: 'Bank', access: 'Open apply', geographic_restrictions: 'Midwest / Southeast footprint',
+    application_url: 'https://www.53.com/content/fifth-third/en/small-business/banking/services/credit-cards/simply-business-card.html',
+    products: [
+      { name: 'Fifth Third Simply Business Card', product_type: 'Business Credit Card', notes: '0% intro APR 12 billing cycles on purchases (balance-transfer inclusion pending verification). No annual fee, unlimited 1.67% cash back with no caps or expiration.' },
+    ],
+  },
+  {
+    name: 'KeyBank', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: '15-state footprint',
+    application_url: 'https://www.key.com/small-business/banking/credit-cards/card-comparison.html',
+    strategy_notes: 'The $200 bonus at only $1,000 spend is one of the lowest bonus hurdles anywhere, a real win for small operators who cannot hit $5K-$8K spend requirements.',
+    products: [
+      { name: 'Business Cash Rewards Card', product_type: 'Business Credit Card', notes: '0% intro APR 6 months on purchases AND balance transfers (BTs in first 60 days), then 17.49% to 27.49%. No annual fee, up to 2% unlimited cash back, $200 bonus at only $1,000 in 60 days.' },
+      { name: 'Business Rewards Card', product_type: 'Business Credit Card', notes: '0% intro 6 months (purchases + BT), then 15.49% to 25.49%. No annual fee, unlimited points, 100,000-point bonus ($1,000 in 60 days).' },
+      { name: 'KeyBank Business Card', product_type: 'Business Credit Card', notes: '0% intro 6 billing cycles (purchases + BT), then 14.49% to 24.49%. No annual fee, no rewards, the low-rate option.' },
+    ],
+  },
+  {
+    name: 'Regions Bank', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Southeast / Midwest / Texas footprint',
+    application_url: 'https://www.regions.com/small-business/business-credit-cards/compare-business-credit-cards',
+    products: [
+      { name: 'Business Visa Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR 6 months, then 13.99% to 23.99%, a very low floor. No annual fee, no rewards.' },
+      { name: 'Business Enhanced Visa', product_type: 'Business Credit Card', notes: '0% intro APR 12 months, then 15.99% to 25.99%. No annual fee, 2 points per $1, $300 bonus ($3,000 in 90 days).' },
+    ],
+  },
+  {
+    name: 'BMO', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'US Midwest / West footprint',
+    application_url: 'https://www.bmo.com/en-us/main/business-banking/credit-cards/',
+    products: [
+      { name: 'BMO Business Platinum Credit Card', product_type: 'Business Credit Card', notes: '0% intro APR 12 months on purchases, then 15.49% to 24.49%. No annual fee; Mastercard Easy Savings merchant rebates up to 25%.' },
+      { name: 'BMO Business Platinum Rewards', product_type: 'Business Credit Card', notes: '0% intro APR 9 months, then 18.74% to 27.74%. No annual fee, up to 5X points, bonus up to 100,000 points.' },
+    ],
+  },
+  {
+    name: 'FNBO', type: 'Bank', access: 'Open apply (online)', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.fnbo.com/small-business/credit-cards',
+    strategy_notes: 'Home of the only SECURED business credit card found across all 85 institutions, the business-side credit-builder crossover.',
+    products: [
+      { name: 'Evergreen Business Edition Card', product_type: 'Business Credit Card', notes: '0% intro APR 6 billing cycles, then 17.49% to 28.24%. No annual fee, unlimited 2% cash back, $200 bonus ($3,000 in 3 cycles).' },
+      { name: 'Business Edition Secured Mastercard', product_type: 'Credit Builder', funding_amount: 'You set the limit: $2,000 to $10,000 deposit', notes: 'The rare SECURED business card: $39 annual fee, deposit sets your limit AND earns interest. Builds business credit when personal credit will not carry an unsecured approval.' },
+    ],
+  },
+  {
+    name: 'Barclays US', type: 'Bank', access: 'Open apply (online); co-brand cards only', geographic_restrictions: 'Nationwide',
+    application_url: 'https://cards.barclaycardus.com/banking/cards/',
+    products: [
+      { name: 'GM Business Mastercard', product_type: 'Business Credit Card', notes: 'No annual fee, 7X on eligible GM purchases, 3X everything else, 100,000-point bonus ($5,000 in 5 months).' },
+      { name: 'JetBlue Business Card', product_type: 'Business Credit Card', notes: '$99 annual fee, 6X on JetBlue, 2X restaurants and office supplies, 50,000-point bonus.' },
+    ],
+  },
+  {
+    name: 'Woodforest National Bank', type: 'Bank', access: 'Requires a Woodforest business checking relationship for key lines', geographic_restrictions: 'TX-based, 17-state branch footprint (many inside Walmart)',
+    application_url: 'https://www.woodforest.com/small-business/loans/',
+    products: [
+      { name: 'Business ReLi Unsecured Line of Credit', product_type: 'Line of Credit', notes: 'Unsecured revolving line; requires maintaining Woodforest business checking (relationship lending). Apply online.' },
+      { name: 'Executive Line of Credit', product_type: 'Line of Credit', funding_amount: '$25,000 to $150,000', notes: 'Variable rates; Woodforest checking required.' },
+    ],
+  },
+  {
+    name: 'Armed Forces Bank', type: 'Bank', access: 'Open to anyone (not military-only); card application via email/branch', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.afbank.com/loans/business-loans/business-credit-card',
+    products: [
+      { name: 'Business Credit Card', product_type: 'Business Credit Card', notes: 'Advertised rate around 12.65% (as-low-as; verify current offer). Also offers business LOCs, SBA, term, and equipment loans.' },
+    ],
+  },
+  {
+    name: 'CreditStrong Business', type: 'Fintech', access: 'Open apply (fully online); EIN required', geographic_restrictions: 'Nationwide',
+    application_url: 'https://www.creditstrong.com/business/',
+    strategy_notes: 'The flagship business credit-builder find: a 0%-interest installment builder that creates a REAL commercial tradeline. Reports to Experian Business, Equifax Business, PayNet, and SBFE. Built by Austin Capital Bank.',
+    products: [
+      { name: 'Business Credit Builder', product_type: 'Credit Builder', docs_required: 'Low-doc (EIN-based, no upfront deposit)', personal_guarantee: 'EIN-based (verify pull policy)', funding_amount: 'Builds $5,000 to $50,000 in reported credit', notes: '0% interest: a one-time fee ($349 to $999 by tier) plus equal monthly payments ($100 to $2,000). No upfront deposit. Reports to four commercial bureaus, exactly how a new LLC builds a real business credit file.' },
+    ],
+  },
 ]
 
 export async function seedBusinessLenders(): Promise<void> {

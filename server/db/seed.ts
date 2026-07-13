@@ -2128,3 +2128,35 @@ export async function seedBusinessLenders(): Promise<void> {
   }
   console.log(`Seeded ${businessInstitutions.length} business institutions / ${productCount} products.`)
 }
+
+// ── Community Room seed ───────────────────────────────────────────────────────
+// The room must never open empty. These are real strategies from our research
+// (Strategy Library), posted transparently by the house account — game from the
+// platform itself, not fake members. Skips if house posts already exist.
+const HOUSE = 'Team Intelligent Funding'
+const houseTips: string[] = [
+  'Welcome to the room. House rule in one line: share what you know, never sell. Real approvals, real denials, real strategy. Read the Community Guidelines and jump in.',
+  'Financial motion beats paperwork. Most no-doc lenders underwrite your DEPOSIT ACTIVITY, not your tax returns. Money moving through a business checking account is the new proof.',
+  'Banking age beats LLC age. A brand-new LLC with 3 months of real deposits gets funded before a 2-year-old shell with an empty account. Open the account day one and feed it.',
+  'The 90-day window: banks tend to set your maximum exposure in the first 90 days of the relationship. Start the relationship BEFORE you need the money.',
+  'Stack banking relationships. Every business checking account you open is another door to a card or line later. Serious operators keep 5+, some keep 15.',
+  'Double-dip the hard pull. Plenty of credit unions let you open a card AND a line of credit off one inquiry if you apply the same day. One pull, two tradelines. Know the window before you apply.',
+  'Only take secured cards that GRADUATE. If the deposit never comes back and it never converts to unsecured, it is a fee machine, not a builder. Check the graduation column in the directory.',
+  'Utilization is the fastest score lever you control. Moving revolving balances to a 0% card or a personal line can move your score in one cycle. Watch the balance-transfer fee fine print.',
+  'Start low, climb fast. Take the starter limit, pay it perfectly, request a credit-limit increase every 3 to 6 months, then graduate to the better products. The first card is a foothold.',
+  'When the big banks say no, CDFIs say yes. Mission lenders approve on your business plan and community impact, not just your score, and many run 0% or below-market programs. Check the Business Funding path for the ones we verified.',
+  'Idle business cash should earn. A business money market pays real interest while staying FDIC-insured and liquid. Do not let your emergency fund sleep at 0%.',
+]
+
+export async function seedChatTips(): Promise<void> {
+  const pool = getPool()
+  const { rows } = await pool.query('SELECT COUNT(*)::int as count FROM messages WHERE display_name = $1', [HOUSE])
+  if (Number(rows[0].count) > 0) return
+  for (const tip of houseTips) {
+    await pool.query(
+      `INSERT INTO messages (user_id, display_name, body, status) VALUES (NULL, $1, $2, 'visible')`,
+      [HOUSE, tip]
+    )
+  }
+  console.log(`Seeded ${houseTips.length} house tips into the Community Room.`)
+}

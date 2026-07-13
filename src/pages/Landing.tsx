@@ -117,7 +117,7 @@ export default function Landing() {
           members post real approvals, real denials, and the strategy behind them, as it happens. You move
           faster because you're not guessing by yourself.
         </p>
-        <div className="lp-edge-grid" style={{ marginTop: 24, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 330px))', justifyContent: 'center', gap: 14 }}>
           <div className="lp-edge-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/wins')}>
             <div className="lp-edge-card__icon"><Trophy size={22} /></div>
             <div className="lp-edge-card__title">The Wins Wall</div>

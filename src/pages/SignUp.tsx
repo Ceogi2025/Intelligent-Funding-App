@@ -1,26 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
+import { CardStackArt } from '../components/BrandArt'
 import { useLiveCounts } from '../hooks/useLiveCounts'
 
 const planInfo: Record<string, { badge: string; benefits: string[] }> = {
   trial: {
     badge: '$1 for 7 Days',
     benefits: [
-      'Full access for 7 days',
       'Every verified institution, {COUNT} and growing',
-      'All 4 education guides + Resources',
-      'Cancel anytime, no commitment',
+      'The Wins Wall, real member approvals',
+      '2 starter strategy guides + Resources',
+      'Preview of the live Community Room · Cancel anytime',
     ],
   },
   monthly: {
     badge: '$29 / month',
     benefits: [
-      'Full institution database',
-      'Every bureau filter & sort tool',
-      'All education guides + Resources',
+      'Everything in the trial, unlocked in full',
+      'The live Community Room',
+      'All 4 strategy playbooks + post your wins',
       'Cancel anytime',
     ],
   },
@@ -46,6 +47,10 @@ export default function SignUp() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    document.title = 'Sign Up | Intelligent Funding'
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -114,6 +119,9 @@ export default function SignUp() {
             <div className="auth-aside__eyebrow">You're one step away</div>
             <div className="auth-aside__badge">{info.badge}</div>
             <h2 className="auth-aside__title">Unlock the full funding map.</h2>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--bright, #22d3ee)', margin: '2px 0 10px' }}>
+              Access is leverage. Leverage is opportunity.
+            </div>
             <ul className="auth-aside__list">
               {info.benefits.map(b => (
                 <li key={b}>
@@ -121,6 +129,7 @@ export default function SignUp() {
                 </li>
               ))}
             </ul>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '14px 0 6px' }}><CardStackArt width={230} /></div>
             <div className="auth-aside__trust">
               {instFloor} verified institutions · 3 bureaus · Every pull confirmed against the official source.
               Secure checkout. Cancel anytime.
@@ -167,7 +176,7 @@ export default function SignUp() {
 
           <p style={{ marginTop: 16, fontSize: '0.78rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.5 }}>
             {plan === 'trial'
-              ? '$1 today for 7 days of full access. Unless you cancel before the trial ends, your subscription continues at $29/month automatically. Cancel anytime in 2 clicks from your Account page.'
+              ? '$1 today for a 7-day trial (directory, Wins Wall, and starter guides; the live Community Room and advanced playbooks unlock with full membership). Unless you cancel before the trial ends, your subscription continues at $29/month automatically. Cancel anytime in 2 clicks from your Account page.'
               : plan === 'annual'
               ? '$278 billed today, renews yearly until cancelled. Full refund within 14 days. Cancel anytime from your Account page.'
               : '$29 billed monthly until cancelled. Cancel anytime in 2 clicks from your Account page.'}

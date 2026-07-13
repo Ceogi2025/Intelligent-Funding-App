@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ExternalLink, Phone, Shield, FileText, AlertTriangle } from 'lucide-react'
 import Header from '../components/Header'
+import { BureauMapArt } from '../components/BrandArt'
 import SideMenu from '../components/SideMenu'
 
 type Bureau = {
@@ -85,6 +86,7 @@ export default function Resources() {
       <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div className="guide">
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 10px' }}><BureauMapArt width={250} /></div>
         <h1 className="guide__title">Resources</h1>
         <p className="guide__subtitle">
           The official numbers, links, and tools you need to monitor, dispute, and protect your credit.

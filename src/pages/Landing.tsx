@@ -3,12 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ShieldCheck, Zap, Users, ArrowRight, Sparkles, FileText, Search, Trophy, MessagesSquare } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { CommunityArt, BureauMapArt } from '../components/BrandArt'
 
-const bureauTiles = [
-  { name: 'Experian', count: '19 institutions', color: '#1e40af' },
-  { name: 'Equifax', count: '11 institutions', color: '#0891b2' },
-  { name: 'TransUnion', count: '13 institutions', color: '#6366f1' },
-  { name: 'Build Credit', count: 'No score? Start here', color: '#475569' },
+// Bureau tile counts derive LIVE from the public directory (never hardcoded — stale
+// numbers on the landing page undersell the catalog). Fallback text is evergreen.
+const bureauTileDefs = [
+  { name: 'Experian', color: '#1e40af' },
+  { name: 'Equifax', color: '#0891b2' },
+  { name: 'TransUnion', color: '#6366f1' },
 ]
 
 const edges = [
@@ -33,12 +35,24 @@ export default function Landing() {
   const navigate = useNavigate()
   // Live counts (consumer + business combined), the landing page can never go stale as the directory grows
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
+  const [bureauCounts, setBureauCounts] = useState<Record<string, number> | null>(null)
   useEffect(() => {
     fetch('/api/public/stats')
       .then(r => r.json())
       .then(d => {
         if (d && typeof d.inst === 'number' && d.inst > 0) {
           setCounts({ inst: d.inst, prod: d.prod })
+        }
+      })
+      .catch(() => {})
+    // Live per-bureau counts from the free directory (bureaus array per institution)
+    fetch('/api/public/institutions')
+      .then(r => r.json())
+      .then(d => {
+        if (Array.isArray(d) && d.length > 0) {
+          const tally: Record<string, number> = {}
+          d.forEach((i: { bureaus?: string[] }) => (i.bureaus || []).forEach(b => { tally[b] = (tally[b] || 0) + 1 }))
+          setBureauCounts(tally)
         }
       })
       .catch(() => {})
@@ -96,13 +110,14 @@ export default function Landing() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>
           <Users size={14} /> This isn't an app. It's a room.
         </div>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '2px 0 10px' }}><CommunityArt width={300} /></div>
         <h2 className="lp-section__title">You're not getting funded alone anymore</h2>
         <p className="lp-section__sub">
           Most funding sites hand you a list and wish you luck. We hand you a community, a live room where
           members post real approvals, real denials, and the strategy behind them, as it happens. You move
           faster because you're not guessing by yourself.
         </p>
-        <div className="lp-edge-grid" style={{ marginTop: 24 }}>
+        <div className="lp-edge-grid" style={{ marginTop: 24, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
           <div className="lp-edge-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/wins')}>
             <div className="lp-edge-card__icon"><Trophy size={22} /></div>
             <div className="lp-edge-card__title">The Wins Wall</div>
@@ -124,13 +139,14 @@ export default function Landing() {
 
       {/* Bureau tiles */}
       <section className="lp-section">
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 8px' }}><BureauMapArt width={270} /></div>
         <h2 className="lp-section__title">Start With Your Bureau</h2>
         <p className="lp-section__sub">
           Pick the bureau where your credit is strongest. We’ll show you every institution that pulls it,
           and which ones let you stack on a single inquiry.
         </p>
         <div className="lp-bureau-grid">
-          {bureauTiles.map(t => (
+          {bureauTileDefs.map(t => (
             <button
               key={t.name}
               className="lp-bureau-tile"
@@ -138,12 +154,19 @@ export default function Landing() {
               onClick={() => navigate('/signup')}
             >
               <div className="lp-bureau-tile__name" style={{ color: t.color }}>{t.name}</div>
-              <div className="lp-bureau-tile__count">{t.count}</div>
+              <div className="lp-bureau-tile__count">{bureauCounts && bureauCounts[t.name] ? `${bureauCounts[t.name]} verified institutions` : 'Mapped & verified'}</div>
               <div className="lp-bureau-tile__arrow" style={{ color: t.color }}>
                 Explore <ArrowRight size={14} />
               </div>
             </button>
           ))}
+          <button className="lp-bureau-tile" style={{ borderTopColor: '#475569' }} onClick={() => navigate('/signup')}>
+            <div className="lp-bureau-tile__name" style={{ color: '#475569' }}>Build Credit</div>
+            <div className="lp-bureau-tile__count">No score? Start here</div>
+            <div className="lp-bureau-tile__arrow" style={{ color: '#475569' }}>
+              Explore <ArrowRight size={14} />
+            </div>
+          </button>
         </div>
       </section>
 

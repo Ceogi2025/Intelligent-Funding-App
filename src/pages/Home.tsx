@@ -20,16 +20,21 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
 
-  // Live catalog stats, the home screen shows real depth, never claims
+  // Live catalog stats, the home screen shows real depth, never claims.
+  // `inst` is the COMBINED count (consumer + business) so the hub matches the
+  // landing page and reflects all three paths on this screen. `reuse` and
+  // `noCheck` are consumer capital-access metrics, verified floors only.
   const [stats, setStats] = useState<{ inst: number; builder: number; capital: number; noCheck: number; reuse: number } | null>(null)
   useEffect(() => {
-    fetch('/api/institutions?path=all', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then((data: Institution[]) => {
+    Promise.all([
+      fetch('/api/institutions?path=all', { headers: { Authorization: `Bearer ${token}` } }).then(r => (r.ok ? r.json() : Promise.reject())),
+      fetch('/api/public/stats').then(r => (r.ok ? r.json() : { inst: 0 })).catch(() => ({ inst: 0 })),
+    ])
+      .then(([data, combined]: [Institution[], { inst: number }]) => {
         if (!Array.isArray(data)) return
         const products = data.flatMap(i => i.products)
         setStats({
-          inst: data.length,
+          inst: combined.inst || data.length,
           builder: products.filter(p => BUILDER_TYPES.includes(p.type)).length,
           capital: products.filter(p => !BUILDER_TYPES.includes(p.type)).length,
           noCheck: products.filter(p => p.bureau_pulled === 'None').length,

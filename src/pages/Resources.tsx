@@ -76,6 +76,41 @@ const govResources = [
   },
 ]
 
+const fieldNotes = [
+  {
+    title: 'Feed the account before you need it',
+    body: 'No-doc lenders read your deposit history, not your tax returns. Open the business checking day one and run consistent deposits through it (about $250/week for 12 weeks, daily is even better). You are manufacturing the record that gets read.',
+  },
+  {
+    title: 'Split income and expenses',
+    body: 'Keep one business checking for income only and one for expenses. Your 3-month statements then show a clean, rising average daily balance, which is exactly what funding applications reward.',
+  },
+  {
+    title: 'Know the no-doc trade-off',
+    body: 'Bank-statement underwriting funds you fast with no tax returns, but the cost of capital is usually higher. Know when speed is worth the rate and when it is not.',
+  },
+  {
+    title: 'Build business credit before chasing EIN-only',
+    body: 'If your personal credit is not strong yet, build the business profile through net-30 vendor tradelines that report to the business bureaus. No personal-guarantee funding only works once the business can stand on its own.',
+  },
+  {
+    title: 'Mind the UCC-1 line',
+    body: 'Larger approvals can trigger a UCC-1 lien that ties up your business assets and blocks the next lender. Sometimes taking the smaller offer keeps you lien-free to stack elsewhere.',
+  },
+  {
+    title: 'CDFIs are the low-score door',
+    body: 'When big banks say no, mission lenders (CDFIs) often say yes. They lend on your business plan and community impact, not just your score, and many run 0% or below-market programs. Come with a package: business plan, proof of income, projections, and a use-of-funds statement.',
+  },
+  {
+    title: 'Do not let IRS debt kill the deal',
+    body: 'Lenders pull your tax transcripts. If you owe, at minimum get on a repayment plan so it does not block funding. Haven’t filed yet? A filed extension plus a year-end P&L and balance sheet can stand in.',
+  },
+  {
+    title: 'Skip the shelf corp',
+    body: 'Buying an aged shell company or seasoned tradelines is money down the drain, lenders in 2026 do not care about them. That capital is far better spent building a real, cash-flowing business.',
+  },
+]
+
 export default function Resources() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
@@ -213,6 +248,34 @@ export default function Resources() {
               Freeze the bureaus you are not targeting so no surprise pull lands where you do not want it. When you
               are ready to stack on your strongest bureau, unfreeze it, apply in sequence, and re-freeze when you are done.
             </p>
+          </div>
+        </div>
+
+        {/* Funding field notes */}
+        <div className="guide__section">
+          <h2 className="guide__section-title">Funding Field Notes</h2>
+          <div className="guide__body" style={{ marginBottom: 16 }}>
+            <p>
+              Hard-won strategy from the community and our research, the things that decide whether you get
+              funded. These teach how the game works. They are educational, not personalized advice, and any
+              specific lender term still gets verified on the official source before you act.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+            {fieldNotes.map(n => (
+              <div
+                key={n.title}
+                style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 18,
+                  borderLeft: '3px solid var(--teal)',
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: '0.98rem', marginBottom: 6, color: 'var(--navy)' }}>{n.title}</div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>{n.body}</p>
+              </div>
+            ))}
           </div>
         </div>
 

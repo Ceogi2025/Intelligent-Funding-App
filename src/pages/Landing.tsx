@@ -64,7 +64,7 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="lp-hero">
-        <div className="lp-hero__inner">
+        <div className="lp-hero__inner fade-up">
           <div className="lp-hero__eyebrow">
             <Sparkles size={13} /> The Funding Algorithm · Bureau-Specific Intelligence
           </div>

@@ -168,7 +168,7 @@ export default function Home() {
         </div>
 
         <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '6px auto 26px', maxWidth: 920 }}>
-          The journey in order: build the profile, stack by bureau, then fund the business. Access is leverage. Leverage is opportunity.
+          This is the Funding Algorithm: build the profile, stack by bureau, fund the business, and the business unlocks the next round of access. It circles back. Access is leverage. Leverage is opportunity.
         </div>
 
         {/* The knowledge layer */}

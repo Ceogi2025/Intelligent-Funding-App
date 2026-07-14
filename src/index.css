@@ -10,12 +10,19 @@
   --badge-teal-bg: #ecfeff;
   --badge-gray-bg: #F9FAFB;
   --surface-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 6px 20px rgba(15,23,42,0.10);
+  --shadow-lg: 0 14px 40px rgba(15,23,42,0.14);
+  --font-head: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --radius: 8px;
   --radius-lg: 12px;
   --unverified-color: #d97706;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.5;color:var(--text-primary);background:var(--bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,.header__wordmark,.guide__title,.guide__section-title,.path-tile__label,.auth-aside__title,.auth-card__title{font-family:var(--font-head);letter-spacing:-0.02em}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fade-up .5s cubic-bezier(.16,1,.3,1) both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 #root{min-height:100vh;display:flex;flex-direction:column}
 a{color:inherit;text-decoration:none}
 button{cursor:pointer;font-family:inherit;border:none;outline:none}
@@ -73,7 +80,8 @@ h3{font-size:1.25rem;font-weight:600}
 
 /* Institution Card */
 .institution-card{background:var(--white);border:1px solid var(--border);box-shadow:var(--surface-shadow);border-radius:var(--radius);padding:20px;transition:box-shadow .15s,border-color .15s}
-.institution-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);border-color:#bfdbfe}
+.institution-card{transition:box-shadow .18s ease,border-color .18s ease,transform .18s ease}
+.institution-card:hover{box-shadow:var(--shadow-md);border-color:#bfdbfe;transform:translateY(-2px)}
 .institution-card__top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .institution-card__name{font-size:1rem;font-weight:700;color:var(--text-primary)}
 .institution-card__score-block{text-align:right}
@@ -156,7 +164,7 @@ h3{font-size:1.25rem;font-weight:600}
 @media(max-width:860px){.path-tiles{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){.path-tiles{grid-template-columns:1fr}}
 .path-tile{border:2px solid var(--navy);border-radius:var(--radius-lg);padding:32px 20px;background:var(--white);cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:12px}
-.path-tile:hover{border-color:var(--teal);box-shadow:0 0 0 3px rgba(8,145,178,.15);transform:translateY(-2px)}
+.path-tile:hover{border-color:var(--teal);box-shadow:0 0 0 3px rgba(8,145,178,.15),var(--shadow-md);transform:translateY(-4px)}
 .path-tile__icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:#eff6ff;border-radius:50%;color:var(--navy)}
 .path-tile__label{font-size:1rem;font-weight:700;color:var(--navy)}
 .path-tile__desc{font-size:.825rem;color:var(--text-secondary);line-height:1.5}

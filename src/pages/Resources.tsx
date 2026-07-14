@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ExternalLink, Phone, Shield, FileText, AlertTriangle } from 'lucide-react'
+import { ExternalLink, Phone, Shield, FileText, AlertTriangle, Building2, Hash, Landmark, Globe } from 'lucide-react'
 import Header from '../components/Header'
 import { BureauMapArt } from '../components/BrandArt'
 import SideMenu from '../components/SideMenu'
@@ -76,6 +76,77 @@ const govResources = [
   },
 ]
 
+// The Business Setup Toolkit. Every link is the OFFICIAL / free source.
+// `monetizable: true` = a category where an affiliate/partner program may exist
+// later (business banking, phone, domain, email). We ship official links now and
+// swap in partner links only after Grams vets a program. EIN and DUNS are always
+// free and stay pointed at the government / D&B direct source, never monetized.
+const setupToolkit: {
+  icon: typeof Building2
+  step: string
+  name: string
+  desc: string
+  url: string
+  cta: string
+  free?: boolean
+  monetizable?: boolean
+}[] = [
+  {
+    icon: Hash,
+    step: 'Step 1',
+    name: 'Get your EIN (Federal Tax ID)',
+    desc: 'Your business Social Security number. Required for a business bank account and any EIN-only funding. It is 100% free directly from the IRS and takes about 10 minutes.',
+    url: 'https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online',
+    cta: 'Apply Free at IRS.gov',
+    free: true,
+  },
+  {
+    icon: Building2,
+    step: 'Step 2',
+    name: 'Form your LLC or corporation',
+    desc: 'Register the entity with your state. Filing is done through your state\'s Secretary of State office. The SBA guide below routes you to the right one and walks the whole setup.',
+    url: 'https://www.sba.gov/business-guide/launch-your-business/register-your-business',
+    cta: 'SBA Registration Guide',
+    monetizable: true,
+  },
+  {
+    icon: Hash,
+    step: 'Step 3',
+    name: 'Get your D-U-N-S Number',
+    desc: 'Dun & Bradstreet\'s business identifier, the backbone of your business credit file. Lenders and net-30 vendors check it. Free directly from D&B (allow a few days for the free option).',
+    url: 'https://www.dnb.com/duns-number/get-a-duns.html',
+    cta: 'Get a D-U-N-S Free',
+    free: true,
+  },
+  {
+    icon: Landmark,
+    step: 'Step 4',
+    name: 'Open a business bank account',
+    desc: 'Separate business banking is non-negotiable, it is the deposit history no-doc lenders read. Open it day one and feed it. Compare accounts by fees, minimums, and bonuses.',
+    url: 'https://www.nerdwallet.com/best/small-business/business-checking-accounts',
+    cta: 'Compare Business Accounts',
+    monetizable: true,
+  },
+  {
+    icon: Phone,
+    step: 'Step 5',
+    name: 'Get a business phone number',
+    desc: 'A dedicated business line makes you look legitimate to lenders and keeps your personal number private. Google Voice is a free starting point; paid services add more.',
+    url: 'https://voice.google.com/',
+    cta: 'Start with Google Voice',
+    monetizable: true,
+  },
+  {
+    icon: Globe,
+    step: 'Step 6',
+    name: 'Register a domain + business email',
+    desc: 'A matching website domain and a name@yourbusiness.com email signal a real operation. Many funding applications and vendor accounts expect a business email, not a Gmail.',
+    url: 'https://www.namecheap.com/',
+    cta: 'Get a Domain',
+    monetizable: true,
+  },
+]
+
 const fieldNotes = [
   {
     title: 'Feed the account before you need it',
@@ -124,9 +195,60 @@ export default function Resources() {
         <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 10px' }}><BureauMapArt width={250} /></div>
         <h1 className="guide__title">Resources</h1>
         <p className="guide__subtitle">
-          The official numbers, links, and tools you need to monitor, dispute, and protect your credit.
-          Every link goes to the source, no middlemen.
+          The Funding Algorithm, start to finish. Set up your business, monitor and protect your credit,
+          then stack by bureau. Every link below goes straight to the official source. No middlemen.
         </p>
+
+        {/* Business setup toolkit */}
+        <div className="guide__section">
+          <h2 className="guide__section-title">Business Setup Toolkit</h2>
+          <div className="guide__body" style={{ marginBottom: 16 }}>
+            <p>
+              Everything you need to stand up a fundable business, in order. Do these before you apply for
+              business funding, lenders check for them. The essentials are free; we point you to the official
+              source every time.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+            {setupToolkit.map(t => {
+              const Icon = t.icon
+              return (
+                <div
+                  key={t.name}
+                  style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: 18,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: 9, background: 'var(--badge-teal-bg)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon size={19} />
+                    </div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>
+                      {t.step}
+                    </div>
+                    {t.free && (
+                      <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontWeight: 800, color: 'var(--teal)', background: 'var(--badge-teal-bg)', padding: '3px 8px', borderRadius: 999 }}>FREE</span>
+                    )}
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: '0.98rem', color: 'var(--navy)' }}>{t.name}</div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6, margin: 0, flex: 1 }}>{t.desc}</p>
+                  <a href={t.url} target="_blank" rel="noopener noreferrer" className="btn btn--teal btn--sm" style={{ alignSelf: 'flex-start' }}>
+                    {t.cta} <ExternalLink size={12} />
+                  </a>
+                </div>
+              )
+            })}
+          </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 12, fontStyle: 'italic' }}>
+            Heads up: your EIN and D-U-N-S number are always free from the government and Dun &amp; Bradstreet directly.
+            Never pay a third party for either one.
+          </p>
+        </div>
 
         {/* Free reports + government */}
         <div className="guide__section">

@@ -49,7 +49,7 @@ type IssuerRule = {
 const ISSUER_RULES: IssuerRule[] = [
   {
     match: 'chase',
-    under: { boost: 2, why: '5/24 window open: Chase auto-denies once you hit 5 new cards in 24 months, so Chase goes FIRST in any sequence' },
+    under: { boost: 1, why: '5/24 note: if a Chase card is on your wishlist, slot it early, Chase auto-denies at 5 new cards in 24 months' },
     over: { penalty: 5, caution: 'Over 5/24: Chase denies most applications regardless of score. Come back when you are under 5 new cards in 24 months' },
   },
   {
@@ -92,6 +92,12 @@ function issuerAnnotate(instName: string, cards24: Cards24 | null): { boost: num
 type Play = { title: string; body: string }
 function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] {
   const plays: Play[] = []
+  if (mode !== 'build') {
+    plays.push({
+      title: 'The 3×3 Spread (the master play)',
+      body: 'Maximum access is not one marquee card, it is the spread: up to three institutions on EACH bureau, and at inquiry-reuse institutions, two products riding a single pull. Run it right and roughly three pulls per bureau can turn into six or more accounts per bureau, eighteen-plus tradelines across the board, while someone chasing one famous card spent the same inquiries on three approvals. The lanes below are built exactly this way. Work them top to bottom, one lane at a time. Access is leverage. Leverage is opportunity.',
+    })
+  }
   if (mode !== 'build' && (a.util === 'over50' || a.util === '30-50')) {
     plays.push({
       title: 'The Balance-Transfer Play',
@@ -100,8 +106,8 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
   }
   if (mode !== 'build' && a.cards24 !== '5plus') {
     plays.push({
-      title: 'The 5/24 Sequence',
-      body: 'Chase counts every card you opened in the last 24 months, across ALL banks, and auto-denies at 5. Most other issuers do not count this way. So the sequence rule is simple: if you want a Chase card, get it FIRST, while your count is low, then work the other issuers. Going the other direction locks Chase out for up to two years.',
+      title: 'The 5/24 Timing Note',
+      body: 'Only relevant if a Chase card is on your wishlist: Chase counts every card you opened in the last 24 months, across ALL banks, and auto-denies at 5. So if you want one, slot it at the very start of your spread, while your count is low. But do not confuse one famous card with the goal. The spread is what maximizes total access; Chase is one seat at that table, not the table.',
     })
   }
   if (mode !== 'build' && a.cards24 === '5plus') {
@@ -133,7 +139,7 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
 
 type Rec = {
   inst: Institution
-  product: Product
+  products: Product[]
   points: number
   why: string[]
   caution: string[]
@@ -142,39 +148,61 @@ type Rec = {
 const CAPITAL_TYPES = ['Unsecured Card', 'Line of Credit', 'Personal Loan']
 const BUILDER_TYPES = ['Secured Card', 'Credit Builder Loan', 'Alternative Tradeline']
 
+// The objective function: MAXIMUM TOTAL ACCESS PER INQUIRY. We rank
+// institutions (not lone products) per bureau lane, because the unit of
+// strategy is the pull: a reuse-friendly institution where two products ride
+// one inquiry beats a marquee name that costs a pull per product. 3 per lane,
+// 3 lanes: the 3×3 spread.
 function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): Rec[] {
   const floor = a.score ? SCORE_FLOOR[a.score] : 0
   const heavyInq = a.inq === '6plus'
   const recs: Rec[] = []
   for (const inst of institutions) {
+    // Score every eligible product at this institution for this lane
+    const scored: { p: Product; pts: number; why: string[]; caution: string[] }[] = []
     for (const p of inst.products) {
       if (!CAPITAL_TYPES.includes(p.type)) continue
       if (p.bureau_pulled !== bureau && p.bureau_pulled !== 'All 3') continue
-      let points = 0
+      let pts = 0
       const why: string[] = []
       const caution: string[] = []
-      if (inst.inquiry_reuse === 'Yes') { points += heavyInq ? 5 : 3; why.push('Inquiry reuse: one pull can cover multiple products') }
-      if (p.inquiry_reuse_eligible === 'Yes') { points += 1 }
-      if (p.preapproval_available === 'Yes' || inst.soft_pull_available === 'Yes') { points += 2; why.push('Preapproval / soft-pull first, see your odds before a hard pull') }
+      if (inst.inquiry_reuse === 'Yes') { pts += heavyInq ? 5 : 3 }
+      if (p.inquiry_reuse_eligible === 'Yes') { pts += 1 }
+      if (p.preapproval_available === 'Yes' || inst.soft_pull_available === 'Yes') { pts += 2; why.push('Preapproval / soft-pull first, see your odds before a hard pull') }
       if (p.minimum_credit_score != null) {
-        if (floor >= p.minimum_credit_score) { points += 2; why.push(`Score fit, needs ~${p.minimum_credit_score}+`) }
-        else { points -= 3; caution.push(`Published minimum ~${p.minimum_credit_score} is above your band`) }
+        if (floor >= p.minimum_credit_score) { pts += 2; why.push(`Score fit, needs ~${p.minimum_credit_score}+`) }
+        else { pts -= 3; caution.push(`Published minimum ~${p.minimum_credit_score} is above your band`) }
       }
-      if (p.bureau_pulled === 'All 3') { points -= 1; caution.push('Pulls all three bureaus, spend this one wisely') }
-      if (p.existing_customer_required === 'Yes') { points -= 1; caution.push('Existing-customer relationship required first') }
+      if (p.bureau_pulled === 'All 3') { pts -= 1; caution.push('Pulls all three bureaus, spend this one wisely') }
+      if (p.existing_customer_required === 'Yes') { pts -= 1; caution.push('Existing-customer relationship required first') }
       // Situational: high utilization boosts 0% / balance-transfer offers (the play)
       if ((a.util === 'over50' || a.util === '30-50') && /0%|balance transfer|intro apr/i.test(p.strategy_notes || '')) {
-        points += 2; why.push('0% / balance-transfer offer noted, fits your utilization play')
+        pts += 2; why.push('0% / balance-transfer offer noted, fits your utilization play')
       }
-      // Issuer rules: 5/24 sequencing and friends
-      const issuer = issuerAnnotate(inst.name, a.cards24)
-      points += issuer.boost
-      why.push(...issuer.why)
-      caution.push(...issuer.caution)
-      if (points > 0) recs.push({ inst, product: p, points, why, caution })
+      if (pts > 0) scored.push({ p, pts, why, caution })
     }
+    if (scored.length === 0) continue
+    scored.sort((x, y) => y.pts - x.pts)
+    const top = scored.slice(0, 2)
+    let points = top[0].pts
+    const why: string[] = []
+    const caution: string[] = []
+    // THE core play: reuse + 2 eligible products = two tradelines, one pull
+    if (inst.inquiry_reuse === 'Yes' && top.length >= 2) {
+      points += 3
+      why.push('Double-dip: take BOTH products below on ONE pull (apply same day)')
+    } else if (inst.inquiry_reuse === 'Yes') {
+      why.push('Inquiry reuse: one pull can cover multiple products here')
+    }
+    for (const s of top) { why.push(...s.why); caution.push(...s.caution) }
+    // Issuer rules, annotation-level, subordinate to the access math
+    const issuer = issuerAnnotate(inst.name, a.cards24)
+    points += issuer.boost
+    why.push(...issuer.why)
+    caution.push(...issuer.caution)
+    if (points > 0) recs.push({ inst, products: top.map(s => s.p), points, why: [...new Set(why)], caution: [...new Set(caution)] })
   }
-  return recs.sort((x, y) => y.points - x.points).slice(0, 4)
+  return recs.sort((x, y) => y.points - x.points).slice(0, 3)
 }
 
 function rankBuilders(institutions: Institution[]): Rec[] {
@@ -190,7 +218,7 @@ function rankBuilders(institutions: Institution[]): Rec[] {
       if (rep.includes('all') || (rep.includes('experian') && rep.includes('equifax') && rep.includes('transunion'))) { points += 2; why.push('Reports to all three bureaus') }
       if (p.bureau_pulled === 'None') { points += 2; why.push('No credit check to open') }
       if (p.existing_customer_required === 'Yes') { points -= 1; caution.push('Existing-customer relationship required first') }
-      recs.push({ inst, product: p, points, why, caution })
+      recs.push({ inst, products: [p], points, why, caution })
     }
   }
   return recs.sort((x, y) => y.points - x.points).slice(0, 5)
@@ -213,18 +241,27 @@ function Chip({ label, tone }: { label: string; tone: 'navy' | 'green' | 'teal' 
 
 function RecCard({ rec, rank }: { rec: Rec; rank: number }) {
   const navigate = useNavigate()
-  const p = rec.product
+  const doubleDip = rec.products.length >= 2 && rec.inst.inquiry_reuse === 'Yes'
   return (
     <div className="institution-card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/institution/${rec.inst.id}`)}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
         <span style={{ fontWeight: 800, color: 'var(--teal)', fontSize: '0.9rem' }}>{rank}.</span>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '1.02rem' }}>{rec.inst.name}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{p.name} · {p.type}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ fontWeight: 700, fontSize: '1.02rem' }}>{rec.inst.name}</div>
+            {doubleDip && (
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 9px', borderRadius: 999, background: 'var(--navy)', color: '#fff' }}>
+                {rec.products.length} products · 1 pull
+              </span>
+            )}
+          </div>
+          {rec.products.map(p => (
+            <div key={p.id} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{p.name} · {p.type}</div>
+          ))}
         </div>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-        <Chip label={`Pulls: ${p.bureau_pulled}`} tone={p.bureau_pulled === 'Not Verified' ? 'gray' : 'navy'} />
+        <Chip label={`Pulls: ${rec.products[0].bureau_pulled}`} tone={rec.products[0].bureau_pulled === 'Not Verified' ? 'gray' : 'navy'} />
         {rec.why.map(w => <Chip key={w} label={w} tone="green" />)}
         {rec.caution.map(c => <Chip key={c} label={c} tone="amber" />)}
       </div>
@@ -392,6 +429,26 @@ export default function Strategy() {
               <RefreshCw size={14} /> Change my answers
             </button>
 
+            {/* The funding map: the whole spread, quantified up front */}
+            {plan.mode !== 'build' && (() => {
+              const instCount = plan.lanes.reduce((n, l) => n + l.recs.length, 0)
+              const prodCount = plan.lanes.reduce((n, l) => n + l.recs.reduce((m, r) => m + r.products.length, 0), 0)
+              if (instCount === 0) return null
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(100deg, var(--navy) 0%, #164e63 100%)', color: '#fff', marginBottom: 20, boxShadow: 'var(--shadow-md)' }}>
+                  <TrendingUp size={26} style={{ flexShrink: 0, color: '#67e8f9' }} />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '1rem' }}>
+                      Your funding map: {instCount} institutions across 3 bureaus · up to {prodCount} products
+                    </div>
+                    <div style={{ fontSize: '0.83rem', opacity: 0.85 }}>
+                      Run the reuse plays and that's roughly one pull per institution. Maximum access, minimum inquiries.
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Your Plays: the named moves for this exact situation */}
             {plan.plays.length > 0 && (
               <div className="guide__section">
@@ -421,7 +478,7 @@ export default function Strategy() {
                     <li>No new hard pulls while you build.</li>
                   </ul>
                 </div>
-                {plan.builders.map((r, i) => <RecCard key={r.product.id} rec={r} rank={i + 1} />)}
+                {plan.builders.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} />)}
               </div>
             )}
 
@@ -447,7 +504,7 @@ export default function Strategy() {
                       {plan.lanes[0].bureau === lane.bureau && answers.clean && answers.clean !== 'notsure' ? ', start here (your cleanest report)' : ''}
                     </h2>
                     {lane.recs.length > 0 ? (
-                      lane.recs.map((r, i) => <RecCard key={r.product.id} rec={r} rank={i + 1} />)
+                      lane.recs.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} />)
                     ) : (
                       <div className="guide__body"><p>No strong verified matches in this lane for your profile yet. As the database grows, this lane fills in, check back.</p></div>
                     )}

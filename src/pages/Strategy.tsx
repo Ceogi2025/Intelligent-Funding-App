@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle } from 'lucide-react'
+import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
@@ -18,6 +18,7 @@ type Util = 'under10' | '10-30' | '30-50' | 'over50'
 type Lates = 'none' | '1-2' | '3plus'
 type Age = 'none' | 'under1' | '1-3' | '3plus'
 type Inq = '0-2' | '3-5' | '6plus'
+type Cards24 = '0-1' | '2-4' | '5plus'
 type Bureau = 'Experian' | 'Equifax' | 'TransUnion'
 type CleanBureau = Bureau | 'notsure'
 
@@ -31,7 +32,103 @@ type Answers = {
   lates: Lates | null
   age: Age | null
   inq: Inq | null
+  cards24: Cards24 | null
   clean: CleanBureau | null
+}
+
+// ─── The strategy brain: issuer rules ────────────────────────────────────────
+// Widely reported community knowledge (5/24 and friends), not official bank
+// policy. The engine uses these to SEQUENCE, and always says why. Matched by
+// institution-name substring.
+type IssuerRule = {
+  match: string
+  under: { boost: number; why: string } | null   // applied when cards24 is NOT 5plus
+  over: { penalty: number; caution: string } | null // applied when cards24 IS 5plus
+  always?: string // annotation regardless of profile
+}
+const ISSUER_RULES: IssuerRule[] = [
+  {
+    match: 'chase',
+    under: { boost: 2, why: '5/24 window open: Chase auto-denies once you hit 5 new cards in 24 months, so Chase goes FIRST in any sequence' },
+    over: { penalty: 5, caution: 'Over 5/24: Chase denies most applications regardless of score. Come back when you are under 5 new cards in 24 months' },
+  },
+  {
+    match: 'bank of america',
+    under: null,
+    over: null,
+    always: 'BofA 2/3/4 velocity rule (reported): max 2 new BofA cards per 2 months, 3 per 12, 4 per 24. Pace your BofA applications',
+  },
+  {
+    match: 'citi',
+    under: null,
+    over: null,
+    always: 'Citi velocity rule (reported): 1 card per 8 days, max 2 per 65 days. Space your Citi applications',
+  },
+  {
+    match: 'american express',
+    under: null,
+    over: null,
+    always: 'Amex often soft-pulls existing customers, and welcome bonuses are once per lifetime per card. Choose your first Amex deliberately',
+  },
+]
+
+function issuerAnnotate(instName: string, cards24: Cards24 | null): { boost: number; why: string[]; caution: string[] } {
+  const n = instName.toLowerCase()
+  let boost = 0
+  const why: string[] = []
+  const caution: string[] = []
+  for (const r of ISSUER_RULES) {
+    if (!n.includes(r.match)) continue
+    if (cards24 === '5plus' && r.over) { boost -= r.over.penalty; caution.push(r.over.caution) }
+    else if (cards24 !== '5plus' && r.under) { boost += r.under.boost; why.push(r.under.why) }
+    if (r.always) why.push(r.always)
+  }
+  return { boost, why, caution }
+}
+
+// ─── The strategy brain: situational plays ───────────────────────────────────
+// Named moves, triggered by the member's situation, each explained in plain
+// English. This is what makes the output a strategy, not a list.
+type Play = { title: string; body: string }
+function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] {
+  const plays: Play[] = []
+  if (mode !== 'build' && (a.util === 'over50' || a.util === '30-50')) {
+    plays.push({
+      title: 'The Balance-Transfer Play',
+      body: 'Your utilization is your biggest score drag right now, and there is a move for that: a 0% intro APR balance-transfer card. You move existing balances onto it (typical fee 3–5%), pay zero interest for the intro period, and your utilization spreads across more available credit, which can lift your score in 1–2 cycles. The engine has boosted cards with 0% or balance-transfer offers in your lanes below. Run the numbers: the transfer fee is usually far less than months of 25%+ interest.',
+    })
+  }
+  if (mode !== 'build' && a.cards24 !== '5plus') {
+    plays.push({
+      title: 'The 5/24 Sequence',
+      body: 'Chase counts every card you opened in the last 24 months, across ALL banks, and auto-denies at 5. Most other issuers do not count this way. So the sequence rule is simple: if you want a Chase card, get it FIRST, while your count is low, then work the other issuers. Going the other direction locks Chase out for up to two years.',
+    })
+  }
+  if (mode !== 'build' && a.cards24 === '5plus') {
+    plays.push({
+      title: 'Over the 5/24 Line: Work Around It',
+      body: 'You are over 5 new cards in 24 months, so Chase is off the table for now, no matter your score. The move: work issuers that do not enforce 5/24 (most credit unions and regional banks in your lanes), and let your oldest new-card dates age past the 24-month line. The engine has already pushed Chase down and 5/24-agnostic lenders up in your lanes.',
+    })
+  }
+  if (mode !== 'build') {
+    plays.push({
+      title: 'The Inquiry-Reuse Double-Dip',
+      body: 'Some institutions let one hard pull cover multiple applications made the same day, a card AND a line of credit off a single inquiry. That is two tradelines for the price of one pull. Lenders that allow this are ranked at the top of your lanes. Apply for both products the same day, always confirm the reuse window with the institution first.',
+    })
+  }
+  if (mode === 'borderline' || a.inq === '6plus') {
+    plays.push({
+      title: 'The Preapproval Sweep',
+      body: 'Before spending a single hard pull, sweep every preapproval and soft-pull check in your lanes. Each one shows your real odds with zero score damage. Collect your yes-list first, then execute the hard applications in one tight window so the inquiries land together and age together.',
+    })
+  }
+  if (mode === 'build') {
+    plays.push({
+      title: 'The Graduation Track',
+      body: 'Not every secured card is equal. The ones that matter GRADUATE: your deposit comes back and the card converts to unsecured, keeping the account age you built. The engine has already prioritized graduating cards that report to all three bureaus. Open one or two, run small charges, pay in full, and let the file build itself.',
+    })
+  }
+  return plays
 }
 
 type Rec = {
@@ -65,6 +162,15 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
       }
       if (p.bureau_pulled === 'All 3') { points -= 1; caution.push('Pulls all three bureaus, spend this one wisely') }
       if (p.existing_customer_required === 'Yes') { points -= 1; caution.push('Existing-customer relationship required first') }
+      // Situational: high utilization boosts 0% / balance-transfer offers (the play)
+      if ((a.util === 'over50' || a.util === '30-50') && /0%|balance transfer|intro apr/i.test(p.strategy_notes || '')) {
+        points += 2; why.push('0% / balance-transfer offer noted, fits your utilization play')
+      }
+      // Issuer rules: 5/24 sequencing and friends
+      const issuer = issuerAnnotate(inst.name, a.cards24)
+      points += issuer.boost
+      why.push(...issuer.why)
+      caution.push(...issuer.caution)
       if (points > 0) recs.push({ inst, product: p, points, why, caution })
     }
   }
@@ -158,7 +264,7 @@ export default function Strategy() {
   const { token } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [answers, setAnswers] = useState<Answers>({ score: null, util: null, lates: null, age: null, inq: null, clean: null })
+  const [answers, setAnswers] = useState<Answers>({ score: null, util: null, lates: null, age: null, inq: null, cards24: null, clean: null })
   const [built, setBuilt] = useState(false)
 
   useEffect(() => { document.title = 'Strategy Engine | Intelligent Funding' }, [])
@@ -169,7 +275,7 @@ export default function Strategy() {
       .catch(() => {})
   }, [token])
 
-  const complete = answers.score && answers.util && answers.lates && answers.age && answers.inq
+  const complete = answers.score && answers.util && answers.lates && answers.age && answers.inq && answers.cards24
 
   const plan = useMemo(() => {
     if (!built || !complete) return null
@@ -181,10 +287,12 @@ export default function Strategy() {
     const ordered = a.clean && a.clean !== 'notsure'
       ? [a.clean as Bureau, ...bureaus.filter(b => b !== a.clean)]
       : bureaus
+    const mode = notReady ? 'build' as const : borderline ? 'borderline' as const : 'ready' as const
     return {
-      mode: notReady ? 'build' as const : borderline ? 'borderline' as const : 'ready' as const,
+      mode,
       builders: rankBuilders(institutions),
       lanes: ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a) })),
+      plays: buildPlays(a, mode),
       payDownFirst: a.util === 'over50' || a.util === '30-50',
       heavyInq: a.inq === '6plus',
     }
@@ -202,8 +310,9 @@ export default function Strategy() {
           <h1 className="guide__title" style={{ margin: 0 }}>The Strategy Engine</h1>
         </div>
         <p className="guide__subtitle">
-          Answer five questions. The Economic Algorithm reads our verified database and hands you a
-          sequence: which bureau lane, which institutions, in what order. No guessing.
+          Answer a few quick questions. The Economic Algorithm reads our verified database and hands you
+          the plays for your exact situation plus a sequence: which bureau lane, which institutions, in
+          what order. No guessing, no cookie-cutter lists.
         </p>
 
         {!plan && (
@@ -248,6 +357,12 @@ export default function Strategy() {
               options={[{ v: '0-2', t: '0–2' }, { v: '3-5', t: '3–5' }, { v: '6plus', t: '6 or more' }]}
             />
             <Question
+              label="New cards opened in the last 24 months? (all banks combined)"
+              value={answers.cards24}
+              onPick={v => setAnswers(prev => ({ ...prev, cards24: v as Cards24 }))}
+              options={[{ v: '0-1', t: '0–1' }, { v: '2-4', t: '2–4' }, { v: '5plus', t: '5 or more' }]}
+            />
+            <Question
               label="Which credit report is your cleanest? (optional, skip if unsure)"
               value={answers.clean}
               onPick={v => setAnswers(prev => ({ ...prev, clean: v as CleanBureau }))}
@@ -276,6 +391,19 @@ export default function Strategy() {
             >
               <RefreshCw size={14} /> Change my answers
             </button>
+
+            {/* Your Plays: the named moves for this exact situation */}
+            {plan.plays.length > 0 && (
+              <div className="guide__section">
+                <h2 className="guide__section-title"><Lightbulb size={16} style={{ verticalAlign: -3 }} /> Your plays, for your exact situation</h2>
+                {plan.plays.map(p => (
+                  <div key={p.title} style={{ border: '1px solid var(--border)', borderLeft: '3px solid var(--navy)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 10 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--navy)', marginBottom: 5 }}>{p.title}</div>
+                    <p style={{ fontSize: '0.87rem', lineHeight: 1.65, color: 'var(--text-secondary)', margin: 0 }}>{p.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {plan.mode === 'build' && (
               <div className="guide__section">
@@ -342,7 +470,9 @@ export default function Strategy() {
             <div className="guide__disclaimer">
               The Strategy Engine is an educational tool that sequences verified data from our directory.
               It is not financial advice, and no approval is ever guaranteed. Bureau pulls can differ by
-              state and change over time; confirm directly with any institution before applying.
+              state and change over time; confirm directly with any institution before applying. Issuer
+              rules like 5/24 are widely reported community knowledge, not official bank policy, and can
+              change without notice.
             </div>
           </>
         )}

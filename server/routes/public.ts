@@ -201,4 +201,21 @@ router.get('/go/:id', async (req: Request, res: Response) => {
   }
 })
 
+// Funnel counter: privacy-first tick marks, no PII, no third parties.
+// Reuses click_events (institution_id stays NULL for funnel events).
+const FUNNEL_EVENTS = new Set([
+  'landing_view', 'landing_cta', 'signup_submit', 'engine_run', 'checkout_start',
+])
+router.post('/public/track', async (req: Request, res: Response) => {
+  const name = String(req.body?.name || '')
+  if (!FUNNEL_EVENTS.has(name)) { res.status(400).json({ error: 'Unknown event' }); return }
+  try {
+    const pool = getPool()
+    await pool.query('INSERT INTO click_events (institution_id, event_type) VALUES (NULL, $1)', [name])
+    res.json({ ok: true })
+  } catch {
+    res.status(500).json({ error: 'track failed' })
+  }
+})
+
 export default router

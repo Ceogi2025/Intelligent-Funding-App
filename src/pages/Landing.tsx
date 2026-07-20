@@ -4,6 +4,7 @@ import { ShieldCheck, Zap, Users, ArrowRight, Sparkles, FileText, Search, Trophy
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { CommunityArt, BureauMapArt } from '../components/BrandArt'
+import { track } from '../lib/track'
 
 // Bureau tile counts derive LIVE from the public directory (never hardcoded — stale
 // numbers on the landing page undersell the catalog). Fallback text is evergreen.
@@ -36,6 +37,7 @@ export default function Landing() {
   // Live counts (consumer + business combined), the landing page can never go stale as the directory grows
   const [counts, setCounts] = useState<{ inst: number; prod: number } | null>(null)
   const [bureauCounts, setBureauCounts] = useState<Record<string, number> | null>(null)
+  useEffect(() => { track('landing_view') }, [])
   useEffect(() => {
     fetch('/api/public/stats')
       .then(r => r.json())
@@ -80,7 +82,7 @@ export default function Landing() {
             in a members-only room.
           </p>
           <div className="lp-hero__ctas">
-            <button className="btn btn--teal btn--lg" onClick={() => navigate('/signup')}>
+            <button className="btn btn--teal btn--lg" onClick={() => { track('landing_cta'); navigate('/signup') }}>
               Get Started — $1 for 7 Days
             </button>
             <button className="btn btn--lg btn--hero-ghost" onClick={() => navigate('/demo')}>

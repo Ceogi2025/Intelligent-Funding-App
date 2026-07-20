@@ -180,4 +180,23 @@ router.delete('/messages/:id', async (req: AuthRequest, res: Response) => {
   res.json({ success: true })
 })
 
+// The instrument panel: funnel counts (last 30 days) + member totals.
+router.get('/metrics', async (_req: AuthRequest, res: Response) => {
+  try {
+    const pool = getPool()
+    const { rows: funnel } = await pool.query(`
+      SELECT event_type, COUNT(*)::int AS count FROM click_events
+      WHERE created_at >= ${process.env.DATABASE_URL || process.env.POSTGRES_URL ? "NOW() - INTERVAL '30 days'" : "datetime('now', '-30 days')"}
+      GROUP BY event_type ORDER BY count DESC
+    `)
+    const { rows: members } = await pool.query(`
+      SELECT subscription_status, COUNT(*)::int AS count FROM users GROUP BY subscription_status
+    `)
+    res.json({ funnel, members })
+  } catch (err) {
+    console.error('Metrics error:', err)
+    res.status(500).json({ error: 'Failed to load metrics' })
+  }
+})
+
 export default router

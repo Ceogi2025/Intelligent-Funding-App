@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import { CardStackArt } from '../components/BrandArt'
 import { useLiveCounts } from '../hooks/useLiveCounts'
+import { track } from '../lib/track'
 
 const planInfo: Record<string, { badge: string; benefits: string[] }> = {
   trial: {
@@ -62,6 +63,7 @@ export default function SignUp() {
     }
 
     setLoading(true)
+    track('signup_submit')
 
     try {
       const res = await fetch('/api/auth/signup', {
@@ -91,6 +93,7 @@ export default function SignUp() {
           })
           const checkoutData = await checkoutRes.json()
           if (checkoutData.url) {
+            track('checkout_start')
             window.location.href = checkoutData.url
             return
           }

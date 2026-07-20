@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import type { Institution, Product } from '../types'
+import { track } from '../lib/track'
 
 // ─── The Strategy Engine v1 ──────────────────────────────────────────────────
 // Rule-based, deterministic, and 100% powered by OUR verified database — no
@@ -450,7 +451,7 @@ export default function Strategy() {
             <button
               className="btn btn--primary btn--lg"
               disabled={!complete}
-              onClick={() => setBuilt(true)}
+              onClick={() => { track('engine_run'); setBuilt(true) }}
               style={{ marginTop: 6, opacity: complete ? 1 : 0.5 }}
             >
               Build My Strategy →

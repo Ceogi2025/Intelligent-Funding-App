@@ -117,6 +117,12 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
       body: 'You said business funding, so your map lives on the Business Funding path: verified business cards, lines, and loans with filters for no-doc, new-LLC, EIN-only (no personal guarantee), and 0% intro offers. Two things first: a business checking account with real deposit activity is the passport (no-doc lenders read deposits, not tax returns), and the Business Setup Toolkit on Resources gets your foundation right in an afternoon. Your personal profile still matters wherever a personal guarantee applies, so keep it clean while you build the business side.',
     })
   }
+  if (mode !== 'build' && a.goal === 'everything') {
+    plays.push({
+      title: 'Revolving First (the capital hierarchy)',
+      body: 'Not all funding is equal. Cards and lines of credit are money SITTING: they cost nothing until you draw, you reuse them forever, and the limits grow with you. A loan is money RENTED: repayment starts the day it funds, and once you pay it back, the access is gone. So the hierarchy is revolving first, installment second, and your lanes below are ranked exactly that way. Loans still have their place, consolidating expensive balances or funding a specific move with a known payoff, but you build the standing access first.',
+    })
+  }
   if (mode !== 'build' && a.goal !== 'business') {
     plays.push({
       title: 'The 3×3 Spread (the master play)',
@@ -208,6 +214,13 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
       // Tapped-out pivot: heavy inquiries favor soft-prequal loans hard
       if (heavyInq && p.type === 'Personal Loan' && (p.preapproval_available === 'Yes' || inst.soft_pull_available === 'Yes')) {
         pts += 2; why.push('Soft prequalification: check your rate without touching your loaded report')
+      }
+      // Capital hierarchy (Grams doctrine): revolving beats installment.
+      // A card or line is money sitting on standby that costs nothing until
+      // drawn and reuses forever; a loan starts costing the day it funds. In
+      // maximum-access mode, revolving products outrank loans.
+      if (a.goal === 'everything' && (p.type === 'Unsecured Card' || p.type === 'Line of Credit')) {
+        pts += 2
       }
       if (pts > 0) scored.push({ p, pts, why, caution })
     }

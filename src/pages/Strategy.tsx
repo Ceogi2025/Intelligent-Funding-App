@@ -19,6 +19,7 @@ type Lates = 'none' | '1-2' | '3plus'
 type Age = 'none' | 'under1' | '1-3' | '3plus'
 type Inq = '0-2' | '3-5' | '6plus'
 type Cards24 = '0-1' | '2-4' | '5plus'
+type Goal = 'cards' | 'loans' | 'business' | 'everything'
 type Bureau = 'Experian' | 'Equifax' | 'TransUnion'
 type CleanBureau = Bureau | 'notsure'
 
@@ -27,6 +28,7 @@ const SCORE_FLOOR: Record<ScoreBand, number> = {
 }
 
 type Answers = {
+  goal: Goal | null
   score: ScoreBand | null
   util: Util | null
   lates: Lates | null
@@ -34,6 +36,16 @@ type Answers = {
   inq: Inq | null
   cards24: Cards24 | null
   clean: CleanBureau | null
+}
+
+// What the member is hunting for decides which product types the lanes carry.
+// The engine serves EVERY profile: the fresh file, the mid-stack, and the
+// tapped-out stacker pivoting to loans / business / soft-pull capital.
+const GOAL_TYPES: Record<Goal, string[]> = {
+  cards: ['Unsecured Card', 'Line of Credit'],
+  loans: ['Personal Loan'],
+  business: [],
+  everything: ['Unsecured Card', 'Line of Credit', 'Personal Loan'],
 }
 
 // ─── The strategy brain: issuer rules ────────────────────────────────────────
@@ -92,7 +104,19 @@ function issuerAnnotate(instName: string, cards24: Cards24 | null): { boost: num
 type Play = { title: string; body: string }
 function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] {
   const plays: Play[] = []
-  if (mode !== 'build') {
+  if (a.inq === '6plus' && mode !== 'build') {
+    plays.push({
+      title: 'The Tapped-Out Pivot (you already ran the stack, here is round two)',
+      body: 'Heavy inquiries do not mean you are done, they mean you change weapons. Three moves: (1) Soft-prequalification loans, most personal-loan lenders show your rate with NO hard pull, so your loaded report costs you nothing to shop. The engine has boosted these in your lanes. (2) Business credit: business cards and lines mostly do not report to your personal bureaus, so your personal file stays clean while you keep building access. Run the Business Funding path. (3) Mission lenders (CDFIs) underwrite your story and your plan, not your inquiry count, find them on the Business path and in Resources. Meanwhile, your inquiries lose scoring weight around 12 months and fall off entirely at 24. The stack reopens on a clock.',
+    })
+  }
+  if (a.goal === 'business') {
+    plays.push({
+      title: 'The Business Route',
+      body: 'You said business funding, so your map lives on the Business Funding path: verified business cards, lines, and loans with filters for no-doc, new-LLC, EIN-only (no personal guarantee), and 0% intro offers. Two things first: a business checking account with real deposit activity is the passport (no-doc lenders read deposits, not tax returns), and the Business Setup Toolkit on Resources gets your foundation right in an afternoon. Your personal profile still matters wherever a personal guarantee applies, so keep it clean while you build the business side.',
+    })
+  }
+  if (mode !== 'build' && a.goal !== 'business') {
     plays.push({
       title: 'The 3×3 Spread (the master play)',
       body: 'Maximum access is not one marquee card, it is the spread: up to three institutions on EACH bureau, and at inquiry-reuse institutions, two products riding a single pull. Run it right and roughly three pulls per bureau can turn into six or more accounts per bureau, eighteen-plus tradelines across the board, while someone chasing one famous card spent the same inquiries on three approvals. The lanes below are built exactly this way. Work them top to bottom, one lane at a time. Access is leverage. Leverage is opportunity.',
@@ -156,12 +180,13 @@ const BUILDER_TYPES = ['Secured Card', 'Credit Builder Loan', 'Alternative Trade
 function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): Rec[] {
   const floor = a.score ? SCORE_FLOOR[a.score] : 0
   const heavyInq = a.inq === '6plus'
+  const laneTypes = a.goal ? GOAL_TYPES[a.goal] : CAPITAL_TYPES
   const recs: Rec[] = []
   for (const inst of institutions) {
     // Score every eligible product at this institution for this lane
     const scored: { p: Product; pts: number; why: string[]; caution: string[] }[] = []
     for (const p of inst.products) {
-      if (!CAPITAL_TYPES.includes(p.type)) continue
+      if (!laneTypes.includes(p.type)) continue
       if (p.bureau_pulled !== bureau && p.bureau_pulled !== 'All 3') continue
       let pts = 0
       const why: string[] = []
@@ -178,6 +203,10 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
       // Situational: high utilization boosts 0% / balance-transfer offers (the play)
       if ((a.util === 'over50' || a.util === '30-50') && /0%|balance transfer|intro apr/i.test(p.strategy_notes || '')) {
         pts += 2; why.push('0% / balance-transfer offer noted, fits your utilization play')
+      }
+      // Tapped-out pivot: heavy inquiries favor soft-prequal loans hard
+      if (heavyInq && p.type === 'Personal Loan' && (p.preapproval_available === 'Yes' || inst.soft_pull_available === 'Yes')) {
+        pts += 2; why.push('Soft prequalification: check your rate without touching your loaded report')
       }
       if (pts > 0) scored.push({ p, pts, why, caution })
     }
@@ -299,9 +328,10 @@ function Question({ label, options, value, onPick }: {
 
 export default function Strategy() {
   const { token } = useAuth()
+  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [answers, setAnswers] = useState<Answers>({ score: null, util: null, lates: null, age: null, inq: null, cards24: null, clean: null })
+  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, util: null, lates: null, age: null, inq: null, cards24: null, clean: null })
   const [built, setBuilt] = useState(false)
 
   useEffect(() => { document.title = 'Strategy Engine | Intelligent Funding' }, [])
@@ -312,7 +342,7 @@ export default function Strategy() {
       .catch(() => {})
   }, [token])
 
-  const complete = answers.score && answers.util && answers.lates && answers.age && answers.inq && answers.cards24
+  const complete = answers.goal && answers.score && answers.util && answers.lates && answers.age && answers.inq && answers.cards24
 
   const plan = useMemo(() => {
     if (!built || !complete) return null
@@ -354,6 +384,15 @@ export default function Strategy() {
 
         {!plan && (
           <div className="guide__section">
+            <Question
+              label="What are you hunting for?"
+              value={answers.goal}
+              onPick={v => setAnswers(prev => ({ ...prev, goal: v as Goal }))}
+              options={[
+                { v: 'everything', t: 'Maximum access (everything)' }, { v: 'cards', t: 'Credit cards + lines' },
+                { v: 'loans', t: 'Loans' }, { v: 'business', t: 'Business funding' },
+              ]}
+            />
             <Question
               label="Where does your credit score land?"
               value={answers.score}
@@ -497,7 +536,19 @@ export default function Strategy() {
                   </div>
                 )}
 
-                {plan.lanes.map(lane => (
+                {answers.goal === 'business' && (
+                  <div className="guide__section">
+                    <button
+                      className="btn btn--primary btn--lg"
+                      onClick={() => navigate('/business')}
+                      style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                      Open the Business Funding path →
+                    </button>
+                  </div>
+                )}
+
+                {answers.goal !== 'business' && plan.lanes.map(lane => (
                   <div className="guide__section" key={lane.bureau}>
                     <h2 className="guide__section-title">
                       <TrendingUp size={16} style={{ verticalAlign: -3 }} /> {lane.bureau} lane
@@ -511,6 +562,7 @@ export default function Strategy() {
                   </div>
                 ))}
 
+                {answers.goal !== 'business' && (
                 <div className="guide__section">
                   <h2 className="guide__section-title">How to run the sequence</h2>
                   <div className="guide__body">
@@ -521,6 +573,7 @@ export default function Strategy() {
                     </ul>
                   </div>
                 </div>
+                )}
               </>
             )}
 

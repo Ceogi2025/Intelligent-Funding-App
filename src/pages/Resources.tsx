@@ -195,7 +195,7 @@ export default function Resources() {
         <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 10px' }}><BureauMapArt width={250} /></div>
         <h1 className="guide__title">Resources</h1>
         <p className="guide__subtitle">
-          The Funding Algorithm, start to finish. Set up your business, monitor and protect your credit,
+          The Economic Algorithm, start to finish. Set up your business, monitor and protect your credit,
           then stack by bureau. Every link below goes straight to the official source. No middlemen.
         </p>
 

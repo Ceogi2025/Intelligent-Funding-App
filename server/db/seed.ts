@@ -1617,6 +1617,8 @@ type BizProductRow = {
   docs_required?: string; personal_guarantee?: string; time_in_business?: string
   min_fico?: string; credit_pull?: string; reports_to?: string
   funding_amount?: string; revenue_required?: string; notes?: string
+  // Bureau gold (same lens as personal). Default 'Not Verified' — never a blocker.
+  bureau_pulled?: string; inquiry_reuse_eligible?: string; preapproval_available?: string
 }
 type BizInstitutionRow = {
   name: string; type: string; access: string; geographic_restrictions: string
@@ -2114,14 +2116,17 @@ export async function seedBusinessLenders(): Promise<void> {
     for (const p of inst.products) {
       await pool.query(`
         INSERT INTO business_products (institution_id, name, product_type, docs_required, personal_guarantee,
-          time_in_business, min_fico, credit_pull, reports_to, funding_amount, revenue_required, notes)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          time_in_business, min_fico, credit_pull, reports_to, funding_amount, revenue_required, notes,
+          bureau_pulled, inquiry_reuse_eligible, preapproval_available)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
       `, [
         instId, p.name, p.product_type,
         p.docs_required || 'Not published', p.personal_guarantee || 'Not published',
         p.time_in_business || 'Not published', p.min_fico || 'Not published',
         p.credit_pull || 'Not published', p.reports_to || 'Not published',
         p.funding_amount || null, p.revenue_required || 'Not published', p.notes || null,
+        p.bureau_pulled || 'Not Verified', p.inquiry_reuse_eligible || 'Not Verified',
+        p.preapproval_available || 'Not Verified',
       ])
       productCount++
     }

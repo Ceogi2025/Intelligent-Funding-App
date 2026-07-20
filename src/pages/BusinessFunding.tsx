@@ -17,6 +17,34 @@ type BizProduct = {
   funding_amount: string | null
   revenue_required: string
   notes: string | null
+  // Bureau gold — same lens as personal. 'Not Verified' is honest, never a blocker.
+  bureau_pulled?: string
+  inquiry_reuse_eligible?: string
+  preapproval_available?: string
+}
+
+// The "Pulls" chip, per BUREAU-GOLD-PHASE-PLAN: direct insider language, honest
+// about confidence, and Not Verified still shows (never hidden, never a guess).
+function BureauChip({ value }: { value?: string }) {
+  const v = value && value.trim() ? value : 'Not Verified'
+  const verified = v !== 'Not Verified' && v !== 'Not published'
+  return (
+    <span
+      title={
+        verified
+          ? 'May vary by area and change over time. Call the lender and ask which bureau they pull before applying, it takes two minutes.'
+          : 'We don’t have reliable bureau data yet, and that’s never a reason to skip a lender. Ask them directly which bureau they pull.'
+      }
+      style={{
+        fontSize: '0.76rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+        background: verified ? '#eff6ff' : 'var(--badge-gray-bg)',
+        color: verified ? 'var(--navy)' : 'var(--text-secondary)',
+        border: verified ? '1px solid #bfdbfe' : '1px solid var(--border)',
+      }}
+    >
+      Pulls: {verified ? v : 'Not Verified'}
+    </span>
+  )
 }
 
 type BizInstitution = {
@@ -103,6 +131,17 @@ function ProductCard({ product }: { product: BizProduct }) {
     <div className="product-card">
       <div className="product-card__name">{product.name}</div>
       <div className="product-card__type">{product.product_type}</div>
+
+      {/* The gold, first thing the eye hits: which bureau, reuse, preapproval */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+        <BureauChip value={product.bureau_pulled} />
+        {product.inquiry_reuse_eligible === 'Yes' && (
+          <span style={{ fontSize: '0.76rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>Inquiry reuse ✓</span>
+        )}
+        {product.preapproval_available === 'Yes' && (
+          <span style={{ fontSize: '0.76rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'var(--badge-teal-bg)', color: 'var(--teal)', border: '1px solid #a5f3fc' }}>Preapproval ✓</span>
+        )}
+      </div>
 
       {highlights.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>

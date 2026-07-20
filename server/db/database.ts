@@ -252,9 +252,23 @@ export async function initSchema(): Promise<void> {
       funding_amount TEXT,
       revenue_required TEXT DEFAULT 'Not published',
       notes TEXT,
+      bureau_pulled TEXT DEFAULT 'Not Verified',
+      inquiry_reuse_eligible TEXT DEFAULT 'Not Verified',
+      preapproval_available TEXT DEFAULT 'Not Verified',
       created_at ${now}
     )
   `)
+
+  // Backfill: the three bureau-gold columns for business products (same lens as
+  // personal — which bureau they pull, inquiry reuse, preapproval). Added July
+  // 2026; ALTERs are safe no-ops guarded by a column check on existing DBs.
+  for (const col of ['bureau_pulled', 'inquiry_reuse_eligible', 'preapproval_available']) {
+    try {
+      await p.query(`ALTER TABLE business_products ADD COLUMN ${col} TEXT DEFAULT 'Not Verified'`)
+    } catch {
+      // column already exists — fine
+    }
+  }
 
   schemaInitialized = true
 }

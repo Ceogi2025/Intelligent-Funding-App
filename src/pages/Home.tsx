@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CreditCard, Building2, Search, BookOpen, LifeBuoy, ShieldCheck, ArrowRight, Briefcase } from 'lucide-react'
+import { CreditCard, Building2, Search, BookOpen, LifeBuoy, ShieldCheck, ArrowRight, Briefcase, Target } from 'lucide-react'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import { useFilters } from '../context/FilterContext'
@@ -117,6 +117,31 @@ export default function Home() {
           </div>
         </div>
 
+        {/* The Strategy Engine — the algorithm, front and center */}
+        <button
+          onClick={() => navigate('/strategy')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 14, width: '100%', maxWidth: 920,
+            margin: '0 auto 22px', padding: '16px 20px', borderRadius: 'var(--radius-lg)',
+            background: 'linear-gradient(100deg, var(--navy) 0%, #1e3a8a 60%, #164e63 100%)',
+            color: '#fff', textAlign: 'left', cursor: 'pointer', border: 'none',
+            boxShadow: 'var(--shadow-md)',
+          }}
+        >
+          <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 11, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Target size={22} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: '1rem' }}>
+              NEW · The Strategy Engine
+            </div>
+            <div style={{ fontSize: '0.83rem', opacity: 0.85, lineHeight: 1.45 }}>
+              Answer 5 questions, get your exact sequence: which bureau lane, which institutions, in what order.
+            </div>
+          </div>
+          <span style={{ flexShrink: 0, fontWeight: 700, fontSize: '0.85rem', color: '#67e8f9' }}>Run it →</span>
+        </button>
+
         {/* The journey, in order: build → access → (business funding joins here) */}
         <div className="path-tiles" style={{ alignItems: 'stretch' }}>
           <button className="path-tile" onClick={openCreditBuilder} style={{ position: 'relative' }}>
@@ -173,7 +198,7 @@ export default function Home() {
         </div>
 
         <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '6px auto 26px', maxWidth: 920 }}>
-          This is the Funding Algorithm: build the profile, stack by bureau, fund the business, and the business unlocks the next round of access. It circles back. Access is leverage. Leverage is opportunity.
+          This is the Economic Algorithm at work: build the profile, stack by bureau, fund the business, and the business unlocks the next round of access. It circles back. Access is leverage. Leverage is opportunity.
         </div>
 
         {/* The knowledge layer */}

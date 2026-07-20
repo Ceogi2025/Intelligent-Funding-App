@@ -66,7 +66,7 @@ export default function Landing() {
       <section className="lp-hero">
         <div className="lp-hero__inner fade-up">
           <div className="lp-hero__eyebrow">
-            <Sparkles size={13} /> The Funding Algorithm · Bureau-Specific Intelligence
+            <Sparkles size={13} /> Powered by the Economic Algorithm
           </div>
           <h1 className="lp-hero__headline">
             Stack by Bureau.<br /><span className="accent">Get Funded by Design.</span>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Map, Plus, Trash2, Timer, Gauge, CalendarClock, TrendingUp } from 'lucide-react'
+import { Map, Plus, Trash2, Timer, Gauge, CalendarClock, TrendingUp, Activity } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
@@ -125,14 +125,37 @@ export default function FundingMap() {
     }).sort((x, y) => x.applied_date.localeCompare(y.applied_date))
     const dropDate = cards24.length > 0 ? addMonths(cards24[0].applied_date, 24) : null
 
-    const inqWindow = (months: number) => accts.filter(a => {
-      if (!a.applied_date) return false
+    // Bureau Inquiry Tracker: every logged application is a hard pull on its
+    // bureau (approved OR denied — denials burn inquiries too). Soft pulls
+    // ('None') don't count. 'All 3' counts against all three lanes.
+    const BUREAUS = ['Experian', 'Equifax', 'TransUnion'] as const
+    type BStat = { inq12: number; aging: number; nextRelief: Date | null }
+    const bureauStats: Record<string, BStat> = {}
+    let unknownPulls = 0
+    for (const b of BUREAUS) bureauStats[b] = { inq12: 0, aging: 0, nextRelief: null }
+    for (const a of accts) {
+      if (!a.applied_date || a.bureau === 'None') continue
       const d = new Date(a.applied_date + 'T00:00:00')
-      return !isNaN(d.getTime()) && (now - d.getTime()) < months * 30.44 * 86400000
-    })
-    const inq12 = inqWindow(12)
+      if (isNaN(d.getTime())) continue
+      const ageMs = now - d.getTime()
+      if (ageMs >= 24 * 30.44 * 86400000) continue // fully off
+      const hit = a.bureau === 'All 3' ? [...BUREAUS] : BUREAUS.includes(a.bureau as typeof BUREAUS[number]) ? [a.bureau] : []
+      if (hit.length === 0) { if (ageMs < 12 * 30.44 * 86400000) unknownPulls++; continue }
+      const within12 = ageMs < 12 * 30.44 * 86400000
+      // next relief: when this pull crosses 12mo (weight drops) or 24mo (falls off)
+      const relief = addMonths(a.applied_date, within12 ? 12 : 24)
+      for (const b of hit) {
+        const st = bureauStats[b]
+        if (within12) st.inq12++; else st.aging++
+        if (relief && (!st.nextRelief || relief < st.nextRelief)) st.nextRelief = relief
+      }
+    }
+    const anyPulls = BUREAUS.some(b => bureauStats[b].inq12 + bureauStats[b].aging > 0)
+    const lightest = anyPulls
+      ? [...BUREAUS].sort((x, y) => (bureauStats[x].inq12 - bureauStats[y].inq12) || (bureauStats[x].aging - bureauStats[y].aging))[0]
+      : null
     const perBureau: Record<string, number> = {}
-    for (const a of inq12) { const b = a.bureau || 'Unknown'; perBureau[b] = (perBureau[b] || 0) + 1 }
+    for (const b of BUREAUS) if (bureauStats[b].inq12 > 0) perBureau[b] = bureauStats[b].inq12
 
     // CLI Calendar: approved cards, soft-pull CLI window commonly opens ~91 days in
     const cli = accts
@@ -140,7 +163,7 @@ export default function FundingMap() {
       .map(a => ({ a, early: addDays(a.applied_date, 91), late: addDays(a.applied_date, 181) }))
       .sort((x, y) => (x.early?.getTime() || 0) - (y.early?.getTime() || 0))
 
-    return { revolving, loans, approvedCount: approved.length, runway, zeroCapital, cards24, dropDate, perBureau, cli }
+    return { revolving, loans, approvedCount: approved.length, runway, zeroCapital, cards24, dropDate, perBureau, bureauStats, unknownPulls, anyPulls, lightest, cli }
   }, [accts])
 
   const inputStyle = { width: '100%', padding: '9px 11px', border: '1.5px solid var(--border)', borderRadius: 8, fontSize: '0.88rem' } as const
@@ -279,13 +302,46 @@ export default function FundingMap() {
                 </li>
                 <li><b>Issuer rules this touches:</b> Chase is the one hard cutoff, they auto-deny at 5 new cards (any bank), so you're {stats.cards24.length >= 5 ? `locked out of Chase until ${fmt(stats.dropDate)}` : `at ${stats.cards24.length} of 5 with the Chase door open`}. Spacing rules at other banks (BofA's 2/3/4, Citi's 8/65) only matter while you're applying there, and the Strategy Engine flags them right on those recommendations.
                 </li>
-                <li><b>Inquiries in the last 12 months:</b>{' '}
-                  {Object.keys(stats.perBureau).length > 0
-                    ? Object.entries(stats.perBureau).map(([b, n]) => `${b}: ${n}`).join(' · ')
-                    : 'none logged.'}{' '}
-                  Inquiries lose most scoring weight around 12 months and fall off reports at 24.
-                </li>
               </ul>
+            </div>
+          </Section>
+        )}
+
+        {/* Bureau Inquiry Tracker */}
+        {accts.length > 0 && (
+          <Section icon={<Activity size={16} style={{ verticalAlign: -3 }} />} title="Bureau Inquiry Tracker">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 12 }}>
+              {(['Experian', 'Equifax', 'TransUnion'] as const).map(b => {
+                const st = stats.bureauStats[b]
+                const isLight = stats.lightest === b
+                return (
+                  <div key={b} className="institution-card" style={{ textAlign: 'center', borderTop: `3px solid ${b === 'Experian' ? '#1d4ed8' : b === 'Equifax' ? '#15803d' : '#7e22ce'}`, position: 'relative', paddingTop: isLight ? 30 : undefined }}>
+                    {isLight && (
+                      <span style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.64rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}>
+                        LIGHTEST LANE
+                      </span>
+                    )}
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: 4 }}>{b}</div>
+                    <div style={{ fontSize: '1.7rem', fontWeight: 800, color: st.inq12 === 0 ? '#15803d' : st.inq12 >= 3 ? '#b45309' : 'var(--navy)' }}>{st.inq12}</div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>hard pulls, last 12 mo</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: 6 }}>
+                      {st.aging > 0 ? `${st.aging} aging off (12–24 mo)` : 'none aging'}
+                      {st.nextRelief ? ` · next relief ${fmt(st.nextRelief)}` : ''}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            {stats.unknownPulls > 0 && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--amber, #b45309)', marginBottom: 8 }}>
+                {stats.unknownPulls} logged pull{stats.unknownPulls > 1 ? 's' : ''} with no bureau recorded. Call the lender, ask which bureau they pulled, and update the entry, every unknown weakens your map.
+              </p>
+            )}
+            <div className="guide__body">
+              <p>
+                Every application costs a hard pull on a bureau, approved or denied. The lane math: pulls lose most
+                of their scoring weight around 12 months and fall off entirely at 24. {stats.lightest ? `Your lightest lane right now is ${stats.lightest}, which is where the Strategy Engine would point your next round.` : ''} Soft pulls (logged as "None") never count against you.
+              </p>
             </div>
           </Section>
         )}

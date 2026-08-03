@@ -173,9 +173,9 @@ export default function FundingMap() {
             <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Capital on 0% runway</div>
           </div>
           <div className="institution-card" style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>{stats.cards24.length}<span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/5</span></div>
-            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Chase 5/24 rule</div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: 2 }}>new cards in 24 mo, any bank. Chase auto-denies at 5</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: stats.cards24.length >= 5 ? '#b91c1c' : 'var(--navy)' }}>{stats.cards24.length}</div>
+            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>New cards, last 24 months</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: 2 }}>every lender watches this velocity{stats.cards24.length >= 5 ? '. Chase locked (auto-denies at 5)' : ''}</div>
           </div>
           <div className="institution-card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>{stats.approvedCount}</div>
@@ -274,12 +274,10 @@ export default function FundingMap() {
           <Section icon={<Gauge size={16} style={{ verticalAlign: -3 }} />} title="Velocity Clock">
             <div className="guide__body">
               <ul>
-                <li><b>Chase's 5/24 rule: you're at {stats.cards24.length} of 5.</b> (Chase-only: they auto-deny anyone who opened 5+ new cards in 24 months, at any bank. Most other issuers don't count this way.){' '}
-                  {stats.cards24.length >= 5
-                    ? `Over the line, Chase auto-denies. Your count drops on ${fmt(stats.dropDate)}.`
-                    : stats.cards24.length > 0
-                    ? `Window open. Your count next drops on ${fmt(stats.dropDate)}.`
-                    : 'Clean slate, every issuer is open.'}
+                <li><b>New-account velocity: {stats.cards24.length} new cards in 24 months.</b> Every lender watches this number, too many too fast makes any underwriter nervous.{' '}
+                  {stats.cards24.length > 0 ? `It next drops on ${fmt(stats.dropDate)}.` : 'Clean slate.'}
+                </li>
+                <li><b>Issuer rules this touches:</b> Chase is the one hard cutoff, they auto-deny at 5 new cards (any bank), so you're {stats.cards24.length >= 5 ? `locked out of Chase until ${fmt(stats.dropDate)}` : `at ${stats.cards24.length} of 5 with the Chase door open`}. Spacing rules at other banks (BofA's 2/3/4, Citi's 8/65) only matter while you're applying there, and the Strategy Engine flags them right on those recommendations.
                 </li>
                 <li><b>Inquiries in the last 12 months:</b>{' '}
                   {Object.keys(stats.perBureau).length > 0

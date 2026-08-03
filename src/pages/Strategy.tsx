@@ -282,15 +282,25 @@ function Chip({ label, tone }: { label: string; tone: 'navy' | 'green' | 'teal' 
   )
 }
 
-function RecCard({ rec, rank }: { rec: Rec; rank: number }) {
+function RecCard({ rec, rank, maxPts }: { rec: Rec; rank: number; maxPts?: number }) {
   const navigate = useNavigate()
   const doubleDip = rec.products.length >= 2 && rec.inst.inquiry_reuse === 'Yes'
+  // Relative fit: strongest match in this member's results ≈ 95, floor 50.
+  const fit = maxPts ? Math.round(50 + 45 * (rec.points / maxPts)) : null
   return (
-    <div className="institution-card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/institution/${rec.inst.id}`)}>
+    <div className="institution-card" style={{ cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/institution/${rec.inst.id}`)}>
+      {fit != null && (
+        <span
+          title="Fit is relative to your own results: how strongly this option matches your profile versus the rest of your map."
+          style={{ position: 'absolute', top: 14, right: 14, fontWeight: 800, fontSize: '0.9rem', color: 'var(--teal)' }}
+        >
+          {fit}% fit
+        </span>
+      )}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
         <span style={{ fontWeight: 800, color: 'var(--teal)', fontSize: '0.9rem' }}>{rank}.</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', paddingRight: 64 }}>
             <div style={{ fontWeight: 700, fontSize: '1.02rem' }}>{rec.inst.name}</div>
             {doubleDip && (
               <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 9px', borderRadius: 999, background: 'var(--navy)', color: '#fff' }}>
@@ -369,10 +379,17 @@ export default function Strategy() {
       ? [a.clean as Bureau, ...bureaus.filter(b => b !== a.clean)]
       : bureaus
     const mode = notReady ? 'build' as const : borderline ? 'borderline' as const : 'ready' as const
+    const builders = rankBuilders(institutions)
+    const lanes = ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a) }))
+    // Fit % is RELATIVE to the strongest match in this member's own results —
+    // derived from the same points the ranking already uses, never invented.
+    const allRecs = [...builders, ...lanes.flatMap(l => l.recs)]
+    const maxPts = Math.max(1, ...allRecs.map(r => r.points))
     return {
       mode,
-      builders: rankBuilders(institutions),
-      lanes: ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a) })),
+      builders,
+      lanes,
+      maxPts,
       plays: buildPlays(a, mode),
       payDownFirst: a.util === 'over50' || a.util === '30-50',
       heavyInq: a.inq === '6plus',
@@ -531,7 +548,7 @@ export default function Strategy() {
                     <li>No new hard pulls while you build.</li>
                   </ul>
                 </div>
-                {plan.builders.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} />)}
+                {plan.builders.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} maxPts={plan.maxPts} />)}
               </div>
             )}
 
@@ -569,7 +586,7 @@ export default function Strategy() {
                       {plan.lanes[0].bureau === lane.bureau && answers.clean && answers.clean !== 'notsure' ? ', start here (your cleanest report)' : ''}
                     </h2>
                     {lane.recs.length > 0 ? (
-                      lane.recs.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} />)
+                      lane.recs.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} maxPts={plan.maxPts} />)
                     ) : (
                       <div className="guide__body"><p>No strong verified matches in this lane for your profile yet. As the database grows, this lane fills in, check back.</p></div>
                     )}

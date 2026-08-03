@@ -236,6 +236,13 @@ export default function BusinessFunding() {
           to established business. A personal guarantee or a time-in-business requirement is a label, not a wall.
         </p>
 
+        <img
+          src="/img/business-owner.jpg"
+          alt="A business owner working through her funding options"
+          loading="lazy"
+          style={{ width: '100%', maxWidth: 660, borderRadius: 16, boxShadow: 'var(--shadow-md)', display: 'block', marginBottom: 20 }}
+        />
+
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
           {FILTERS.map(f => (
             <button

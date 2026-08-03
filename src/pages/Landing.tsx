@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ShieldCheck, Zap, Users, ArrowRight, Sparkles, FileText, Search, Trophy, MessagesSquare } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { CommunityArt, BureauMapArt } from '../components/BrandArt'
+import { BureauMapArt } from '../components/BrandArt'
 import { track } from '../lib/track'
 
 // Bureau tile counts derive LIVE from the public directory (never hardcoded — stale
@@ -96,6 +96,9 @@ export default function Landing() {
             <span>·</span>
             <span>Cancel anytime</span>
           </div>
+          <div style={{ marginTop: 14, fontSize: '0.92rem', fontStyle: 'italic', opacity: 0.92 }}>
+            "We'll tell you when you're not ready, and exactly what to fix."
+          </div>
         </div>
       </section>
 
@@ -112,7 +115,14 @@ export default function Landing() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>
           <Users size={14} /> This isn't an app. It's a room.
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '2px 0 10px' }}><CommunityArt width={300} /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '2px 0 18px' }}>
+          <img
+            src="/img/community-founder.jpg"
+            alt="A young founder working on her sticker-covered laptop"
+            loading="lazy"
+            style={{ width: '100%', maxWidth: 460, borderRadius: 16, boxShadow: 'var(--shadow-md)', display: 'block' }}
+          />
+        </div>
         <h2 className="lp-section__title">You're not getting funded alone anymore</h2>
         <p className="lp-section__sub">
           Most funding sites hand you a list and wish you luck. We hand you a community, a live room where
@@ -239,6 +249,14 @@ export default function Landing() {
                 and every bureau pull, before you apply.
               </p>
             </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 28 }}>
+            <img
+              src="/img/member-building.jpg"
+              alt="A member working her funding plan on a laptop"
+              loading="lazy"
+              style={{ width: '100%', maxWidth: 560, borderRadius: 16, boxShadow: 'var(--shadow-md)', display: 'block' }}
+            />
           </div>
         </div>
       </section>

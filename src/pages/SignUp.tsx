@@ -102,7 +102,9 @@ export default function SignUp() {
         }
       }
 
-      navigate('/home')
+      // First-run aha: a brand-new member lands directly in the Strategy Engine,
+      // answers the questions, and holds a personal funding map inside 2 minutes.
+      navigate('/strategy')
     } catch {
       setError('Connection error. Make sure the server is running.')
     } finally {

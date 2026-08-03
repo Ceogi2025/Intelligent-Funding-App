@@ -1479,10 +1479,14 @@ export async function seedDatabase(): Promise<void> {
   const { rows } = await pool.query('SELECT COUNT(*)::int as count FROM institutions')
   const existing = Number(rows[0].count)
   if (existing > 0) {
-    // SEED_MODE=replace lets an already-seeded database (e.g. production with old
-    // pilot data) sync to the current seed. Set it for ONE deploy, then remove it.
-    if (process.env.SEED_MODE === 'replace') {
-      console.log(`SEED_MODE=replace — clearing ${existing} institutions and reseeding.`)
+    // Self-healing: a database holding FEWER institutions than the current seed
+    // is stale or half-loaded (e.g. production still on old pilot data, or a
+    // seed that timed out mid-run), so refresh it automatically. Counts at or
+    // above the seed are left alone, which protects admin-added records.
+    // SEED_MODE=replace still forces a full refresh on demand.
+    const stale = existing < allInstitutions.length
+    if (process.env.SEED_MODE === 'replace' || stale) {
+      console.log(`Reseeding: found ${existing} institutions, seed has ${allInstitutions.length}.`)
       await pool.query('DELETE FROM products')
       await pool.query('DELETE FROM institutions')
     } else {
@@ -1505,18 +1509,28 @@ export async function seedDatabase(): Promise<void> {
     ])
     const institutionId = instRows[0].id
 
-    for (const p of inst.products) {
+    // One multi-row INSERT per institution instead of one per product. Over a
+    // network database this is the difference between ~190 round trips and ~85,
+    // which keeps the whole seed inside a serverless function's time limit.
+    if (inst.products.length > 0) {
+      const COLS = 15
+      const values: unknown[] = []
+      const tuples = inst.products.map((p, i) => {
+        values.push(
+          institutionId, p.name, p.type, p.bureau_pulled, p.reports_to,
+          p.inquiry_reuse_eligible, p.preapproval_available, p.minimum_credit_score,
+          p.deposit_amount, p.annual_fee, p.graduation_potential, p.graduation_timeline,
+          p.existing_customer_required, instDate, p.strategy_notes,
+        )
+        const base = i * COLS
+        return `(${Array.from({ length: COLS }, (_, k) => `$${base + k + 1}`).join(',')})`
+      })
       await pool.query(`
         INSERT INTO products (institution_id, name, type, bureau_pulled, reports_to, inquiry_reuse_eligible,
           preapproval_available, minimum_credit_score, deposit_amount, annual_fee, graduation_potential,
           graduation_timeline, existing_customer_required, last_verified_date, strategy_notes)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-      `, [
-        institutionId, p.name, p.type, p.bureau_pulled, p.reports_to,
-        p.inquiry_reuse_eligible, p.preapproval_available, p.minimum_credit_score,
-        p.deposit_amount, p.annual_fee, p.graduation_potential, p.graduation_timeline,
-        p.existing_customer_required, instDate, p.strategy_notes,
-      ])
+        VALUES ${tuples.join(',')}
+      `, values)
     }
   }
   console.log(`Seeded ${allInstitutions.length} institutions.`)
@@ -2098,7 +2112,11 @@ export async function seedBusinessLenders(): Promise<void> {
   const { rows } = await pool.query('SELECT COUNT(*)::int as count FROM business_institutions')
   const existing = Number(rows[0].count)
   if (existing > 0) {
-    if (process.env.SEED_MODE === 'replace') {
+    // Same self-healing rule as the consumer seed: fewer rows than the current
+    // seed means stale or half-loaded data, so refresh automatically.
+    const stale = existing < businessInstitutions.length
+    if (process.env.SEED_MODE === 'replace' || stale) {
+      console.log(`Reseeding business: found ${existing}, seed has ${businessInstitutions.length}.`)
       await pool.query('DELETE FROM business_products')
       await pool.query('DELETE FROM business_institutions')
     } else {

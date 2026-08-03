@@ -26,6 +26,7 @@ import WinsWall from './pages/public/WinsWall'
 import ChatRoom from './pages/ChatRoom'
 import BusinessFunding from './pages/BusinessFunding'
 import Strategy from './pages/Strategy'
+import FundingMap from './pages/FundingMap'
 import ProfilePositioning from './pages/education/ProfilePositioning'
 import StackingMethod from './pages/education/StackingMethod'
 import WealthyPlaybook from './pages/education/WealthyPlaybook'
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="/community" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
             <Route path="/business" element={<ProtectedRoute><BusinessFunding /></ProtectedRoute>} />
             <Route path="/strategy" element={<ProtectedRoute><Strategy /></ProtectedRoute>} />
+            <Route path="/map" element={<ProtectedRoute><FundingMap /></ProtectedRoute>} />
             <Route path="/results/capital-access" element={<ProtectedRoute><CapitalAccessResults /></ProtectedRoute>} />
             <Route path="/results/credit-builder" element={<ProtectedRoute><CreditBuilderResults /></ProtectedRoute>} />
             <Route path="/institution/:id" element={<ProtectedRoute><InstitutionDetail /></ProtectedRoute>} />

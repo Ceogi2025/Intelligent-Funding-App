@@ -601,6 +601,7 @@ export default function Strategy() {
                       <li>Work ONE lane at a time, starting at the top. Same-day applications inside an inquiry-reuse institution can share a single pull.</li>
                       <li>Space lanes out, let approvals post before you open the next lane.</li>
                       <li><b><Phone size={13} style={{ verticalAlign: -2 }} /> Always call first.</b> Ask one question: "Which credit bureau do you pull?" Get the answer, hang up, then apply knowing where the pull lands.</li>
+                      <li><b>Log every result in <span style={{ color: 'var(--teal)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/map')}>My Funding Map</span>.</b> Approvals AND denials. The map tracks your total access, your 0% runways, and your 5/24 clock, and tells you when your next window opens.</li>
                     </ul>
                   </div>
                 </div>

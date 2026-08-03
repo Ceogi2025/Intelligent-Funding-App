@@ -259,6 +259,27 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── My Funding Map (the retention core) ──────────────────────────────────
+  // Every application/account a member logs: their personal ledger AND the
+  // input for the 0% Runway, Velocity Clock, and CLI Calendar. One table
+  // powers all four retention features.
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS member_accounts (
+      id ${pk},
+      user_id INTEGER NOT NULL,
+      institution TEXT NOT NULL,
+      product TEXT,
+      ptype TEXT DEFAULT 'card',
+      bureau TEXT,
+      applied_date TEXT,
+      outcome TEXT DEFAULT 'approved',
+      limit_amount INTEGER,
+      promo_end TEXT,
+      notes TEXT,
+      created_at ${now}
+    )
+  `)
+
   // Backfill: the three bureau-gold columns for business products (same lens as
   // personal — which bureau they pull, inquiry reuse, preapproval). Added July
   // 2026; ALTERs are safe no-ops guarded by a column check on existing DBs.

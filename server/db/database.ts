@@ -109,20 +109,20 @@ export async function initSchema(): Promise<void> {
 
   await p.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id ${pk},
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'customer',
       stripe_customer_id TEXT,
       subscription_status TEXT DEFAULT 'inactive',
       subscription_end_date TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at ${now}
     )
   `)
 
   await p.query(`
     CREATE TABLE IF NOT EXISTS institutions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id ${pk},
       name TEXT NOT NULL,
       type TEXT NOT NULL CHECK(type IN ('Bank', 'Credit Union', 'Fintech')),
       inquiry_reuse TEXT NOT NULL DEFAULT 'Not Verified' CHECK(inquiry_reuse IN ('Yes', 'No', 'Partial', 'Not Verified')),
@@ -133,13 +133,13 @@ export async function initSchema(): Promise<void> {
       application_url TEXT,
       path TEXT NOT NULL CHECK(path IN ('Capital Access', 'Credit Builder', 'Both')),
       last_verified_date TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at ${now}
     )
   `)
 
   await p.query(`
     CREATE TABLE IF NOT EXISTS products (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id ${pk},
       institution_id INTEGER NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       type TEXT NOT NULL CHECK(type IN ('Unsecured Card', 'Line of Credit', 'Personal Loan', 'Secured Card', 'Credit Builder Loan', 'Alternative Tradeline')),
@@ -155,7 +155,7 @@ export async function initSchema(): Promise<void> {
       existing_customer_required TEXT DEFAULT 'No' CHECK(existing_customer_required IN ('Yes', 'No')),
       last_verified_date TEXT,
       strategy_notes TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at ${now}
     )
   `)
 

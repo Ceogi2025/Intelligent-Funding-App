@@ -174,7 +174,8 @@ export default function FundingMap() {
           </div>
           <div className="institution-card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>{stats.cards24.length}<span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/5</span></div>
-            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>5/24 count (new cards, 24 mo)</div>
+            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Chase 5/24 rule</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: 2 }}>new cards in 24 mo, any bank. Chase auto-denies at 5</div>
           </div>
           <div className="institution-card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>{stats.approvedCount}</div>
@@ -273,7 +274,7 @@ export default function FundingMap() {
           <Section icon={<Gauge size={16} style={{ verticalAlign: -3 }} />} title="Velocity Clock">
             <div className="guide__body">
               <ul>
-                <li><b>5/24 status: {stats.cards24.length} of 5.</b>{' '}
+                <li><b>Chase's 5/24 rule: you're at {stats.cards24.length} of 5.</b> (Chase-only: they auto-deny anyone who opened 5+ new cards in 24 months, at any bank. Most other issuers don't count this way.){' '}
                   {stats.cards24.length >= 5
                     ? `Over the line, Chase auto-denies. Your count drops on ${fmt(stats.dropDate)}.`
                     : stats.cards24.length > 0

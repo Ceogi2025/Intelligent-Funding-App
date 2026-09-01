@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { getPool } from './database.js'
+import type { Pool } from './database.js'
 
 const VERIFIED_DATE = '2026-06-21'
 
@@ -1479,6 +1480,37 @@ const allInstitutions: InstitutionRow[] = [
   },
 ]
 
+
+// ── Seed version ────────────────────────────────────────────────────────────
+// BUMP THIS whenever the seed CONTENT changes (a corrected field, a new
+// product, reworded access text). Row counts can't detect a correction, so
+// without this a fix sits in the code and never reaches production.
+// v2 (Sep 1 2026): Phase C verification pass — Navy Federal 3→6 month
+// graduation, Capital One rename + 6 months, OpenSky Launch card added and
+// graduation corrected, Citi + Discover 'Varies by state', access rewrites
+// (SECU, First Tech, Northwest, PenFed, Alliant, Connexus, Service CU),
+// Huntington 7-month graduation, PNC deposit/friction, 20 bureau values from
+// the community pipeline.
+const SEED_VERSION = '2'
+
+async function getSeedVersion(pool: Pool): Promise<string | null> {
+  try {
+    const { rows } = await pool.query("SELECT value FROM seed_meta WHERE key = 'seed_version'")
+    return rows[0] ? String(rows[0].value) : null
+  } catch {
+    return null
+  }
+}
+
+async function setSeedVersion(pool: Pool): Promise<void> {
+  try {
+    await pool.query('DELETE FROM seed_meta WHERE key = $1', ['seed_version'])
+    await pool.query('INSERT INTO seed_meta (key, value) VALUES ($1, $2)', ['seed_version', SEED_VERSION])
+  } catch (err) {
+    console.error('Could not record seed version:', err)
+  }
+}
+
 export async function seedDatabase(): Promise<void> {
   const pool = getPool()
   const { rows } = await pool.query('SELECT COUNT(*)::int as count FROM institutions')
@@ -1489,9 +1521,10 @@ export async function seedDatabase(): Promise<void> {
     // seed that timed out mid-run), so refresh it automatically. Counts at or
     // above the seed are left alone, which protects admin-added records.
     // SEED_MODE=replace still forces a full refresh on demand.
-    const stale = existing < allInstitutions.length
+    const loaded = await getSeedVersion(pool)
+    const stale = existing < allInstitutions.length || loaded !== SEED_VERSION
     if (process.env.SEED_MODE === 'replace' || stale) {
-      console.log(`Reseeding: found ${existing} institutions, seed has ${allInstitutions.length}.`)
+      console.log(`Reseeding: found ${existing} institutions (seed has ${allInstitutions.length}), data version ${loaded ?? 'none'} vs ${SEED_VERSION}.`)
       await pool.query('DELETE FROM products')
       await pool.query('DELETE FROM institutions')
     } else {
@@ -1538,7 +1571,8 @@ export async function seedDatabase(): Promise<void> {
       `, values)
     }
   }
-  console.log(`Seeded ${allInstitutions.length} institutions.`)
+  await setSeedVersion(pool)
+  console.log(`Seeded ${allInstitutions.length} institutions (data version ${SEED_VERSION}).`)
 }
 
 export async function seedProductUpdates(): Promise<void> {
@@ -2119,7 +2153,8 @@ export async function seedBusinessLenders(): Promise<void> {
   if (existing > 0) {
     // Same self-healing rule as the consumer seed: fewer rows than the current
     // seed means stale or half-loaded data, so refresh automatically.
-    const stale = existing < businessInstitutions.length
+    const loadedB = await getSeedVersion(pool)
+    const stale = existing < businessInstitutions.length || loadedB !== SEED_VERSION
     if (process.env.SEED_MODE === 'replace' || stale) {
       console.log(`Reseeding business: found ${existing}, seed has ${businessInstitutions.length}.`)
       await pool.query('DELETE FROM business_products')

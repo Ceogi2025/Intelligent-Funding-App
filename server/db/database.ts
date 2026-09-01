@@ -285,6 +285,18 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── Seed version marker ──────────────────────────────────────────────────
+  // The row-count check alone can't see a CORRECTION. Fixing Navy Federal's
+  // graduation timeline or Citi's bureau changes no counts, so production
+  // silently kept stale data. This records which seed version is loaded so a
+  // content change reaches members without anyone setting an env var.
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS seed_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )
+  `)
+
   // ── My Blueprint ─────────────────────────────────────────────────────────
   // A SNAPSHOT of the plan the member was given, not a live re-computation.
   // If the database changes later, their checked-off steps still line up with

@@ -143,7 +143,7 @@ export async function initSchema(): Promise<void> {
       institution_id INTEGER NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       type TEXT NOT NULL CHECK(type IN ('Unsecured Card', 'Line of Credit', 'Personal Loan', 'Secured Card', 'Credit Builder Loan', 'Alternative Tradeline')),
-      bureau_pulled TEXT NOT NULL DEFAULT 'Not Verified' CHECK(bureau_pulled IN ('Experian', 'Equifax', 'TransUnion', 'All 3', 'None', 'Not Verified')),
+      bureau_pulled TEXT NOT NULL DEFAULT 'Not Verified' CHECK(bureau_pulled IN ('Experian', 'Equifax', 'TransUnion', 'All 3', 'Varies by state', 'None', 'Not Verified')),
       reports_to TEXT DEFAULT 'Not verified — contact institution to confirm',
       inquiry_reuse_eligible TEXT NOT NULL DEFAULT 'Not Verified' CHECK(inquiry_reuse_eligible IN ('Yes', 'No', 'Not Verified')),
       preapproval_available TEXT NOT NULL DEFAULT 'Not Found' CHECK(preapproval_available IN ('Yes', 'No', 'Not Found')),
@@ -164,6 +164,11 @@ export async function initSchema(): Promise<void> {
   if (pg) {
     await p.query(`ALTER TABLE products DROP CONSTRAINT IF EXISTS products_type_check`)
     await p.query(`ALTER TABLE products ADD CONSTRAINT products_type_check CHECK (type IN ('Unsecured Card','Line of Credit','Personal Loan','Secured Card','Credit Builder Loan','Alternative Tradeline'))`)
+    // 'Varies by state' added Sep 2026: some issuers (Citi is the classic case)
+    // genuinely pull different bureaus by region, and forcing one answer would
+    // send members into the wrong lane.
+    await p.query(`ALTER TABLE products DROP CONSTRAINT IF EXISTS products_bureau_pulled_check`)
+    await p.query(`ALTER TABLE products ADD CONSTRAINT products_bureau_pulled_check CHECK (bureau_pulled IN ('Experian','Equifax','TransUnion','All 3','Varies by state','None','Not Verified'))`)
   }
 
   // ── Growth tables (leads, community datapoints, click tracking) ──────────

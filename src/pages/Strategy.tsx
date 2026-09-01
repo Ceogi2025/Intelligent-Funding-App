@@ -245,7 +245,9 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
     const scored: { p: Product; pts: number; why: string[]; caution: string[] }[] = []
     for (const p of inst.products) {
       if (!laneTypes.includes(p.type)) continue
-      if (p.bureau_pulled !== bureau && p.bureau_pulled !== 'All 3') continue
+      // 'Varies by state' products belong in EVERY lane, because the member's
+      // lane depends on where they live. They carry a call-first caution.
+      if (p.bureau_pulled !== bureau && p.bureau_pulled !== 'All 3' && p.bureau_pulled !== 'Varies by state') continue
       let pts = 0
       const why: string[] = []
       const caution: string[] = []
@@ -257,6 +259,7 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
         else { pts -= 3; caution.push(`Published minimum ~${p.minimum_credit_score} is above your band`) }
       }
       if (p.bureau_pulled === 'All 3') { pts -= 1; caution.push('Pulls all three bureaus, spend this one wisely') }
+      if (p.bureau_pulled === 'Varies by state') { pts -= 1; caution.push('Bureau varies by state, call and ask before you apply') }
       if (p.existing_customer_required === 'Yes') { pts -= 1; caution.push('Existing-customer relationship required first') }
       // Situational: high utilization boosts 0% / balance-transfer offers (the play)
       if ((a.util === 'over50' || a.util === '30-50') && /0%|balance transfer|intro apr/i.test(p.strategy_notes || '')) {

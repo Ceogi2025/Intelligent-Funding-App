@@ -17,6 +17,10 @@ type ProductRow = {
   graduation_timeline: string
   existing_customer_required: 'Yes' | 'No'
   strategy_notes: string
+  // Per-product re-verification date. Phase C re-checks products individually,
+  // so a product can be fresher than its institution record. Falls back to the
+  // institution's date when absent.
+  verified_date?: string
 }
 
 type InstitutionRow = {
@@ -1102,7 +1106,7 @@ const allInstitutions: InstitutionRow[] = [
     products: [
       { name: 'Navy Federal cashRewards Credit Card', type: 'Unsecured Card', bureau_pulled: 'TransUnion', reports_to: 'All 3', inquiry_reuse_eligible: 'Yes', preapproval_available: 'Yes', minimum_credit_score: 620, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Lowest minimum score in database at 620. Pulls TransUnion. Same-day inquiry reuse. Preapproval available. Military/family membership required.' },
       { name: 'Navy Federal More Rewards American Express', type: 'Unsecured Card', bureau_pulled: 'TransUnion', reports_to: 'All 3', inquiry_reuse_eligible: 'Yes', preapproval_available: 'Yes', minimum_credit_score: 650, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Everyday rewards card. Pulls TransUnion. Stack with cashRewards on same-day inquiry for dual-line TU setup.' },
-      { name: 'Navy Federal Secured Credit Card', type: 'Secured Card', bureau_pulled: 'TransUnion', reports_to: 'All 3', inquiry_reuse_eligible: 'No', preapproval_available: 'Not Found', minimum_credit_score: null, deposit_amount: '$200–$5,000', annual_fee: 'None', graduation_potential: 'Yes', graduation_timeline: '3 months', existing_customer_required: 'No', strategy_notes: 'Fastest graduation path in database at 3 months. Pulls TransUnion. Military/family membership required.' },
+      { name: 'cashRewards Secured Credit Card', type: 'Secured Card', bureau_pulled: 'TransUnion', reports_to: 'All 3', inquiry_reuse_eligible: 'No', preapproval_available: 'Not Found', minimum_credit_score: null, deposit_amount: '$200–$5,000 (deposit sets your limit)', annual_fee: 'None', graduation_potential: 'Yes', graduation_timeline: '6 months', existing_customer_required: 'No', verified_date: '2026-09-01', strategy_notes: 'Re-verified Sep 2026 on navyfederal.org: 6-month account review determines eligibility to move to the unsecured cashRewards card. Note Navy Federal\'s own education article says 3 months, but the product page and the 2025 launch release both say 6, so we use 6. Unlimited 1% cash back, no annual fee, 18.00% APR at time of check. Military/family membership required.' },
     ],
   },
 
@@ -1520,7 +1524,7 @@ export async function seedDatabase(): Promise<void> {
           institutionId, p.name, p.type, p.bureau_pulled, p.reports_to,
           p.inquiry_reuse_eligible, p.preapproval_available, p.minimum_credit_score,
           p.deposit_amount, p.annual_fee, p.graduation_potential, p.graduation_timeline,
-          p.existing_customer_required, instDate, p.strategy_notes,
+          p.existing_customer_required, p.verified_date ?? instDate, p.strategy_notes,
         )
         const base = i * COLS
         return `(${Array.from({ length: COLS }, (_, k) => `$${base + k + 1}`).join(',')})`

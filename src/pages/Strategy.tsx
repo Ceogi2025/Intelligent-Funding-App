@@ -23,6 +23,13 @@ type Cards24 = '0-1' | '2-4' | '5plus'
 type Goal = 'cards' | 'loans' | 'business' | 'everything'
 type Bureau = 'Experian' | 'Equifax' | 'TransUnion'
 type CleanBureau = Bureau | 'notsure'
+// Open accounts drive the thin-file rule. Target is 7-8 reporting accounts.
+type Accounts = '0-2' | '3-5' | '6-8' | '9plus'
+// Hard blockers: these stop the funding path regardless of score.
+type Derog = 'none' | 'collections' | 'chargeoff' | 'bk2yr'
+// Which lane the member has been burning inquiries on (more answerable than
+// "which report is cleanest", and it drives the same lane ordering).
+type InqFocus = Bureau | 'even' | 'notsure'
 
 const SCORE_FLOOR: Record<ScoreBand, number> = {
   under580: 500, '580-639': 580, '640-699': 640, '700-749': 700, '750plus': 750,
@@ -31,10 +38,13 @@ const SCORE_FLOOR: Record<ScoreBand, number> = {
 type Answers = {
   goal: Goal | null
   score: ScoreBand | null
+  accounts: Accounts | null
   util: Util | null
   lates: Lates | null
+  derog: Derog | null
   age: Age | null
   inq: Inq | null
+  inqFocus: InqFocus | null
   cards24: Cards24 | null
   clean: CleanBureau | null
 }
@@ -105,6 +115,40 @@ function issuerAnnotate(instName: string, cards24: Cards24 | null): { boost: num
 type Play = { title: string; body: string }
 function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] {
   const plays: Play[] = []
+
+  // ── Hard blockers get addressed first, and strictly educationally. We never
+  // assess whether a specific item is disputable and never promise removal.
+  if (a.derog === 'collections' || a.derog === 'chargeoff' || a.derog === 'bk2yr') {
+    plays.push({
+      title: 'Clear the blocker before you spend a single inquiry',
+      body: 'A collection, charge-off, or recent bankruptcy outranks everything else on your file, so applying now mostly buys denials. Three things worth knowing. One, you have a federal right to dispute anything INACCURATE, and the CFPB publishes free sample dispute letters on its own site (see Resources). We do not assess whether your specific item is inaccurate and nobody honest can promise a removal. Two, if the debt is accurate, time and payment behavior are what move it, a paid or settled collection still ages off, and newer scoring models weigh paid collections less. Three, if any of it is unfamiliar or you suspect an error, talk to a qualified professional. Meanwhile the build steps below are not dead time, they run in parallel.',
+    })
+  }
+
+  // ── Utilization: FREE moves first. Most people sitting at high utilization
+  // have no cash for a deposit, so never lead with a product that costs money.
+  if (a.util === 'over50' || a.util === '30-50') {
+    plays.push({
+      title: 'Utilization: the free moves first',
+      body: 'Every one of these costs zero dollars. (1) Pay before the STATEMENT date, not the due date. Your balance is photographed when the statement cuts, so paying it down before that day is what reports, and you can use the card again right after. You are not giving up the money, you are changing when the picture is taken. (2) Ask for a credit limit increase. Most issuers process these as a soft pull after about six months on the account, so a bigger limit against the same balance drops your utilization instantly with no new account and no inquiry. (3) Look at each card individually, not just the total. One card near its limit hurts even when your overall number looks fine, so move balances around or pay that one down first. Only after these do deposits and new accounts make sense.',
+    })
+  }
+
+  // ── Payment history: goodwill first, and it is free.
+  if (a.lates === '1-2' || a.lates === '3plus') {
+    plays.push({
+      title: 'Late payments: make the free call first',
+      body: 'Before anything else, call the lender and ask for a goodwill adjustment. It costs nothing, takes about ten minutes, and it works often enough on a first late with an otherwise clean record to be worth every attempt. Ask politely, explain what happened, and ask if they will remove the late as a courtesy. Outcomes vary and nobody can promise one. Two things that matter more than the call: do not miss another payment, because a single late aging out is manageable while a second one restarts the clock, and remember lateness only reports at 30 days past due, so a few days late costs a fee, not a credit hit. Set autopay for the minimum on everything today.',
+    })
+  }
+
+  // ── Age: the one-sentence rule that saves people years.
+  if (a.age === 'under1' || a.age === '1-3' || a.age === 'none') {
+    plays.push({
+      title: 'Age: protect what you already have',
+      body: 'Never close your oldest account. People tidy up their credit by closing old cards and destroy years of history doing it, and it is the one thing you cannot buy back. Keep it open with a small recurring charge and autopay. Beyond that, age is mostly time, so the honest move is to put your effort into the factors you can actually move and let this one run. The one exception that adds age retroactively: becoming an authorized user on a seasoned account belonging to someone who trusts you, with perfect payment history and low utilization. Family or a close friend only, never a stranger or a paid service.',
+    })
+  }
   if (a.inq === '6plus' && mode !== 'build') {
     plays.push({
       title: 'The Tapped-Out Pivot (you already ran the stack, here is round two)',
@@ -157,6 +201,12 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
     plays.push({
       title: 'The Preapproval Sweep',
       body: 'Before spending a single hard pull, sweep every preapproval and soft-pull check in your lanes. Each one shows your real odds with zero score damage. Collect your yes-list first, then execute the hard applications in one tight window so the inquiries land together and age together.',
+    })
+  }
+  if (a.accounts === '0-2' || a.accounts === '3-5') {
+    plays.push({
+      title: 'Thin file: build to 7 or 8 accounts, in this order',
+      body: 'Underwriters want to see a handful of accounts paying on time, and the target is roughly seven to eight. Here is the order that works. Open two secured cards at two DIFFERENT institutions, because two banks reporting looks materially different from one. Add an installment account so your file has a mix, and a share-secured loan from a credit union is worth more than a fintech builder product because it reports as a normal bank loan rather than something an underwriter can spot as a credit-building product. On any secured loan, do not rush it closed. Pay the bulk down early, then stretch the rest in small payments over about twelve months, since an open installment account with on-time history scores better than a closed one. Two critical rules: stagger your openings, two accounts, wait 60 to 90 days, then two more, because opening six at once collapses your average age and reads as a spree. And pick institutions you will want funding from later, so the secured card doubles as a foot in the door. The list below is already sorted that way.',
     })
   }
   if (mode === 'build') {
@@ -251,6 +301,9 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
 function rankBuilders(institutions: Institution[]): Rec[] {
   const recs: Rec[] = []
   for (const inst of institutions) {
+    // THE RELATIONSHIP PLAY: building at a place that ALSO funds you later means
+    // the secured card doubles as a foot in the door. Ranked accordingly.
+    const fundingLater = inst.products.filter(p => CAPITAL_TYPES.includes(p.type)).length
     for (const p of inst.products) {
       if (!BUILDER_TYPES.includes(p.type)) continue
       let points = 1
@@ -260,11 +313,22 @@ function rankBuilders(institutions: Institution[]): Rec[] {
       const rep = (p.reports_to || '').toLowerCase()
       if (rep.includes('all') || (rep.includes('experian') && rep.includes('equifax') && rep.includes('transunion'))) { points += 2; why.push('Reports to all three bureaus') }
       if (p.bureau_pulled === 'None') { points += 2; why.push('No credit check to open') }
+      if (fundingLater > 0) {
+        points += Math.min(3, fundingLater)
+        why.push(`Relationship play: ${fundingLater} funding product${fundingLater > 1 ? 's' : ''} here once you qualify`)
+      }
+      if (inst.inquiry_reuse === 'Yes') { points += 1; why.push('Allows inquiry reuse later') }
       if (p.existing_customer_required === 'Yes') { points -= 1; caution.push('Existing-customer relationship required first') }
       recs.push({ inst, products: [p], points, why, caution })
     }
   }
-  return recs.sort((x, y) => y.points - x.points).slice(0, 5)
+  // One product per institution, so the plan spreads across issuers instead of
+  // stacking five cards at one bank.
+  const seen = new Set<number>()
+  return recs.sort((x, y) => y.points - x.points).filter(r => {
+    if (seen.has(r.inst.id)) return false
+    seen.add(r.inst.id); return true
+  }).slice(0, 5)
 }
 
 function Chip({ label, tone }: { label: string; tone: 'navy' | 'green' | 'teal' | 'gray' | 'amber' }) {
@@ -355,7 +419,7 @@ export default function Strategy() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, util: null, lates: null, age: null, inq: null, cards24: null, clean: null })
+  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null })
   const [built, setBuilt] = useState(false)
 
   useEffect(() => { document.title = 'Strategy Engine | Intelligent Funding' }, [])
@@ -366,27 +430,66 @@ export default function Strategy() {
       .catch(() => {})
   }, [token])
 
-  const complete = answers.goal && answers.score && answers.util && answers.lates && answers.age && answers.inq && answers.cards24
+  const complete = answers.goal && answers.score && answers.accounts && answers.util && answers.lates
+    && answers.derog && answers.age && answers.inq && answers.inqFocus && answers.cards24
 
   const plan = useMemo(() => {
     if (!built || !complete) return null
     const a = answers
-    // Readiness: honest gate. Not a judgment — a sequence.
-    const notReady = a.age === 'none' || a.score === 'under580' || a.lates === '3plus'
-    const borderline = !notReady && (a.score === '580-639' || (a.lates === '1-2' && a.util === 'over50'))
+
+    // ── HARD BLOCKERS ────────────────────────────────────────────────────────
+    // These stop the funding path regardless of everything else. Named, so the
+    // plan can say exactly what is in the way instead of a vague "not ready".
+    const hardBlocker =
+      a.derog === 'bk2yr' ? 'a bankruptcy in the last 2 years'
+      : a.derog === 'collections' ? 'an open collection account'
+      : a.derog === 'chargeoff' ? 'a charge-off, repossession, or judgment'
+      : a.util === 'over50' ? 'utilization above 50%'
+      : a.age === 'none' ? 'no credit history reporting yet'
+      : a.score === 'under580' ? 'a score under 580'
+      : null
+
+    // ── THIN FILE ────────────────────────────────────────────────────────────
+    // Not a blocker, but it routes to build-first. Target is 7-8 accounts.
+    // This is the rule that stops us telling a 4-account file to run a spread.
+    const thinFile = a.accounts === '0-2'
+    const buildingFile = a.accounts === '3-5'
+
+    const notReady = !!hardBlocker || thinFile || a.lates === '3plus'
+      || (buildingFile && a.lates === '1-2')
+    const borderline = !notReady && (a.score === '580-639' || a.util === '30-50'
+      || a.lates === '1-2' || buildingFile)
+
+    // Lane order: the bureau you've been burning goes LAST, your cleanest first.
     const bureaus: Bureau[] = ['Experian', 'Equifax', 'TransUnion']
-    const ordered = a.clean && a.clean !== 'notsure'
-      ? [a.clean as Bureau, ...bureaus.filter(b => b !== a.clean)]
-      : bureaus
+    let ordered = [...bureaus]
+    if (a.clean && a.clean !== 'notsure') {
+      ordered = [a.clean as Bureau, ...ordered.filter(b => b !== a.clean)]
+    }
+    if (a.inqFocus && a.inqFocus !== 'notsure' && a.inqFocus !== 'even') {
+      ordered = [...ordered.filter(b => b !== a.inqFocus), a.inqFocus as Bureau]
+    }
+
+    // ── STOP CONDITIONS ──────────────────────────────────────────────────────
+    // The engine must be able to say "hold this lane" instead of always selling.
+    const burnedLane = (b: Bureau): string | null => {
+      if (a.inq === '6plus') return 'You are at 6+ inquiries in 6 months. Every lane needs to rest.'
+      if (a.inqFocus === b && a.inq === '3-5') return `Your recent inquiries are concentrated here. Work the other lanes first and let this one age.`
+      return null
+    }
+
     const mode = notReady ? 'build' as const : borderline ? 'borderline' as const : 'ready' as const
     const builders = rankBuilders(institutions)
-    const lanes = ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a) }))
+    const lanes = ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a), hold: burnedLane(b) }))
     // Fit % is RELATIVE to the strongest match in this member's own results —
     // derived from the same points the ranking already uses, never invented.
     const allRecs = [...builders, ...lanes.flatMap(l => l.recs)]
     const maxPts = Math.max(1, ...allRecs.map(r => r.points))
     return {
       mode,
+      hardBlocker,
+      thinFile,
+      buildingFile,
       builders,
       lanes,
       maxPts,
@@ -433,6 +536,20 @@ export default function Strategy() {
                 { v: '640-699', t: '640–699' }, { v: '700-749', t: '700–749' }, { v: '750plus', t: '750+' },
               ]}
             />
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '-10px 0 18px', lineHeight: 1.5 }}>
+              If your credit card app shows a free FICO score, use that number. Free apps like Credit Karma
+              show a different score that often runs higher than what card issuers actually pull. Between two
+              bands? Pick the lower one.
+            </div>
+            <Question
+              label="How many open credit accounts report on your file?"
+              value={answers.accounts}
+              onPick={v => setAnswers(prev => ({ ...prev, accounts: v as Accounts }))}
+              options={[
+                { v: '0-2', t: '0–2' }, { v: '3-5', t: '3–5' },
+                { v: '6-8', t: '6–8' }, { v: '9plus', t: '9 or more' },
+              ]}
+            />
             <Question
               label="Credit card utilization right now?"
               value={answers.util}
@@ -449,6 +566,15 @@ export default function Strategy() {
               options={[{ v: 'none', t: 'None' }, { v: '1-2', t: '1–2' }, { v: '3plus', t: '3 or more' }]}
             />
             <Question
+              label="Any of these on your report right now? (pick the most serious)"
+              value={answers.derog}
+              onPick={v => setAnswers(prev => ({ ...prev, derog: v as Derog }))}
+              options={[
+                { v: 'none', t: 'None of these' }, { v: 'collections', t: 'Collection account' },
+                { v: 'chargeoff', t: 'Charge-off / repo / judgment' }, { v: 'bk2yr', t: 'Bankruptcy (last 2 yrs)' },
+              ]}
+            />
+            <Question
               label="Age of your oldest account?"
               value={answers.age}
               onPick={v => setAnswers(prev => ({ ...prev, age: v as Age }))}
@@ -462,6 +588,16 @@ export default function Strategy() {
               value={answers.inq}
               onPick={v => setAnswers(prev => ({ ...prev, inq: v as Inq }))}
               options={[{ v: '0-2', t: '0–2' }, { v: '3-5', t: '3–5' }, { v: '6plus', t: '6 or more' }]}
+            />
+            <Question
+              label="Are those inquiries concentrated on one bureau?"
+              value={answers.inqFocus}
+              onPick={v => setAnswers(prev => ({ ...prev, inqFocus: v as InqFocus }))}
+              options={[
+                { v: 'notsure', t: 'Not sure' }, { v: 'even', t: 'Spread evenly' },
+                { v: 'Experian', t: 'Mostly Experian' }, { v: 'Equifax', t: 'Mostly Equifax' },
+                { v: 'TransUnion', t: 'Mostly TransUnion' },
+              ]}
             />
             <Question
               label="New cards opened in the last 24 months? (all banks combined)"
@@ -537,15 +673,22 @@ export default function Strategy() {
                 <h2 className="guide__section-title"><ShieldCheck size={16} style={{ verticalAlign: -3 }} /> Your move right now: build first</h2>
                 <div className="guide__body" style={{ marginBottom: 14 }}>
                   <p>
-                    Straight talk: hitting unsecured lenders today would burn hard pulls on likely denials.
-                    That's not a no, it's a sequence. Run this build phase, then come back and re-run the
-                    engine. The capital lanes will open.
+                    {plan.hardBlocker
+                      ? <>Straight talk: <b>{plan.hardBlocker}</b> is what's standing in the way right now, and it outranks your score. Applying before it's handled mostly buys denials.</>
+                      : plan.thinFile
+                      ? <>Straight talk: with <b>only a couple of accounts reporting</b>, lenders have almost nothing to underwrite. Applying now would burn pulls on denials no matter how good the rest looks.</>
+                      : plan.buildingFile
+                      ? <>Straight talk: you have <b>a few accounts and a recent late</b>. That combination gets declined more often than it gets approved, so we build a few months of clean history first instead of spending inquiries to find out.</>
+                      : <>Straight talk: hitting unsecured lenders today would burn hard pulls on likely denials.</>}
+                    {' '}That's not a no, it's a sequence. Run this build phase, then come back and re-run the engine. The capital lanes will open.
                   </p>
                   <ul>
-                    <li>Open 1–2 of the builder products below. Graduation and all-three-bureau reporting are already prioritized for you.</li>
+                    <li>Work the plays above in order. The free moves come before anything that costs money.</li>
+                    <li>Open the builder products below, two at a time, then wait 60 to 90 days before the next two.</li>
                     <li>Pay everything on time for 6 straight months. Nothing moves a file like clean recency.</li>
                     {plan.payDownFirst && <li>Get utilization under 30%, then under 10%. It's the fastest lever you control.</li>}
                     <li>No new hard pulls while you build.</li>
+                    <li>Re-run this engine in 90 days. The verdict changes as the file changes.</li>
                   </ul>
                 </div>
                 {plan.builders.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} maxPts={plan.maxPts} />)}
@@ -583,9 +726,18 @@ export default function Strategy() {
                   <div className="guide__section" key={lane.bureau}>
                     <h2 className="guide__section-title">
                       <TrendingUp size={16} style={{ verticalAlign: -3 }} /> {lane.bureau} lane
-                      {plan.lanes[0].bureau === lane.bureau && answers.clean && answers.clean !== 'notsure' ? ', start here (your cleanest report)' : ''}
+                      {lane.hold ? ', on hold' : plan.lanes[0].bureau === lane.bureau && !plan.lanes[0].hold ? ', start here' : ''}
                     </h2>
-                    {lane.recs.length > 0 ? (
+                    {/* STOP CONDITION: the engine has to be able to say hold, not always sell. */}
+                    {lane.hold ? (
+                      <div style={{ border: '1px solid #fde68a', background: '#fffbeb', borderRadius: 'var(--radius-lg)', padding: 16 }}>
+                        <div style={{ fontWeight: 800, color: '#b45309', marginBottom: 5 }}>Hold this lane</div>
+                        <p style={{ fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--text-secondary)', margin: 0 }}>
+                          {lane.hold} Inquiries lose most of their weight around 12 months and fall off at 24,
+                          so this lane reopens on a clock. Spend your applications in the lanes above instead.
+                        </p>
+                      </div>
+                    ) : lane.recs.length > 0 ? (
                       lane.recs.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} maxPts={plan.maxPts} />)
                     ) : (
                       <div className="guide__body"><p>No strong verified matches in this lane for your profile yet. As the database grows, this lane fills in, check back.</p></div>

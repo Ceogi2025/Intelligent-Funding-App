@@ -361,7 +361,17 @@ function accessInfo(inst: Institution): { tier: AccessTier; label: string; penal
   if (/acc |american consumer council|community charter|online membership|membership via|association/.test(g)) {
     return { tier: 'joinable', label: 'Open to anyone (join to qualify)', penalty: 0 }
   }
-  if (/nationwide|anyone/.test(g)) return { tier: 'open', label: 'Open to anyone', penalty: 0 }
+  if (/nationwide|anyone/.test(g)) {
+    // A BANK saying "nationwide" is open. A CREDIT UNION saying it without
+    // naming the route is an unverified claim — every credit union has a field
+    // of membership, and auditing found real cases where "Nationwide" actually
+    // meant employer- or state-gated. Say "confirm you qualify" rather than
+    // sending someone to a door that may not open.
+    if (inst.type === 'Credit Union' && !/acc |american consumer council|charter|donation|association|membership via|online membership/.test(g)) {
+      return { tier: 'joinable', label: 'Confirm you qualify to join (credit union)', penalty: 1 }
+    }
+    return { tier: 'open', label: 'Open to anyone', penalty: 0 }
+  }
   return { tier: 'regional', label: `Regional: ${inst.geographic_restrictions}`, penalty: 2 }
 }
 

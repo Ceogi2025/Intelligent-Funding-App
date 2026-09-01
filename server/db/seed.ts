@@ -352,7 +352,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: '30 Days',
     preapproval_available: 'No',
     soft_pull_available: 'No',
-    geographic_restrictions: 'Nationwide',
+    geographic_restrictions: 'NOT open to the general public. Verified Sep 2026 on firsttechfed.com: you qualify by working for one of their 1,700+ partner companies, living/working/worshipping in a participating community, working for the State of Oregon, belonging to a participating organization, living in a participating condo association, or having a family/household member who is already a member. Their page names no open association route.',
     application_url: 'https://www.firsttechfed.com',
     path: 'Capital Access',
     products: [

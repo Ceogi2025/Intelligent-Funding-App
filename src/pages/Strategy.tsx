@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle, Lightbulb, Save } from 'lucide-react'
+import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle, Lightbulb, Save, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
@@ -474,14 +474,6 @@ const QUESTIONS: QDef[] = [
     help: 'All banks combined. Chase auto-denies at five, so this one decides whether that door is open.',
     options: [{ v: '0-1', t: '0 or 1' }, { v: '2-4', t: '2 to 4' }, { v: '5plus', t: '5 or more' }],
   },
-  {
-    key: 'clean', short: 'Cleanest report', label: 'Which credit report is your cleanest?', optional: true,
-    help: 'Skip this if you do not know. It only fine-tunes which lane we start you in.',
-    options: [
-      { v: 'notsure', t: 'Not sure, skip this' }, { v: 'Experian', t: 'Experian' },
-      { v: 'Equifax', t: 'Equifax' }, { v: 'TransUnion', t: 'TransUnion' },
-    ],
-  },
 ]
 
 // ─── The Funding Bridge ──────────────────────────────────────────────────────
@@ -813,10 +805,20 @@ export default function Strategy() {
           if (onLast) {
             return (
               <div className="guide__section">
-                <div style={{ fontSize: '0.74rem', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>
-                  That's everything
+                <div style={{
+                  background: 'linear-gradient(100deg, var(--navy), #164e63)', color: '#fff',
+                  borderRadius: 'var(--radius-lg)', padding: '22px 24px', marginBottom: 20,
+                  boxShadow: 'var(--shadow-md)', textAlign: 'center',
+                }} className="fade-up">
+                  <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: 8 }}>🎯</div>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: '#67e8f9' }}>
+                    All 10 answered
+                  </div>
+                  <h2 style={{ fontSize: '1.5rem', margin: '4px 0 6px' }}>Your blueprint is ready to build</h2>
+                  <p style={{ fontSize: '0.88rem', opacity: 0.9, margin: 0 }}>
+                    We'll read {' '}your answers against every verified institution and hand you a numbered plan.
+                  </p>
                 </div>
-                <h2 style={{ fontSize: '1.25rem', marginBottom: 14 }}>Ready to build your plan</h2>
                 <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 18 }}>
                   {QUESTIONS.map((qq, i) => {
                     const val = answers[qq.key] as string | null
@@ -850,7 +852,7 @@ export default function Strategy() {
             )
           }
           return (
-            <div className="guide__section">
+            <div className="guide__section fade-up" key={step}>
               {/* Progress */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
@@ -864,7 +866,7 @@ export default function Strategy() {
                 </div>
               </div>
 
-              <h2 style={{ fontSize: '1.3rem', lineHeight: 1.3, marginBottom: q.help ? 8 : 18 }}>{q.label}</h2>
+              <h2 style={{ fontSize: '1.65rem', lineHeight: 1.25, letterSpacing: '-0.02em', marginBottom: q.help ? 10 : 22 }}>{q.label}</h2>
               {q.help && (
                 <p style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: 18 }}>{q.help}</p>
               )}
@@ -877,17 +879,25 @@ export default function Strategy() {
                       key={o.v}
                       onClick={() => {
                         setAnswers(prev => ({ ...prev, [q.key]: o.v }))
-                        window.setTimeout(() => setStep(s => s + 1), 130)
+                        // Brief pause so the selection visibly registers before
+                        // the next question slides in. Tapping into a void feels
+                        // broken; a confirmed tap feels responsive.
+                        window.setTimeout(() => setStep(s => s + 1), 260)
                       }}
                       style={{
-                        textAlign: 'left', padding: '15px 18px', borderRadius: 'var(--radius-lg)', fontSize: '1rem', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                        textAlign: 'left', minHeight: 56, padding: '16px 20px', borderRadius: 'var(--radius-lg)',
+                        fontSize: '1.02rem', fontWeight: 600,
                         border: `2px solid ${selected ? 'var(--teal)' : 'var(--border)'}`,
                         background: selected ? 'var(--badge-teal-bg)' : '#fff',
                         color: selected ? 'var(--teal)' : 'var(--text-primary)',
-                        transition: 'all .15s',
+                        boxShadow: selected ? '0 0 0 4px rgba(8,145,178,.12)' : 'none',
+                        transform: selected ? 'scale(0.99)' : 'none',
+                        transition: 'all .18s cubic-bezier(.16,1,.3,1)',
                       }}
                     >
-                      {o.t}
+                      <span>{o.t}</span>
+                      {selected && <CheckCircle2 size={20} style={{ flexShrink: 0 }} />}
                     </button>
                   )
                 })}

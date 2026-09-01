@@ -311,3 +311,16 @@ h3{font-size:1.25rem;font-weight:600}
   .header__actions{gap:8px}
   .btn--sm{padding:5px 11px;font-size:.78rem}
 }
+
+/* Touch targets: 44px minimum on phones (Apple/Google guideline). */
+@media (max-width: 767px){
+  .btn{min-height:44px;padding-top:12px;padding-bottom:12px}
+  .btn--sm{min-height:40px}
+  .sidemenu__item{min-height:46px}
+  .lp-hero__ctas .btn{min-height:52px;font-size:1rem}
+  .modal__option-btn{min-height:48px}
+  .header__menu-btn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  footer a, .lp-footer a{display:inline-block;padding:6px 2px}
+}
+/* Buttons should feel pressed, not static. */
+.btn:active{transform:translateY(1px)}

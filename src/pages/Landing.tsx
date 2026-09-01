@@ -227,26 +227,34 @@ export default function Landing() {
           <div className="how-it-works__steps">
             <div className="step">
               <div className="step__number">1</div>
-              <div className="step__title">Choose Your Path</div>
+              <div className="step__title">Answer 10 questions</div>
               <p className="step__text">
-                Building a stack of unsecured credit? Or starting from scratch with secured products?
-                Select the path that matches where you are.
+                One at a time, about two minutes. Your score, your accounts, your inquiries.
+                No documents, no credit check, nothing to connect.
               </p>
             </div>
             <div className="step">
               <div className="step__number">2</div>
-              <div className="step__title">Target Your Bureau</div>
+              <div className="step__title">Get your blueprint</div>
               <p className="step__text">
-                Select your strongest bureau, Experian, Equifax, or TransUnion.
-                Filter by inquiry reuse and soft pull preapproval to protect your inquiry count.
+                Named institutions in a numbered order, with the timing on each step and the reason
+                behind it. Or an honest "build first" plan if you're not ready yet.
               </p>
             </div>
             <div className="step">
               <div className="step__number">3</div>
-              <div className="step__title">Apply With Strategy</div>
+              <div className="step__title">Work the plan</div>
               <p className="step__text">
-                Get matched to verified institutions. See every product, every requirement,
-                and every bureau pull, before you apply.
+                Your blueprint saves to your account. Check off each step as you go, and print it
+                if you want it on paper.
+              </p>
+            </div>
+            <div className="step">
+              <div className="step__number">4</div>
+              <div className="step__title">Log what happened</div>
+              <p className="step__text">
+                Approvals and denials both. Your map tracks total access unlocked, your 0% runways,
+                and which bureau lane is open next.
               </p>
             </div>
           </div>

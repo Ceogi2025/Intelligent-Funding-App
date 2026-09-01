@@ -52,6 +52,7 @@ type Answers = {
   bizTib: BizTIB | null
   bizRev: BizRev | null
   bizEntity: BizEntity | null
+  bizCredit: BizCredit | null
 }
 
 // What the member is hunting for decides which product types the lanes carry.
@@ -75,6 +76,7 @@ const GOAL_TYPES: Record<Goal, string[]> = {
 type BizTIB = 'none' | 'under6' | '6-12' | '1-2' | '2plus'
 type BizRev = 'none' | 'under5k' | '5-15k' | '15kplus'
 type BizEntity = 'none' | 'entity-no-bank' | 'entity-and-bank'
+type BizCredit = 'none' | 'ein-only' | 'some-tradelines' | 'established'
 
 // ─── The strategy brain: issuer rules ────────────────────────────────────────
 // Widely reported community knowledge (5/24 and friends), not official bank
@@ -176,6 +178,12 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
     plays.push({
       title: 'The Business Route',
       body: 'You said business funding, so your map lives on the Business Funding path: verified business cards, lines, and loans with filters for no-doc, new-LLC, EIN-only (no personal guarantee), and 0% intro offers. Two things first: a business checking account with real deposit activity is the passport (no-doc lenders read deposits, not tax returns), and the Business Setup Toolkit on Resources gets your foundation right in an afternoon. Your personal profile still matters wherever a personal guarantee applies, so keep it clean while you build the business side.',
+    })
+  }
+  if (a.goal === 'loans') {
+    plays.push({
+      title: 'What our loan coverage actually includes',
+      body: 'Straight about scope: we carry verified PERSONAL loans and lines. We do not carry mortgages or auto loans, so nothing here is a home or car recommendation and we will not pretend otherwise. Two things worth knowing before you apply. Most personal-loan lenders let you CHECK YOUR RATE with a soft pull, so shop several before spending a single hard inquiry. And if the reason for the loan is high card balances, run the numbers against a 0% balance-transfer card first, because a consolidation loan adds a new monthly payment and a new hard pull, and it only helps if the cards stay paid down afterward.',
     })
   }
   if (mode !== 'build' && a.goal === 'everything') {
@@ -491,8 +499,8 @@ const QUESTIONS: QDef[] = [
 // Four questions, each mapped to a field the business directory can filter on.
 const BIZ_QUESTIONS: QDef[] = [
   {
-    key: 'bizEntity', short: 'Business setup', label: 'Where is your business set up?',
-    help: 'Lenders want to see a real entity and a business bank account with money moving through it. If you do not have those yet, that is the first move and we will show you how.',
+    key: 'bizEntity', short: 'Business foundation', label: 'What does your business have set up so far?',
+    help: 'The entity and the business bank account are the two things almost every lender checks first. If either is missing that is the opening move, and it is cheaper than people expect.',
     options: [
       { v: 'none', t: 'No entity or EIN yet' },
       { v: 'entity-no-bank', t: 'Entity + EIN, no business bank account' },
@@ -500,8 +508,8 @@ const BIZ_QUESTIONS: QDef[] = [
     ],
   },
   {
-    key: 'bizTib', short: 'Time in business', label: 'How long has the business existed?',
-    help: 'Counted from when you registered. Many lenders have a minimum, and plenty of good ones do not.',
+    key: 'bizTib', short: 'Years established', label: 'How long has your entity been established?',
+    help: 'Counted from your registration date, not from when you started working. Traditional banks usually want 2 years. Plenty of good lenders want far less, and we will show you those.',
     options: [
       { v: 'none', t: 'Not started yet' }, { v: 'under6', t: 'Under 6 months' },
       { v: '6-12', t: '6 to 12 months' }, { v: '1-2', t: '1 to 2 years' }, { v: '2plus', t: '2 years or more' },
@@ -516,6 +524,16 @@ const BIZ_QUESTIONS: QDef[] = [
     ],
   },
   {
+    key: 'bizCredit', short: 'Business credit', label: 'What does your BUSINESS credit profile look like?',
+    help: 'Separate from your personal credit. Net-30 vendor accounts and other business tradelines build a file with the business bureaus (D&B, Experian Business, Equifax Business). It is what eventually unlocks EIN-only funding with no personal guarantee.',
+    options: [
+      { v: 'none', t: 'Nothing yet, no EIN' },
+      { v: 'ein-only', t: 'EIN, but nothing reporting' },
+      { v: 'some-tradelines', t: 'A few net-30s reporting' },
+      { v: 'established', t: 'Established business credit file' },
+    ],
+  },
+  {
     key: 'score', short: 'Personal score', label: 'Where does your PERSONAL credit score land?',
     help: 'Most business credit still carries a personal guarantee, so your personal score matters even for an EIN-only hunt. We will flag the lenders that do not require one.',
     options: [
@@ -525,6 +543,42 @@ const BIZ_QUESTIONS: QDef[] = [
   },
 ]
 
+
+
+// ─── The Fundability Checklist ───────────────────────────────────────────────
+// Grams' point: EIN, a website, a business phone, a business email, a 411
+// listing and net-30 tradelines are not lender FILTERS, they are the signals
+// that make a business look real to an underwriter. So they belong in the
+// output as a gap audit that teaches, not as ten more intake questions.
+// Status is inferred from the answers we already have; everything unknown is
+// presented as a step to take, never as a claim about the member.
+type FundItem = { item: string; why: string; status: 'have' | 'todo' | 'unknown' }
+function fundabilityChecklist(a: Answers): FundItem[] {
+  const hasEntity = a.bizEntity === 'entity-no-bank' || a.bizEntity === 'entity-and-bank'
+  const hasBank = a.bizEntity === 'entity-and-bank'
+  const hasEin = hasEntity || a.bizCredit === 'ein-only' || a.bizCredit === 'some-tradelines' || a.bizCredit === 'established'
+  const tradelines = a.bizCredit === 'some-tradelines' || a.bizCredit === 'established'
+  return [
+    { item: 'Registered entity (LLC or corp)', status: hasEntity ? 'have' : 'todo',
+      why: 'The wall between business debt and your personal assets, and the first thing any lender checks. State filing, done online.' },
+    { item: 'EIN from the IRS', status: hasEin ? 'have' : 'todo',
+      why: 'Your business Social Security number. FREE directly from IRS.gov, about 10 minutes. Never pay a third party for it.' },
+    { item: 'Business bank account with deposit activity', status: hasBank ? 'have' : 'todo',
+      why: 'The single biggest one. No-doc lenders underwrite your DEPOSITS, not your tax returns. Open it early and feed it consistently.' },
+    { item: 'D-U-N-S number', status: tradelines ? 'have' : 'unknown',
+      why: 'Dun & Bradstreet\'s business identifier and the backbone of your business credit file. Free directly from D&B.' },
+    { item: 'Net-30 vendor tradelines reporting', status: tradelines ? 'have' : 'todo',
+      why: 'Vendor accounts that report to the business bureaus. This is how a business credit file gets built, and it is what eventually unlocks EIN-only funding with no personal guarantee.' },
+    { item: 'Business phone number', status: 'unknown',
+      why: 'A dedicated line makes you look established and keeps your personal number private. A free option gets you started.' },
+    { item: 'Business email on your own domain', status: 'unknown',
+      why: 'name@yourbusiness.com instead of a Gmail. Underwriters and vendor accounts notice.' },
+    { item: 'Website', status: 'unknown',
+      why: 'Even a single page. It is often the first thing a human reviewer checks to confirm the business is real.' },
+    { item: 'Listed in a business directory (411 / ListYourself.net)', status: 'unknown',
+      why: 'A verifiable listing tying your business name, address and phone together. Some underwriting checks look for exactly this.' },
+  ]
+}
 
 // ─── Business matcher ────────────────────────────────────────────────────────
 // Ranks the business directory against the four business answers. Load-all
@@ -816,7 +870,7 @@ export default function Strategy() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [bizList, setBizList] = useState<BizInst[]>([])
-  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null, bizTib: null, bizRev: null, bizEntity: null })
+  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null, bizTib: null, bizRev: null, bizEntity: null, bizCredit: null })
   const [built, setBuilt] = useState(false)
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -835,7 +889,7 @@ export default function Strategy() {
   }, [token])
 
   const complete = answers.goal === 'business'
-    ? !!(answers.goal && answers.bizEntity && answers.bizTib && answers.bizRev && answers.score)
+    ? !!(answers.goal && answers.bizEntity && answers.bizTib && answers.bizRev && answers.bizCredit && answers.score)
     : !!(answers.goal && answers.score && answers.accounts && answers.util && answers.lates
       && answers.derog && answers.age && answers.inq && answers.inqFocus)
 
@@ -1082,6 +1136,38 @@ export default function Strategy() {
                 </div>
               </div>
             )}
+
+
+            <div className="guide__section">
+              <h2 className="guide__section-title"><ShieldCheck size={16} style={{ verticalAlign: -3 }} /> Your fundability checklist</h2>
+              <div className="guide__body" style={{ marginBottom: 12 }}>
+                <p>
+                  None of these are hard stoppers, and none of them are on a lender's application form. They are
+                  the signals that make a business look <b>real</b> when a human or an underwriting model looks you
+                  up. The more of them you have, the more funding opens and the less a personal guarantee gets
+                  demanded. Work down the list.
+                </p>
+              </div>
+              {fundabilityChecklist(answers).map(f => {
+                const tone = f.status === 'have' ? ['#f0fdf4', '#15803d', '✓ have it']
+                  : f.status === 'todo' ? ['#fffbeb', '#b45309', '→ next up']
+                  : ['var(--badge-gray-bg)', 'var(--text-secondary)', '? confirm']
+                return (
+                  <div key={f.item} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '11px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', marginBottom: 8 }}>
+                    <span style={{ flexShrink: 0, fontSize: '0.68rem', fontWeight: 800, padding: '3px 9px', borderRadius: 999, background: tone[0], color: tone[1], whiteSpace: 'nowrap' }}>{tone[2]}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>{f.item}</div>
+                      <p style={{ fontSize: '0.83rem', lineHeight: 1.55, color: 'var(--text-secondary)', margin: '2px 0 0' }}>{f.why}</p>
+                    </div>
+                  </div>
+                )
+              })}
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 10 }}>
+                Every official link for these lives in the{' '}
+                <span style={{ color: 'var(--teal)', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigate('/resources')}>Business Setup Toolkit</span>.
+                The EIN and the D-U-N-S are free, so never pay anyone for them.
+              </p>
+            </div>
 
             <div className="guide__section">
               <h2 className="guide__section-title"><TrendingUp size={16} style={{ verticalAlign: -3 }} /> Your business funding matches</h2>

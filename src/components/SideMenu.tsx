@@ -1,4 +1,4 @@
-import { X, Home, Building2, Target, Map, BookOpen, Briefcase, Award, LifeBuoy, Users, UserCircle, LogOut, MessagesSquare, Trophy, Landmark } from 'lucide-react'
+import { X, Building2, Target, Map, ClipboardList, BookOpen, LifeBuoy, Users, UserCircle, LogOut, MessagesSquare, Trophy, Landmark } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -41,15 +41,32 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           </button>
         </div>
 
+        {/* FIVE primary doors. Everything else still exists, just demoted out of
+            the main flow so the plan is never competing for attention. */}
         <div className="sidemenu__nav">
-          <button className={active('/home')} onClick={() => go('/home')}>
-            <Home size={16} /> Home
-          </button>
-          <button className={active('/strategy')} onClick={() => go('/strategy')}>
-            <Target size={16} /> The Strategy Engine
+          <button className={active('/blueprint')} onClick={() => go('/blueprint')}>
+            <ClipboardList size={16} /> My Blueprint
           </button>
           <button className={active('/map')} onClick={() => go('/map')}>
             <Map size={16} /> My Funding Map
+          </button>
+          <button className={active('/community')} onClick={() => go('/community')}>
+            <MessagesSquare size={16} /> The Community Room
+          </button>
+          <button className={active('/resources')} onClick={() => go('/resources')}>
+            <LifeBuoy size={16} /> Resources
+          </button>
+          <button className={active('/account')} onClick={() => go('/account')}>
+            <UserCircle size={16} /> Account & Billing
+          </button>
+
+          <div className="sidemenu__divider" />
+          <div style={{ fontSize: '0.66rem', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-secondary)', padding: '4px 14px 6px' }}>
+            More
+          </div>
+
+          <button className={active('/strategy')} onClick={() => go('/strategy')}>
+            <Target size={16} /> Run the Strategy Engine
           </button>
           <button className={active('/browse')} onClick={() => go('/browse')}>
             <Building2 size={16} /> Browse All Institutions
@@ -57,42 +74,14 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
           <button className={active('/business')} onClick={() => go('/business')}>
             <Landmark size={16} /> Business Funding
           </button>
-
-          <div className="sidemenu__divider" />
-
-          <button className={active('/community')} onClick={() => go('/community')}>
-            <MessagesSquare size={16} /> The Community Room
-          </button>
           <button className={active('/wins')} onClick={() => go('/wins')}>
             <Trophy size={16} /> The Wins Wall
-          </button>
-
-          <button className={active('/education/profile-positioning')} onClick={() => go('/education/profile-positioning')}>
-            <Target size={16} /> Profile Positioning
-          </button>
-          <button className={active('/education/stacking-method')} onClick={() => go('/education/stacking-method')}>
-            <BookOpen size={16} /> Credit Card Stacking Method
-          </button>
-          <button className={active('/education/wealthy-playbook')} onClick={() => go('/education/wealthy-playbook')}>
-            <Briefcase size={16} /> The Wealthy Person's Playbook
-          </button>
-          <button className={active('/education/acc-blueprint')} onClick={() => go('/education/acc-blueprint')}>
-            <Award size={16} /> The ACC Blueprint
-          </button>
-
-          <div className="sidemenu__divider" />
-
-          <button className={active('/resources')} onClick={() => go('/resources')}>
-            <LifeBuoy size={16} /> Resources
           </button>
           <button className={active('/share')} onClick={() => go('/share')}>
             <Users size={16} /> Share a Datapoint
           </button>
-
-          <div className="sidemenu__divider" />
-
-          <button className={active('/account')} onClick={() => go('/account')}>
-            <UserCircle size={16} /> Account & Billing
+          <button className={active('/education/profile-positioning')} onClick={() => go('/education/profile-positioning')}>
+            <BookOpen size={16} /> Strategy Guides
           </button>
 
           <div className="sidemenu__divider" />

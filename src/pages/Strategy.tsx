@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react'
+import { Target, RefreshCw, Phone, ShieldCheck, TrendingUp, AlertTriangle, Lightbulb, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import type { Institution, Product } from '../types'
 import { track } from '../lib/track'
+import type { BlueprintStep } from '../lib/blueprint'
 
 // ─── The Strategy Engine v1 ──────────────────────────────────────────────────
 // Rule-based, deterministic, and 100% powered by OUR verified database — no
@@ -331,6 +332,161 @@ function rankBuilders(institutions: Institution[]): Rec[] {
   }).slice(0, 5)
 }
 
+// ─── The Funding Bridge ──────────────────────────────────────────────────────
+// What's open to you now, and what unlocks at each rung above you. Turns the
+// score from a number into a door you can watch getting closer. Built only
+// from products with a VERIFIED score floor, and it says so.
+function fundingBridge(institutions: Institution[], a: Answers) {
+  const floor = a.score ? SCORE_FLOOR[a.score] : 0
+  const scored = institutions.flatMap(i => i.products)
+    .filter(p => CAPITAL_TYPES.includes(p.type) && p.minimum_credit_score != null)
+  const nowOpen = scored.filter(p => (p.minimum_credit_score as number) <= floor).length
+  const TIERS = [580, 620, 660, 700, 740]
+  const rungs = TIERS.filter(t => t > floor).map(tier => ({
+    tier,
+    opens: scored.filter(p => {
+      const m = p.minimum_credit_score as number
+      return m > floor && m <= tier
+    }).length,
+  })).filter(r => r.opens > 0)
+  return { nowOpen, rungs, scoredTotal: scored.length }
+}
+
+// ─── Turn the plan into a numbered, timed sequence ───────────────────────────
+// A list of recommendations is not a plan. This converts the engine's output
+// into ordered steps with waits between them, which is what a member actually
+// works and what Grams hands a client.
+type PlanShape = {
+  mode: 'build' | 'borderline' | 'ready'
+  hardBlocker: string | null
+  thinFile: boolean
+  buildingFile: boolean
+  builders: Rec[]
+  lanes: { bureau: Bureau; recs: Rec[]; hold: string | null }[]
+  payDownFirst: boolean
+}
+
+function buildSteps(plan: PlanShape, a: Answers): BlueprintStep[] {
+  const steps: BlueprintStep[] = []
+  const push = (s: Omit<BlueprintStep, 'n'>) => steps.push({ ...s, n: steps.length + 1 })
+
+  if (plan.mode === 'build') {
+    if (plan.hardBlocker) {
+      push({
+        kind: 'action', timing: 'Start now, runs alongside everything else',
+        title: `Deal with ${plan.hardBlocker}`,
+        why: 'This outranks your score, so it comes first. If anything on your report is inaccurate, you have a federal right to dispute it and the CFPB publishes free sample letters (see Resources). If it is accurate, time and payment behavior are what move it. Nobody can promise a removal.',
+      })
+    }
+    if (plan.payDownFirst) {
+      push({
+        kind: 'action', timing: 'This week, costs nothing',
+        title: 'Run the free utilization moves',
+        why: 'Pay before the statement date rather than the due date, ask for a credit limit increase (usually a soft pull after about six months on an account), and check each card individually, not just your total.',
+      })
+    }
+    if (a.lates === '1-2' || a.lates === '3plus') {
+      push({
+        kind: 'action', timing: 'This week, about 10 minutes per call',
+        title: 'Call for a goodwill adjustment on the late payments',
+        why: 'Free, and it works often enough on a first late with an otherwise clean record to be worth every attempt. Then set autopay for the minimum on everything so it never happens again.',
+      })
+    }
+    const first = plan.builders.slice(0, 2)
+    first.forEach(r => {
+      const p = r.products[0]
+      push({
+        kind: 'action', timing: 'Weeks 1 to 2', instId: r.inst.id,
+        title: `Open the ${p.name} at ${r.inst.name}`,
+        why: [
+          p.graduation_potential === 'Yes' && p.graduation_timeline && p.graduation_timeline !== 'Not Verified' ? `Graduates to unsecured in ${p.graduation_timeline}.` : '',
+          `Pulls ${p.bureau_pulled}.`,
+          r.why.find(w => w.startsWith('Relationship play')) ? r.why.find(w => w.startsWith('Relationship play')) + ', so this account doubles as a foot in the door.' : '',
+        ].filter(Boolean).join(' '),
+      })
+    })
+    push({
+      kind: 'wait', timing: 'Months 1 to 3',
+      title: 'Pay on time, every time. No new applications.',
+      why: 'Keep every balance under 10% of the limit when the statement cuts. Clean recency is what moves a file, and new pulls during this window undo the work.',
+    })
+    const next = plan.builders.slice(2, 4)
+    next.forEach(r => {
+      const p = r.products[0]
+      push({
+        kind: 'action', timing: 'Around month 3', instId: r.inst.id,
+        title: `Add the ${p.name} at ${r.inst.name}`,
+        why: `Second wave, staggered on purpose. Opening everything at once collapses your average account age and reads as a spree. Pulls ${p.bureau_pulled}.`,
+      })
+    })
+    push({
+      kind: 'wait', timing: 'Months 3 to 6',
+      title: 'Season the file',
+      why: 'No new accounts, no new pulls. You are letting the accounts age and the on-time history stack up. This is the part most people skip and it is the part that works.',
+    })
+    push({
+      kind: 'action', timing: 'Month 6',
+      title: 'Re-run the Strategy Engine',
+      why: 'Your answers will have changed, which means the verdict changes. This is when the capital lanes typically open.',
+    })
+    return steps
+  }
+
+  // READY / BORDERLINE
+  push({
+    kind: 'action', timing: 'Before you apply for anything',
+    title: 'Protect the profile you are about to spend',
+    why: 'Pull your free reports at AnnualCreditReport.com and check for surprises. Nothing goes 30 days late, no balance spikes before a statement cuts, and no unplanned new accounts. People lose approvals in the two weeks before applying more often than they think.',
+  })
+  push({
+    kind: 'action', timing: 'Day 1, spends nothing',
+    title: 'Sweep every soft-pull preapproval first',
+    why: 'Preapprovals and prequalification checks show your real odds without touching your report. Collect your yes-list before you spend a single hard inquiry.',
+  })
+  const openLanes = plan.lanes.filter(l => !l.hold && l.recs.length > 0)
+  openLanes.forEach((lane, li) => {
+    lane.recs.slice(0, 3).forEach(r => {
+      const dd = r.products.length >= 2 && r.inst.inquiry_reuse === 'Yes'
+      push({
+        kind: 'action', instId: r.inst.id,
+        timing: li === 0 ? 'Week 1' : `Month ${li + 1}`,
+        title: dd
+          ? `${r.inst.name}: apply for BOTH ${r.products.map(p => p.name).join(' and ')} the same day`
+          : `${r.inst.name}: apply for the ${r.products[0].name}`,
+        why: dd
+          ? `One hard pull on ${r.products[0].bureau_pulled} covers both products here, so you get two tradelines for the price of one inquiry. Same day matters. Confirm the reuse window when you call.`
+          : `Pulls ${r.products[0].bureau_pulled}. ${r.why.slice(0, 2).join('. ')}`,
+      })
+    })
+    if (li < openLanes.length - 1) {
+      push({
+        kind: 'wait', timing: '30 to 45 days',
+        title: `Let the ${lane.bureau} approvals report before you open the next lane`,
+        why: 'New accounts need to post before the next issuer looks at your file. Moving too fast makes the whole run read as a spree.',
+      })
+    }
+  })
+  const held = plan.lanes.filter(l => l.hold)
+  held.forEach(l => {
+    push({
+      kind: 'wait', timing: 'Hold until the inquiries age',
+      title: `${l.bureau} stays on hold`,
+      why: `${l.hold} Inquiries lose most of their weight around 12 months and fall off at 24, so this lane reopens on a clock.`,
+    })
+  })
+  push({
+    kind: 'habit', timing: 'Ongoing',
+    title: 'Log every result in My Funding Map',
+    why: 'Approvals and denials both. The map tracks your total access, your 0% runways, your inquiry lanes, and when each card\'s limit-increase window opens.',
+  })
+  push({
+    kind: 'action', timing: '90 days from today',
+    title: 'Re-run the Strategy Engine',
+    why: 'Your inquiry lanes, account count, and utilization will all have moved. The plan should move with them.',
+  })
+  return steps
+}
+
 function Chip({ label, tone }: { label: string; tone: 'navy' | 'green' | 'teal' | 'gray' | 'amber' }) {
   const tones = {
     navy: { bg: '#eff6ff', fg: 'var(--navy)', bd: '#bfdbfe' },
@@ -421,6 +577,8 @@ export default function Strategy() {
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null })
   const [built, setBuilt] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [savedId, setSavedId] = useState<number | null>(null)
 
   useEffect(() => { document.title = 'Strategy Engine | Intelligent Funding' }, [])
   useEffect(() => {
@@ -494,6 +652,7 @@ export default function Strategy() {
       lanes,
       maxPts,
       plays: buildPlays(a, mode),
+      bridge: fundingBridge(institutions, a),
       payDownFirst: a.util === 'over50' || a.util === '30-50',
       heavyInq: a.inq === '6plus',
     }
@@ -627,13 +786,42 @@ export default function Strategy() {
 
         {plan && (
           <>
-            <button
-              className="btn btn--ghost"
-              onClick={() => setBuilt(false)}
-              style={{ marginBottom: 18, display: 'inline-flex', gap: 6 }}
-            >
-              <RefreshCw size={14} /> Change my answers
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+              <button className="btn btn--ghost" onClick={() => { setBuilt(false); setSavedId(null) }} style={{ display: 'inline-flex', gap: 6 }}>
+                <RefreshCw size={14} /> Change my answers
+              </button>
+              <button
+                className="btn btn--primary"
+                disabled={saving || savedId != null}
+                style={{ display: 'inline-flex', gap: 6, opacity: saving || savedId != null ? 0.6 : 1 }}
+                onClick={async () => {
+                  if (saving || savedId != null) return
+                  setSaving(true)
+                  try {
+                    const steps = buildSteps(plan, answers)
+                    const res = await fetch('/api/my/blueprints', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({
+                        title: `Funding blueprint · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+                        mode: plan.mode, answers, steps,
+                      }),
+                    })
+                    const d = await res.json()
+                    if (d.id) setSavedId(d.id)
+                  } finally {
+                    setSaving(false)
+                  }
+                }}
+              >
+                <Save size={14} /> {savedId != null ? 'Saved to My Blueprint' : saving ? 'Saving…' : 'Save as my blueprint'}
+              </button>
+              {savedId != null && (
+                <button className="btn btn--teal" onClick={() => navigate('/blueprint')} style={{ display: 'inline-flex', gap: 6 }}>
+                  Open My Blueprint →
+                </button>
+              )}
+            </div>
 
             {/* The funding map: the whole spread, quantified up front */}
             {plan.mode !== 'build' && (() => {
@@ -654,6 +842,34 @@ export default function Strategy() {
                 </div>
               )
             })()}
+
+            {/* The Funding Bridge: the road ahead, in doors not points */}
+            {plan.bridge.rungs.length > 0 && (
+              <div className="guide__section">
+                <h2 className="guide__section-title"><TrendingUp size={16} style={{ verticalAlign: -3 }} /> The road ahead</h2>
+                <div className="guide__body" style={{ marginBottom: 12 }}>
+                  <p>
+                    {plan.bridge.nowOpen > 0
+                      ? <><b>{plan.bridge.nowOpen} products</b> in our directory list a score floor at or below your band right now.</>
+                      : <>Nothing in our directory lists a score floor at your band yet.</>}
+                    {' '}Here's what opens as it climbs.
+                  </p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+                  {plan.bridge.rungs.map(r => (
+                    <div key={r.tier} className="institution-card" style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>at {r.tier}+</div>
+                      <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--teal)' }}>+{r.opens}</div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', fontWeight: 600 }}>more products open</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 10 }}>
+                  Counted from the {plan.bridge.scoredTotal} products where an institution publishes a score floor.
+                  Plenty of lenders don't publish one, so treat this as the floor of what's out there, not the ceiling.
+                </p>
+              </div>
+            )}
 
             {/* Your Plays: the named moves for this exact situation */}
             {plan.plays.length > 0 && (

@@ -280,6 +280,23 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── My Blueprint ─────────────────────────────────────────────────────────
+  // A SNAPSHOT of the plan the member was given, not a live re-computation.
+  // If the database changes later, their checked-off steps still line up with
+  // the plan they were actually working. `steps` and `done` are JSON.
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS member_blueprints (
+      id ${pk},
+      user_id INTEGER NOT NULL,
+      title TEXT,
+      mode TEXT,
+      answers TEXT,
+      steps TEXT,
+      done TEXT DEFAULT '[]',
+      created_at ${now}
+    )
+  `)
+
   // Backfill: the three bureau-gold columns for business products (same lens as
   // personal — which bureau they pull, inquiry reuse, preapproval). Added July
   // 2026; ALTERs are safe no-ops guarded by a column check on existing DBs.

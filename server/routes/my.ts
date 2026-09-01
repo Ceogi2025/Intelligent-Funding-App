@@ -88,4 +88,70 @@ router.delete('/accounts/:id', requireAuth, async (req: AuthRequest, res: Respon
   }
 })
 
+// ── My Blueprint ────────────────────────────────────────────────────────────
+// Saved plans. The member's own rows only, same isolation as accounts.
+
+router.get('/blueprints', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const pool = getPool()
+    const { rows } = await pool.query(
+      'SELECT * FROM member_blueprints WHERE user_id = $1 ORDER BY id DESC',
+      [req.user!.id]
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error('Blueprint load error:', err)
+    res.status(500).json({ error: 'Failed to load your blueprints' })
+  }
+})
+
+router.post('/blueprints', requireAuth, async (req: AuthRequest, res: Response) => {
+  const b = req.body || {}
+  const steps = Array.isArray(b.steps) ? b.steps : null
+  if (!steps || steps.length === 0) { res.status(400).json({ error: 'No steps to save' }); return }
+  const title = String(b.title || 'My funding blueprint').slice(0, 120)
+  const mode = ['build', 'borderline', 'ready'].includes(String(b.mode)) ? String(b.mode) : 'ready'
+  try {
+    const pool = getPool()
+    const { rows } = await pool.query(
+      `INSERT INTO member_blueprints (user_id, title, mode, answers, steps, done)
+       VALUES ($1,$2,$3,$4,$5,'[]') RETURNING id`,
+      [req.user!.id, title, mode, JSON.stringify(b.answers || {}), JSON.stringify(steps).slice(0, 60000)]
+    )
+    res.json({ id: rows[0].id })
+  } catch (err) {
+    console.error('Blueprint save error:', err)
+    res.status(500).json({ error: 'Failed to save' })
+  }
+})
+
+// Toggle completion. `done` is the full array of completed step numbers.
+router.patch('/blueprints/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id)
+  if (isNaN(id)) { res.status(400).json({ error: 'Bad id' }); return }
+  const done = Array.isArray(req.body?.done) ? req.body.done.filter((n: unknown) => Number.isInteger(n)) : []
+  try {
+    const pool = getPool()
+    await pool.query('UPDATE member_blueprints SET done = $1 WHERE id = $2 AND user_id = $3',
+      [JSON.stringify(done), id, req.user!.id])
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Blueprint update error:', err)
+    res.status(500).json({ error: 'Failed to update' })
+  }
+})
+
+router.delete('/blueprints/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id)
+  if (isNaN(id)) { res.status(400).json({ error: 'Bad id' }); return }
+  try {
+    const pool = getPool()
+    await pool.query('DELETE FROM member_blueprints WHERE id = $1 AND user_id = $2', [id, req.user!.id])
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Blueprint delete error:', err)
+    res.status(500).json({ error: 'Failed to delete' })
+  }
+})
+
 export default router

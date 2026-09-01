@@ -332,6 +332,97 @@ function rankBuilders(institutions: Institution[]): Rec[] {
   }).slice(0, 5)
 }
 
+// ─── The intake, as data ─────────────────────────────────────────────────────
+// One question per screen. Declared here rather than repeated in markup so the
+// order is obvious, every question is guaranteed to feed a rule, and the review
+// screen can render itself. `short` is the label used on the review summary.
+type QDef = {
+  key: keyof Answers
+  label: string
+  short: string
+  help?: string
+  optional?: boolean
+  options: { v: string; t: string }[]
+}
+const QUESTIONS: QDef[] = [
+  {
+    key: 'goal', short: 'Looking for', label: 'What are you hunting for?',
+    options: [
+      { v: 'everything', t: 'Maximum access (everything)' }, { v: 'cards', t: 'Credit cards + lines of credit' },
+      { v: 'loans', t: 'Loans' }, { v: 'business', t: 'Business funding' },
+    ],
+  },
+  {
+    key: 'score', short: 'Credit score', label: 'Where does your credit score land?',
+    help: 'If your credit card app shows a free FICO score, use that number. Free apps like Credit Karma show a different score that often runs higher than what card issuers actually pull. Between two bands? Pick the lower one.',
+    options: [
+      { v: 'under580', t: 'Under 580' }, { v: '580-639', t: '580 to 639' }, { v: '640-699', t: '640 to 699' },
+      { v: '700-749', t: '700 to 749' }, { v: '750plus', t: '750 or higher' },
+    ],
+  },
+  {
+    key: 'accounts', short: 'Open accounts', label: 'How many open credit accounts report on your file?',
+    help: 'Credit cards, loans, anything that shows up on your credit report. Lenders want to see roughly seven or eight.',
+    options: [
+      { v: '0-2', t: '0 to 2' }, { v: '3-5', t: '3 to 5' }, { v: '6-8', t: '6 to 8' }, { v: '9plus', t: '9 or more' },
+    ],
+  },
+  {
+    key: 'util', short: 'Utilization', label: 'How much of your credit limits are you using?',
+    help: 'Add up your card balances, divide by your total limits. A rough guess is fine.',
+    options: [
+      { v: 'under10', t: 'Under 10%' }, { v: '10-30', t: '10 to 30%' },
+      { v: '30-50', t: '30 to 50%' }, { v: 'over50', t: 'Over 50%' },
+    ],
+  },
+  {
+    key: 'lates', short: 'Late payments', label: 'Any late payments in the last 24 months?',
+    help: 'Only counts if it reached 30 days past due. A few days late costs a fee, not a credit hit.',
+    options: [{ v: 'none', t: 'None' }, { v: '1-2', t: '1 or 2' }, { v: '3plus', t: '3 or more' }],
+  },
+  {
+    key: 'derog', short: 'On your report', label: 'Any of these on your report right now?',
+    help: 'Pick the most serious one that applies.',
+    options: [
+      { v: 'none', t: 'None of these' }, { v: 'collections', t: 'A collection account' },
+      { v: 'chargeoff', t: 'A charge-off, repo, or judgment' }, { v: 'bk2yr', t: 'Bankruptcy in the last 2 years' },
+    ],
+  },
+  {
+    key: 'age', short: 'Oldest account', label: 'How old is your oldest account?',
+    options: [
+      { v: 'none', t: 'No credit history yet' }, { v: 'under1', t: 'Under 1 year' },
+      { v: '1-3', t: '1 to 3 years' }, { v: '3plus', t: '3 years or more' },
+    ],
+  },
+  {
+    key: 'inq', short: 'Recent inquiries', label: 'How many hard inquiries in the last 6 months?',
+    help: 'Every credit application creates one, approved or denied.',
+    options: [{ v: '0-2', t: '0 to 2' }, { v: '3-5', t: '3 to 5' }, { v: '6plus', t: '6 or more' }],
+  },
+  {
+    key: 'inqFocus', short: 'Inquiries land on', label: 'Are those inquiries concentrated on one bureau?',
+    help: 'If you have been applying at the same few places, they often pile onto one report. Not sure is a fine answer.',
+    options: [
+      { v: 'notsure', t: 'Not sure' }, { v: 'even', t: 'Spread evenly' }, { v: 'Experian', t: 'Mostly Experian' },
+      { v: 'Equifax', t: 'Mostly Equifax' }, { v: 'TransUnion', t: 'Mostly TransUnion' },
+    ],
+  },
+  {
+    key: 'cards24', short: 'New cards (24 mo)', label: 'How many new credit cards have you opened in the last 24 months?',
+    help: 'All banks combined. Chase auto-denies at five, so this one decides whether that door is open.',
+    options: [{ v: '0-1', t: '0 or 1' }, { v: '2-4', t: '2 to 4' }, { v: '5plus', t: '5 or more' }],
+  },
+  {
+    key: 'clean', short: 'Cleanest report', label: 'Which credit report is your cleanest?', optional: true,
+    help: 'Skip this if you do not know. It only fine-tunes which lane we start you in.',
+    options: [
+      { v: 'notsure', t: 'Not sure, skip this' }, { v: 'Experian', t: 'Experian' },
+      { v: 'Equifax', t: 'Equifax' }, { v: 'TransUnion', t: 'TransUnion' },
+    ],
+  },
+]
+
 // ─── The Funding Bridge ──────────────────────────────────────────────────────
 // What's open to you now, and what unlocks at each rung above you. Turns the
 // score from a number into a door you can watch getting closer. Built only
@@ -542,34 +633,6 @@ function RecCard({ rec, rank, maxPts }: { rec: Rec; rank: number; maxPts?: numbe
   )
 }
 
-function Question({ label, options, value, onPick }: {
-  label: string
-  options: { v: string; t: string }[]
-  value: string | null
-  onPick: (v: string) => void
-}) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 8 }}>{label}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {options.map(o => (
-          <button
-            key={o.v}
-            className="modal__option-btn"
-            onClick={() => onPick(o.v)}
-            style={{
-              flex: '0 1 auto', minWidth: 90, padding: '10px 14px', fontSize: '0.85rem',
-              ...(value === o.v ? { borderColor: 'var(--teal)', background: 'var(--badge-teal-bg)', color: 'var(--teal)' } : {}),
-            }}
-          >
-            {o.t}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export default function Strategy() {
   const { token } = useAuth()
   const navigate = useNavigate()
@@ -577,6 +640,7 @@ export default function Strategy() {
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null })
   const [built, setBuilt] = useState(false)
+  const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
   const [savedId, setSavedId] = useState<number | null>(null)
 
@@ -675,119 +739,104 @@ export default function Strategy() {
           what order. No guessing, no cookie-cutter lists.
         </p>
 
-        {!plan && (
-          <div className="guide__section">
-            <Question
-              label="What are you hunting for?"
-              value={answers.goal}
-              onPick={v => setAnswers(prev => ({ ...prev, goal: v as Goal }))}
-              options={[
-                { v: 'everything', t: 'Maximum access (everything)' }, { v: 'cards', t: 'Credit cards + lines' },
-                { v: 'loans', t: 'Loans' }, { v: 'business', t: 'Business funding' },
-              ]}
-            />
-            <Question
-              label="Where does your credit score land?"
-              value={answers.score}
-              onPick={v => setAnswers(prev => ({ ...prev, score: v as ScoreBand }))}
-              options={[
-                { v: 'under580', t: 'Under 580' }, { v: '580-639', t: '580–639' },
-                { v: '640-699', t: '640–699' }, { v: '700-749', t: '700–749' }, { v: '750plus', t: '750+' },
-              ]}
-            />
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '-10px 0 18px', lineHeight: 1.5 }}>
-              If your credit card app shows a free FICO score, use that number. Free apps like Credit Karma
-              show a different score that often runs higher than what card issuers actually pull. Between two
-              bands? Pick the lower one.
+        {!plan && (() => {
+          const q = QUESTIONS[step]
+          const onLast = step >= QUESTIONS.length
+          if (onLast) {
+            return (
+              <div className="guide__section">
+                <div style={{ fontSize: '0.74rem', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: 10 }}>
+                  That's everything
+                </div>
+                <h2 style={{ fontSize: '1.25rem', marginBottom: 14 }}>Ready to build your plan</h2>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 18 }}>
+                  {QUESTIONS.map((qq, i) => {
+                    const val = answers[qq.key] as string | null
+                    const opt = qq.options.find(o => o.v === val)
+                    return (
+                      <div key={qq.key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '7px 0', borderBottom: i < QUESTIONS.length - 1 ? '1px dashed var(--border)' : 'none' }}>
+                        <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>{qq.short}</span>
+                        <button
+                          onClick={() => setStep(i)}
+                          style={{ background: 'none', padding: 0, fontWeight: 700, fontSize: '0.86rem', color: 'var(--navy)', textAlign: 'right' }}
+                          title="Change this answer"
+                        >
+                          {opt ? opt.t : 'not set'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button className="btn btn--ghost" onClick={() => setStep(QUESTIONS.length - 1)}>← Back</button>
+                  <button
+                    className="btn btn--primary btn--lg"
+                    disabled={!complete}
+                    onClick={() => { track('engine_run'); setBuilt(true) }}
+                    style={{ opacity: complete ? 1 : 0.5 }}
+                  >
+                    Build My Strategy →
+                  </button>
+                </div>
+              </div>
+            )
+          }
+          return (
+            <div className="guide__section">
+              {/* Progress */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                  <span style={{ fontSize: '0.76rem', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                    Question {step + 1} of {QUESTIONS.length}
+                  </span>
+                  {q.optional && <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>optional</span>}
+                </div>
+                <div style={{ height: 6, borderRadius: 999, background: 'var(--badge-gray-bg)', overflow: 'hidden' }}>
+                  <div style={{ width: `${(step / QUESTIONS.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--navy), var(--teal))', transition: 'width .25s' }} />
+                </div>
+              </div>
+
+              <h2 style={{ fontSize: '1.3rem', lineHeight: 1.3, marginBottom: q.help ? 8 : 18 }}>{q.label}</h2>
+              {q.help && (
+                <p style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: 18 }}>{q.help}</p>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                {q.options.map(o => {
+                  const selected = answers[q.key] === o.v
+                  return (
+                    <button
+                      key={o.v}
+                      onClick={() => {
+                        setAnswers(prev => ({ ...prev, [q.key]: o.v }))
+                        window.setTimeout(() => setStep(s => s + 1), 130)
+                      }}
+                      style={{
+                        textAlign: 'left', padding: '15px 18px', borderRadius: 'var(--radius-lg)', fontSize: '1rem', fontWeight: 600,
+                        border: `2px solid ${selected ? 'var(--teal)' : 'var(--border)'}`,
+                        background: selected ? 'var(--badge-teal-bg)' : '#fff',
+                        color: selected ? 'var(--teal)' : 'var(--text-primary)',
+                        transition: 'all .15s',
+                      }}
+                    >
+                      {o.t}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {step > 0 && (
+                <button className="btn btn--ghost" onClick={() => setStep(s => Math.max(0, s - 1))}>← Back</button>
+              )}
             </div>
-            <Question
-              label="How many open credit accounts report on your file?"
-              value={answers.accounts}
-              onPick={v => setAnswers(prev => ({ ...prev, accounts: v as Accounts }))}
-              options={[
-                { v: '0-2', t: '0–2' }, { v: '3-5', t: '3–5' },
-                { v: '6-8', t: '6–8' }, { v: '9plus', t: '9 or more' },
-              ]}
-            />
-            <Question
-              label="Credit card utilization right now?"
-              value={answers.util}
-              onPick={v => setAnswers(prev => ({ ...prev, util: v as Util }))}
-              options={[
-                { v: 'under10', t: 'Under 10%' }, { v: '10-30', t: '10–30%' },
-                { v: '30-50', t: '30–50%' }, { v: 'over50', t: 'Over 50%' },
-              ]}
-            />
-            <Question
-              label="Late payments in the last 24 months?"
-              value={answers.lates}
-              onPick={v => setAnswers(prev => ({ ...prev, lates: v as Lates }))}
-              options={[{ v: 'none', t: 'None' }, { v: '1-2', t: '1–2' }, { v: '3plus', t: '3 or more' }]}
-            />
-            <Question
-              label="Any of these on your report right now? (pick the most serious)"
-              value={answers.derog}
-              onPick={v => setAnswers(prev => ({ ...prev, derog: v as Derog }))}
-              options={[
-                { v: 'none', t: 'None of these' }, { v: 'collections', t: 'Collection account' },
-                { v: 'chargeoff', t: 'Charge-off / repo / judgment' }, { v: 'bk2yr', t: 'Bankruptcy (last 2 yrs)' },
-              ]}
-            />
-            <Question
-              label="Age of your oldest account?"
-              value={answers.age}
-              onPick={v => setAnswers(prev => ({ ...prev, age: v as Age }))}
-              options={[
-                { v: 'none', t: 'No credit yet' }, { v: 'under1', t: 'Under 1 year' },
-                { v: '1-3', t: '1–3 years' }, { v: '3plus', t: '3+ years' },
-              ]}
-            />
-            <Question
-              label="Hard inquiries in the last 6 months?"
-              value={answers.inq}
-              onPick={v => setAnswers(prev => ({ ...prev, inq: v as Inq }))}
-              options={[{ v: '0-2', t: '0–2' }, { v: '3-5', t: '3–5' }, { v: '6plus', t: '6 or more' }]}
-            />
-            <Question
-              label="Are those inquiries concentrated on one bureau?"
-              value={answers.inqFocus}
-              onPick={v => setAnswers(prev => ({ ...prev, inqFocus: v as InqFocus }))}
-              options={[
-                { v: 'notsure', t: 'Not sure' }, { v: 'even', t: 'Spread evenly' },
-                { v: 'Experian', t: 'Mostly Experian' }, { v: 'Equifax', t: 'Mostly Equifax' },
-                { v: 'TransUnion', t: 'Mostly TransUnion' },
-              ]}
-            />
-            <Question
-              label="New cards opened in the last 24 months? (all banks combined)"
-              value={answers.cards24}
-              onPick={v => setAnswers(prev => ({ ...prev, cards24: v as Cards24 }))}
-              options={[{ v: '0-1', t: '0–1' }, { v: '2-4', t: '2–4' }, { v: '5plus', t: '5 or more' }]}
-            />
-            <Question
-              label="Which credit report is your cleanest? (optional, skip if unsure)"
-              value={answers.clean}
-              onPick={v => setAnswers(prev => ({ ...prev, clean: v as CleanBureau }))}
-              options={[
-                { v: 'Experian', t: 'Experian' }, { v: 'Equifax', t: 'Equifax' },
-                { v: 'TransUnion', t: 'TransUnion' }, { v: 'notsure', t: 'Not sure' },
-              ]}
-            />
-            <button
-              className="btn btn--primary btn--lg"
-              disabled={!complete}
-              onClick={() => { track('engine_run'); setBuilt(true) }}
-              style={{ marginTop: 6, opacity: complete ? 1 : 0.5 }}
-            >
-              Build My Strategy →
-            </button>
-          </div>
-        )}
+          )
+        })()}
+
 
         {plan && (
           <>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-              <button className="btn btn--ghost" onClick={() => { setBuilt(false); setSavedId(null) }} style={{ display: 'inline-flex', gap: 6 }}>
+              <button className="btn btn--ghost" onClick={() => { setBuilt(false); setSavedId(null); setStep(0) }} style={{ display: 'inline-flex', gap: 6 }}>
                 <RefreshCw size={14} /> Change my answers
               </button>
               <button

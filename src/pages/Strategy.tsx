@@ -289,6 +289,11 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
       why.push('Inquiry reuse: one pull can cover multiple products here')
     }
     for (const s of top) { why.push(...s.why); caution.push(...s.caution) }
+    // Who can actually open an account here
+    const acc = accessInfo(inst)
+    points -= acc.penalty
+    if (acc.tier === 'military' || acc.tier === 'regional') caution.push(acc.label)
+    else if (acc.tier === 'joinable') why.push(acc.label)
     // Issuer rules, annotation-level, subordinate to the access math
     const issuer = issuerAnnotate(inst.name, a.cards24)
     points += issuer.boost
@@ -296,7 +301,7 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
     caution.push(...issuer.caution)
     if (points > 0) recs.push({ inst, products: top.map(s => s.p), points, why: [...new Set(why)], caution: [...new Set(caution)] })
   }
-  return recs.sort((x, y) => y.points - x.points).slice(0, 3)
+  return ensureOpenAccess(recs.sort((x, y) => y.points - x.points).slice(0, 3))
 }
 
 function rankBuilders(institutions: Institution[]): Rec[] {
@@ -320,16 +325,53 @@ function rankBuilders(institutions: Institution[]): Rec[] {
       }
       if (inst.inquiry_reuse === 'Yes') { points += 1; why.push('Allows inquiry reuse later') }
       if (p.existing_customer_required === 'Yes') { points -= 1; caution.push('Existing-customer relationship required first') }
+      const acc = accessInfo(inst)
+      points -= acc.penalty
+      if (acc.tier === 'military' || acc.tier === 'regional') caution.push(acc.label)
+      else if (acc.tier === 'joinable') why.push(acc.label)
       recs.push({ inst, products: [p], points, why, caution })
     }
   }
   // One product per institution, so the plan spreads across issuers instead of
   // stacking five cards at one bank.
   const seen = new Set<number>()
-  return recs.sort((x, y) => y.points - x.points).filter(r => {
+  const ranked = recs.sort((x, y) => y.points - x.points).filter(r => {
     if (seen.has(r.inst.id)) return false
     seen.add(r.inst.id); return true
   }).slice(0, 5)
+  return ensureOpenAccess(ranked)
+}
+
+// ─── Who can actually open this? ─────────────────────────────────────────────
+// A plan full of military-only credit unions is useless to a civilian. The
+// engine ranks OPEN access first, labels every gate honestly, and never lets
+// the top of a list be entirely gated. Gated institutions are still shown,
+// because they're excellent if you happen to qualify.
+type AccessTier = 'open' | 'joinable' | 'regional' | 'military'
+function accessInfo(inst: Institution): { tier: AccessTier; label: string; penalty: number } {
+  const g = (inst.geographic_restrictions || '').toLowerCase()
+  if (/military|veteran|\bdod\b|armed forces/.test(g) && !/not military-only|anyone can apply/.test(g)) {
+    return { tier: 'military', label: 'Military / family only', penalty: 4 }
+  }
+  // Nationwide but you join something first (ACC, a community charter, a state
+  // association). Still open to anyone, so barely penalised — and we say how.
+  if (/acc |american consumer council|community charter|online membership|membership via|association/.test(g)) {
+    return { tier: 'joinable', label: 'Open to anyone (join to qualify)', penalty: 0 }
+  }
+  if (/nationwide|anyone/.test(g)) return { tier: 'open', label: 'Open to anyone', penalty: 0 }
+  return { tier: 'regional', label: `Regional: ${inst.geographic_restrictions}`, penalty: 2 }
+}
+
+// Guarantee the top of a list isn't all gated. If the first two entries are
+// both restricted, pull the best open option up into second place.
+function ensureOpenAccess(recs: Rec[]): Rec[] {
+  const gated = (r: Rec) => ['military', 'regional'].includes(accessInfo(r.inst).tier)
+  if (recs.length < 2 || !recs.slice(0, 2).every(gated)) return recs
+  const i = recs.findIndex(r => !gated(r))
+  if (i < 2) return recs
+  const [open] = recs.splice(i, 1)
+  recs.splice(1, 0, open)
+  return recs
 }
 
 // ─── The intake, as data ─────────────────────────────────────────────────────
@@ -702,6 +744,12 @@ export default function Strategy() {
 
     const mode = notReady ? 'build' as const : borderline ? 'borderline' as const : 'ready' as const
     const builders = rankBuilders(institutions)
+    // Gated institutions are excellent IF you qualify, so we offer them
+    // separately rather than letting them crowd out options everyone can open.
+    const openIds = new Set(builders.map(b => b.inst.id))
+    const gatedBuilders = rankBuilders(
+      institutions.filter(i => !openIds.has(i.id) && ['military', 'regional'].includes(accessInfo(i).tier))
+    ).slice(0, 3)
     const lanes = ordered.map(b => ({ bureau: b, recs: rankCapital(institutions, b, a), hold: burnedLane(b) }))
     // Fit % is RELATIVE to the strongest match in this member's own results —
     // derived from the same points the ranking already uses, never invented.
@@ -713,6 +761,7 @@ export default function Strategy() {
       thinFile,
       buildingFile,
       builders,
+      gatedBuilders,
       lanes,
       maxPts,
       plays: buildPlays(a, mode),
@@ -957,6 +1006,22 @@ export default function Strategy() {
                   </ul>
                 </div>
                 {plan.builders.map((r, i) => <RecCard key={`${r.inst.id}-${r.products[0].id}`} rec={r} rank={i + 1} maxPts={plan.maxPts} />)}
+
+                {plan.gatedBuilders.length > 0 && (
+                  <div style={{ marginTop: 16, border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, background: 'var(--badge-gray-bg)' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem', marginBottom: 6 }}>If you qualify, these are worth a look too</div>
+                    <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>
+                      Everything above is open to anyone. These have a membership or regional requirement, so they
+                      are not in your main plan, but they are strong products if you happen to be eligible.
+                    </p>
+                    {plan.gatedBuilders.map(r => (
+                      <div key={r.inst.id} style={{ fontSize: '0.86rem', marginBottom: 6 }}>
+                        <b>{r.inst.name}</b> · {r.products[0].name}
+                        <span style={{ color: 'var(--text-secondary)' }}> — {accessInfo(r.inst).label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

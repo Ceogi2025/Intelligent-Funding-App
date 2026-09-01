@@ -317,7 +317,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: 'Same Day',
     preapproval_available: 'Yes',
     soft_pull_available: 'Yes',
-    geographic_restrictions: 'Nationwide',
+    geographic_restrictions: 'Nationwide, genuinely open. Verified Sep 2026 on penfed.org: \'Everyone is eligible to apply.\' No military service required.',
     application_url: 'https://www.penfed.org',
     path: 'Both',
     products: [
@@ -334,7 +334,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: '30 Days',
     preapproval_available: 'No',
     soft_pull_available: 'No',
-    geographic_restrictions: 'Nationwide',
+    geographic_restrictions: 'Nationwide, genuinely open. Verified Sep 2026 on alliantcreditunion.org: \'Anyone can apply to be an Alliant member.\' If no other route fits, choose the Alliant Credit Union Foundation option during the application and Alliant pays the one-time $5 membership fee for you. Non-US residents can apply with an SSN or a valid ITIN.',
     application_url: 'https://www.alliantcreditunion.org',
     path: 'Capital Access',
     products: [

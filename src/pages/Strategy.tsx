@@ -367,7 +367,7 @@ function accessInfo(inst: Institution): { tier: AccessTier; label: string; penal
     // of membership, and auditing found real cases where "Nationwide" actually
     // meant employer- or state-gated. Say "confirm you qualify" rather than
     // sending someone to a door that may not open.
-    if (inst.type === 'Credit Union' && !/acc |american consumer council|charter|donation|association|membership via|online membership/.test(g)) {
+    if (inst.type === 'Credit Union' && !/acc |american consumer council|charter|donation|association|membership via|online membership|everyone is eligible|anyone can apply|foundation|genuinely open/.test(g)) {
       return { tier: 'joinable', label: 'Confirm you qualify to join (credit union)', penalty: 1 }
     }
     return { tier: 'open', label: 'Open to anyone', penalty: 0 }

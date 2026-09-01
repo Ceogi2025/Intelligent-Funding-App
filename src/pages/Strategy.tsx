@@ -48,6 +48,10 @@ type Answers = {
   inqFocus: InqFocus | null
   cards24: Cards24 | null
   clean: CleanBureau | null
+  // business branch
+  bizTib: BizTIB | null
+  bizRev: BizRev | null
+  bizEntity: BizEntity | null
 }
 
 // What the member is hunting for decides which product types the lanes carry.
@@ -59,6 +63,18 @@ const GOAL_TYPES: Record<Goal, string[]> = {
   business: [],
   everything: ['Unsecured Card', 'Line of Credit', 'Personal Loan'],
 }
+
+
+// ─── The business branch ─────────────────────────────────────────────────────
+// Picking "business funding" used to run the member through nine PERSONAL
+// credit questions and then hand them a directory link, because GOAL_TYPES
+// mapped business to an empty list. A business owner needs different inputs:
+// how long the business has existed, whether money moves through it, whether
+// the entity exists yet, and their personal score (because a personal
+// guarantee applies to most business credit).
+type BizTIB = 'none' | 'under6' | '6-12' | '1-2' | '2plus'
+type BizRev = 'none' | 'under5k' | '5-15k' | '15kplus'
+type BizEntity = 'none' | 'entity-no-bank' | 'entity-and-bank'
 
 // ─── The strategy brain: issuer rules ────────────────────────────────────────
 // Widely reported community knowledge (5/24 and friends), not official bank
@@ -471,6 +487,119 @@ const QUESTIONS: QDef[] = [
   },
 ]
 
+
+// Four questions, each mapped to a field the business directory can filter on.
+const BIZ_QUESTIONS: QDef[] = [
+  {
+    key: 'bizEntity', short: 'Business setup', label: 'Where is your business set up?',
+    help: 'Lenders want to see a real entity and a business bank account with money moving through it. If you do not have those yet, that is the first move and we will show you how.',
+    options: [
+      { v: 'none', t: 'No entity or EIN yet' },
+      { v: 'entity-no-bank', t: 'Entity + EIN, no business bank account' },
+      { v: 'entity-and-bank', t: 'Entity, EIN, and a business bank account' },
+    ],
+  },
+  {
+    key: 'bizTib', short: 'Time in business', label: 'How long has the business existed?',
+    help: 'Counted from when you registered. Many lenders have a minimum, and plenty of good ones do not.',
+    options: [
+      { v: 'none', t: 'Not started yet' }, { v: 'under6', t: 'Under 6 months' },
+      { v: '6-12', t: '6 to 12 months' }, { v: '1-2', t: '1 to 2 years' }, { v: '2plus', t: '2 years or more' },
+    ],
+  },
+  {
+    key: 'bizRev', short: 'Monthly revenue', label: 'Roughly how much revenue runs through the business each month?',
+    help: 'No-doc lenders read your DEPOSIT ACTIVITY, not your tax returns. Money moving through a business checking account is the proof they underwrite.',
+    options: [
+      { v: 'none', t: 'No revenue yet' }, { v: 'under5k', t: 'Under $5,000' },
+      { v: '5-15k', t: '$5,000 to $15,000' }, { v: '15kplus', t: '$15,000 or more' },
+    ],
+  },
+  {
+    key: 'score', short: 'Personal score', label: 'Where does your PERSONAL credit score land?',
+    help: 'Most business credit still carries a personal guarantee, so your personal score matters even for an EIN-only hunt. We will flag the lenders that do not require one.',
+    options: [
+      { v: 'under580', t: 'Under 580' }, { v: '580-639', t: '580 to 639' }, { v: '640-699', t: '640 to 699' },
+      { v: '700-749', t: '700 to 749' }, { v: '750plus', t: '750 or higher' },
+    ],
+  },
+]
+
+
+// ─── Business matcher ────────────────────────────────────────────────────────
+// Ranks the business directory against the four business answers. Load-all
+// philosophy holds: time in business and personal guarantee are FILTERS that
+// order the list, never walls that hide products.
+type BizProd = {
+  id: number; name: string; product_type: string | null; docs_required: string
+  personal_guarantee: string; time_in_business: string; min_fico: string
+  credit_pull: string; funding_amount: string | null; revenue_required: string; notes: string | null
+}
+type BizInst = { id: number; name: string; access: string; application_url: string | null; products: BizProd[] }
+type BizRec = { inst: BizInst; product: BizProd; points: number; why: string[]; caution: string[] }
+
+const TIB_MONTHS: Record<BizTIB, number> = { none: 0, under6: 3, '6-12': 9, '1-2': 18, '2plus': 30 }
+const REV_MONTHLY: Record<BizRev, number> = { none: 0, under5k: 2500, '5-15k': 10000, '15kplus': 20000 }
+
+function requiredMonths(t: string): number {
+  const s = (t || '').toLowerCase()
+  if (/pre-revenue|startup|no minimum|not published/.test(s)) return 0
+  const yr = s.match(/(\d+)\+?\s*year/)
+  if (yr) return parseInt(yr[1]) * 12
+  const mo = s.match(/(\d+)\+?\s*month/)
+  if (mo) return parseInt(mo[1])
+  return 0
+}
+function requiredRevenue(r: string): number {
+  const m = (r || '').replace(/,/g, '').match(/\$(\d+)/)
+  if (!m) return 0
+  const n = parseInt(m[1])
+  return /year|annual/i.test(r) ? Math.round(n / 12) : n
+}
+
+function rankBusiness(list: BizInst[], a: Answers): BizRec[] {
+  const months = a.bizTib ? TIB_MONTHS[a.bizTib] : 0
+  const rev = a.bizRev ? REV_MONTHLY[a.bizRev] : 0
+  const score = a.score ? SCORE_FLOOR[a.score] : 0
+  const recs: BizRec[] = []
+  for (const inst of list) {
+    for (const p of inst.products || []) {
+      let pts = 1
+      const why: string[] = []
+      const caution: string[] = []
+      const needM = requiredMonths(p.time_in_business)
+      const needR = requiredRevenue(p.revenue_required)
+      const pg = (p.personal_guarantee || '').toLowerCase()
+      const docs = (p.docs_required || '').toLowerCase()
+
+      if (needM === 0) { pts += 3; why.push('No time-in-business minimum published') }
+      else if (months >= needM) { pts += 2; why.push(`Time in business fits (needs ${p.time_in_business})`) }
+      else { pts -= 4; caution.push(`Needs ${p.time_in_business}, you are not there yet`) }
+
+      if (needR === 0) { pts += 1 }
+      else if (rev >= needR) { pts += 2; why.push(`Revenue fits (needs ${p.revenue_required})`) }
+      else { pts -= 3; caution.push(`Revenue requirement: ${p.revenue_required}`) }
+
+      if (/ein-only|no personal guarantee/.test(pg)) { pts += 3; why.push('EIN-only, no personal guarantee') }
+      else if (/pg required/.test(pg)) {
+        caution.push('Personal guarantee required')
+        if (score && score < 640) { pts -= 2; caution.push('PG plus a sub-640 personal score is a hard combination') }
+      }
+      if (/no-doc|low-doc|no\/low-doc|bank statement|connect/.test(docs)) { pts += 2; why.push('No tax returns required') }
+      if (/soft|no hard/.test((p.credit_pull || '').toLowerCase())) { pts += 2; why.push('Soft pull, no score damage to apply') }
+      if (/0% intro/.test((p.notes || '').toLowerCase())) { pts += 2; why.push('0% intro APR offer') }
+      if (/membership|existing|customers/.test((inst.access || '').toLowerCase())) { pts -= 1; caution.push('Requires an existing account or membership first') }
+
+      recs.push({ inst, product: p, points: pts, why, caution })
+    }
+  }
+  const seen = new Set<number>()
+  return recs.sort((x, y) => y.points - x.points).filter(r => {
+    if (seen.has(r.inst.id)) return false
+    seen.add(r.inst.id); return true
+  }).slice(0, 6)
+}
+
 // ─── The Funding Bridge ──────────────────────────────────────────────────────
 // What's open to you now, and what unlocks at each rung above you. Turns the
 // score from a number into a door you can watch getting closer. Built only
@@ -686,7 +815,8 @@ export default function Strategy() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null })
+  const [bizList, setBizList] = useState<BizInst[]>([])
+  const [answers, setAnswers] = useState<Answers>({ goal: null, score: null, accounts: null, util: null, lates: null, derog: null, age: null, inq: null, inqFocus: null, cards24: null, clean: null, bizTib: null, bizRev: null, bizEntity: null })
   const [built, setBuilt] = useState(false)
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -698,13 +828,27 @@ export default function Strategy() {
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then((data: Institution[]) => { if (Array.isArray(data)) setInstitutions(data) })
       .catch(() => {})
+    fetch('/api/business-lenders', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then((d: BizInst[]) => { if (Array.isArray(d)) setBizList(d) })
+      .catch(() => {})
   }, [token])
 
-  const complete = answers.goal && answers.score && answers.accounts && answers.util && answers.lates
-    && answers.derog && answers.age && answers.inq && answers.inqFocus
+  const complete = answers.goal === 'business'
+    ? !!(answers.goal && answers.bizEntity && answers.bizTib && answers.bizRev && answers.score)
+    : !!(answers.goal && answers.score && answers.accounts && answers.util && answers.lates
+      && answers.derog && answers.age && answers.inq && answers.inqFocus)
+
+  // The business branch has its own plan shape. It never runs the personal
+  // lane engine, which is what used to leave every lane empty.
+  const bizPlan = useMemo(() => {
+    if (!built || !complete || answers.goal !== 'business') return null
+    const needsFoundation = answers.bizEntity !== 'entity-and-bank'
+    return { recs: rankBusiness(bizList, answers), needsFoundation, locked: bizList.length === 0 }
+  }, [built, complete, answers, bizList])
 
   const plan = useMemo(() => {
-    if (!built || !complete) return null
+    if (!built || !complete || answers.goal === 'business') return null
     const a = answers
 
     // ── HARD BLOCKERS ────────────────────────────────────────────────────────
@@ -794,9 +938,11 @@ export default function Strategy() {
           what order. No guessing, no cookie-cutter lists.
         </p>
 
-        {!plan && (() => {
-          const q = QUESTIONS[step]
-          const onLast = step >= QUESTIONS.length
+        {!plan && !bizPlan && (() => {
+          // Business branches into its own set after the first question.
+          const ACTIVE = answers.goal === 'business' ? [QUESTIONS[0], ...BIZ_QUESTIONS] : QUESTIONS
+          const q = ACTIVE[step]
+          const onLast = step >= ACTIVE.length
           if (onLast) {
             return (
               <div className="guide__section">
@@ -807,7 +953,7 @@ export default function Strategy() {
                 }} className="fade-up">
                   <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: 8 }}>🎯</div>
                   <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: '#67e8f9' }}>
-                    All {QUESTIONS.length} answered
+                    All {ACTIVE.length} answered
                   </div>
                   <h2 style={{ fontSize: '1.5rem', margin: '4px 0 6px' }}>Your blueprint is ready to build</h2>
                   <p style={{ fontSize: '0.88rem', opacity: 0.9, margin: 0 }}>
@@ -815,11 +961,11 @@ export default function Strategy() {
                   </p>
                 </div>
                 <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 18 }}>
-                  {QUESTIONS.map((qq, i) => {
+                  {ACTIVE.map((qq, i) => {
                     const val = answers[qq.key] as string | null
                     const opt = qq.options.find(o => o.v === val)
                     return (
-                      <div key={qq.key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '7px 0', borderBottom: i < QUESTIONS.length - 1 ? '1px dashed var(--border)' : 'none' }}>
+                      <div key={qq.key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '7px 0', borderBottom: i < ACTIVE.length - 1 ? '1px dashed var(--border)' : 'none' }}>
                         <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>{qq.short}</span>
                         <button
                           onClick={() => setStep(i)}
@@ -833,7 +979,7 @@ export default function Strategy() {
                   })}
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn btn--ghost" onClick={() => setStep(QUESTIONS.length - 1)}>← Back</button>
+                  <button className="btn btn--ghost" onClick={() => setStep(ACTIVE.length - 1)}>← Back</button>
                   <button
                     className="btn btn--primary btn--lg"
                     disabled={!complete}
@@ -852,12 +998,12 @@ export default function Strategy() {
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
                   <span style={{ fontSize: '0.76rem', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                    Question {step + 1} of {QUESTIONS.length}
+                    Question {step + 1} of {ACTIVE.length}
                   </span>
                   {q.optional && <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>optional</span>}
                 </div>
                 <div style={{ height: 6, borderRadius: 999, background: 'var(--badge-gray-bg)', overflow: 'hidden' }}>
-                  <div style={{ width: `${(step / QUESTIONS.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--navy), var(--teal))', transition: 'width .25s' }} />
+                  <div style={{ width: `${(step / ACTIVE.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--navy), var(--teal))', transition: 'width .25s' }} />
                 </div>
               </div>
 
@@ -906,6 +1052,84 @@ export default function Strategy() {
         })()}
 
 
+
+        {bizPlan && (
+          <>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+              <button className="btn btn--ghost" onClick={() => { setBuilt(false); setSavedId(null); setStep(0) }} style={{ display: 'inline-flex', gap: 6 }}>
+                <RefreshCw size={14} /> Change my answers
+              </button>
+              <button className="btn btn--teal" onClick={() => navigate('/business')} style={{ display: 'inline-flex', gap: 6 }}>
+                Browse all business lenders →
+              </button>
+            </div>
+
+            {bizPlan.needsFoundation && (
+              <div className="guide__section">
+                <h2 className="guide__section-title"><ShieldCheck size={16} style={{ verticalAlign: -3 }} /> First: build the foundation</h2>
+                <div className="guide__body">
+                  <p>
+                    {answers.bizEntity === 'none'
+                      ? <>You do not have an entity or EIN yet, and almost nothing below will approve without them. This is the cheapest step in the whole plan: <b>the EIN is free from the IRS and takes about 10 minutes</b>, and forming the entity is a state filing.</>
+                      : <>You have the entity and EIN. The missing piece is a <b>business bank account</b>, and it matters more than people expect: no-doc lenders underwrite your DEPOSIT ACTIVITY, not your tax returns. No business account means no deposit history to read.</>}
+                  </p>
+                  <ul>
+                    {answers.bizEntity === 'none' && <li>Get your EIN free at IRS.gov, then register the entity with your state.</li>}
+                    <li>Open a business checking account and run consistent deposits through it, roughly $250 a week for 12 weeks builds a readable record.</li>
+                    <li>Keep it separate from personal from day one. Mixed money is what kills these applications.</li>
+                    <li>The <span style={{ color: 'var(--teal)', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigate('/resources')}>Business Setup Toolkit</span> in Resources links every official source, and the essentials are free.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            <div className="guide__section">
+              <h2 className="guide__section-title"><TrendingUp size={16} style={{ verticalAlign: -3 }} /> Your business funding matches</h2>
+              {bizPlan.locked ? (
+                <div className="guide__body"><p>Business lender data loads for members. If you are on the trial, the full business directory unlocks with membership.</p></div>
+              ) : bizPlan.recs.length === 0 ? (
+                <div className="guide__body"><p>No strong matches yet for this profile. Work the foundation steps above and re-run in 90 days.</p></div>
+              ) : (
+                bizPlan.recs.map((r, i) => (
+                  <div key={`${r.inst.id}-${r.product.id}`} className="institution-card" style={{ marginBottom: 10, cursor: 'pointer' }} onClick={() => navigate('/business')}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                      <span style={{ fontWeight: 800, color: 'var(--teal)', fontSize: '0.9rem' }}>{i + 1}.</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '1.02rem' }}>{r.inst.name}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {r.product.name}{r.product.product_type ? ` · ${r.product.product_type}` : ''}
+                          {r.product.funding_amount ? ` · ${r.product.funding_amount}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                      {r.why.map(w => <Chip key={w} label={w} tone="green" />)}
+                      {r.caution.map(c => <Chip key={c} label={c} tone="amber" />)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="guide__section">
+              <h2 className="guide__section-title">How to run this</h2>
+              <div className="guide__body">
+                <ul>
+                  <li>Start with anything marked <b>soft pull</b>. Those cost you nothing to test.</li>
+                  <li><b>EIN-only</b> products keep the debt off your personal report. Where a personal guarantee applies, your personal score still matters and delinquency still reports.</li>
+                  <li>Business cards mostly do not report to your personal bureaus, which is why this path stays open when your personal inquiry lanes are burned.</li>
+                  <li><b><Phone size={13} style={{ verticalAlign: -2 }} /> Call and confirm</b> time-in-business and revenue requirements before applying. These move more often than card terms.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="guide__disclaimer">
+              Educational matching against our verified business directory, not financial advice, and no approval
+              is guaranteed. A business entity does not shield you from business debt where you signed a personal
+              guarantee. Confirm every requirement directly with the institution before applying.
+            </div>
+          </>
+        )}
         {plan && (
           <>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>

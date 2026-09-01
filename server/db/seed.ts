@@ -445,7 +445,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: 'Not Found',
     preapproval_available: 'Not Found',
     soft_pull_available: 'Not Found',
-    geographic_restrictions: 'Maryland-based; membership open beyond MD via association (not state-employee-only)',
+    geographic_restrictions: 'Maryland: the site states you must live or work in MD. Many entry routes though, employer partners, University System of Maryland alumni/students/staff, state agencies, family of a member, plus a one-time donation to the SECU MD Foundation. $10 opens membership.',
     application_url: 'https://www.secumd.org',
     path: 'Both',
     verified_date: '2026-07-04',

@@ -285,7 +285,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: '30 Days',
     preapproval_available: 'No',
     soft_pull_available: 'No',
-    geographic_restrictions: 'Nationwide (military/DOD + community)',
+    geographic_restrictions: 'Nationwide, genuinely open. Verified Sep 2026 on servicecu.org: besides military, veterans and DoD, membership is open through the AMERICAN CONSUMER COUNCIL, and the page says join the ACC online FREE with promo code \'Service\'. The Financial Fitness Association is a second free route and Service CU says they will help you join.',
     application_url: 'https://www.servicecu.org',
     path: 'Capital Access',
     products: [
@@ -522,7 +522,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: 'Not Found',
     preapproval_available: 'Not Found',
     soft_pull_available: 'Not Found',
-    geographic_restrictions: 'Broad employer/community partner network (600+ orgs nationwide incl. federal agencies) + family of existing members',
+    geographic_restrictions: 'NOT open to the general public. Verified Sep 2026 on nwfcu.org: the become-a-member page lists only three routes, your workplace (their employer partners), a community organization you work for/volunteer with/belong to, or a government agency employer. No public association or donation route is named. Northern Virginia and DMV focused.',
     application_url: 'https://www.nwfcu.org',
     path: 'Capital Access',
     verified_date: '2026-07-05',
@@ -1238,7 +1238,7 @@ const allInstitutions: InstitutionRow[] = [
     inquiry_reuse_window: '30 Days',
     preapproval_available: 'No',
     soft_pull_available: 'No',
-    geographic_restrictions: 'Nationwide (community membership)',
+    geographic_restrictions: 'Nationwide, genuinely open. Verified Sep 2026 on connexuscu.org: \'Anyone in the U.S. is eligible to join.\' Route is a one-time $5 donation to the Connexus Association (100% goes to the Association, not the credit union), plus a $5 deposit into savings that stays yours. Free routes exist for family of a member and for partner employers and listed communities.',
     application_url: 'https://www.connexuscu.org',
     path: 'Capital Access',
     products: [

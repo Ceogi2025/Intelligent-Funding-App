@@ -227,10 +227,10 @@ export default function Landing() {
           <div className="how-it-works__steps">
             <div className="step">
               <div className="step__number">1</div>
-              <div className="step__title">Answer 10 questions</div>
+              <div className="step__title">Answer 9 quick questions</div>
               <p className="step__text">
-                One at a time, about two minutes. Your score, your accounts, your inquiries.
-                No documents, no credit check, nothing to connect.
+                One at a time, about two minutes. They match what Credit Karma already shows you,
+                so you can copy the numbers straight across. No documents, no credit check.
               </p>
             </div>
             <div className="step">

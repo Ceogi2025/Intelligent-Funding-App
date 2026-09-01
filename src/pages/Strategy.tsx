@@ -183,7 +183,7 @@ function buildPlays(a: Answers, mode: 'build' | 'borderline' | 'ready'): Play[] 
   if (mode !== 'build' && a.cards24 !== '5plus') {
     plays.push({
       title: 'The 5/24 Timing Note',
-      body: 'Only relevant if a Chase card is on your wishlist: Chase counts every card you opened in the last 24 months, across ALL banks, and auto-denies at 5. So if you want one, slot it at the very start of your spread, while your count is low. But do not confuse one famous card with the goal. The spread is what maximizes total access; Chase is one seat at that table, not the table.',
+      body: 'Only relevant if a Chase card is on your wishlist. Count the credit cards you have opened in the last 24 months across ALL banks, your Credit Karma account list makes this easy to check. Chase auto-denies at 5. So if you want one, slot it at the very start of your spread, while your count is low. But do not confuse one famous card with the goal. The spread is what maximizes total access; Chase is one seat at that table, not the table.',
     })
   }
   if (mode !== 'build' && a.cards24 === '5plus') {
@@ -422,57 +422,52 @@ const QUESTIONS: QDef[] = [
     ],
   },
   {
-    key: 'accounts', short: 'Open accounts', label: 'How many open credit accounts report on your file?',
-    help: 'Credit cards, loans, anything that shows up on your credit report. Lenders want to see roughly seven or eight.',
+    key: 'accounts', short: 'Total accounts', label: 'Total accounts',
+    help: 'Credit Karma shows this as Total Accounts. Use the open ones. Lenders want to see roughly seven or eight.',
     options: [
       { v: '0-2', t: '0 to 2' }, { v: '3-5', t: '3 to 5' }, { v: '6-8', t: '6 to 8' }, { v: '9plus', t: '9 or more' },
     ],
   },
   {
-    key: 'util', short: 'Utilization', label: 'How much of your credit limits are you using?',
-    help: 'Add up your card balances, divide by your total limits. A rough guess is fine.',
+    key: 'util', short: 'Credit card use', label: 'Credit card use',
+    help: 'Credit Karma calls this Credit Card Use. Copy the percentage it shows you, or estimate: card balances divided by total limits.',
     options: [
       { v: 'under10', t: 'Under 10%' }, { v: '10-30', t: '10 to 30%' },
       { v: '30-50', t: '30 to 50%' }, { v: 'over50', t: 'Over 50%' },
     ],
   },
   {
-    key: 'lates', short: 'Late payments', label: 'Any late payments in the last 24 months?',
-    help: 'Only counts if it reached 30 days past due. A few days late costs a fee, not a credit hit.',
+    key: 'lates', short: 'Payment history', label: 'Payment history',
+    help: 'Credit Karma shows this as a percentage. If yours is 100%, choose None. Anything below that means missed payments are reporting. Only counts once a payment hit 30 days late.',
     options: [{ v: 'none', t: 'None' }, { v: '1-2', t: '1 or 2' }, { v: '3plus', t: '3 or more' }],
   },
   {
-    key: 'derog', short: 'On your report', label: 'Any of these on your report right now?',
-    help: 'Pick the most serious one that applies.',
+    key: 'derog', short: 'Derogatory marks', label: 'Derogatory marks',
+    help: 'Credit Karma lists these under Derogatory Marks. Pick the most serious one showing on yours.',
     options: [
       { v: 'none', t: 'None of these' }, { v: 'collections', t: 'A collection account' },
       { v: 'chargeoff', t: 'A charge-off, repo, or judgment' }, { v: 'bk2yr', t: 'Bankruptcy in the last 2 years' },
     ],
   },
   {
-    key: 'age', short: 'Oldest account', label: 'How old is your oldest account?',
+    key: 'age', short: 'Credit age', label: 'Age of credit history',
     options: [
-      { v: 'none', t: 'No credit history yet' }, { v: 'under1', t: 'Under 1 year' },
+      { v: 'none', t: 'No credit history yet' }, { v: 'under1', t: 'Less than 1 year' },
       { v: '1-3', t: '1 to 3 years' }, { v: '3plus', t: '3 years or more' },
     ],
   },
   {
-    key: 'inq', short: 'Recent inquiries', label: 'How many hard inquiries in the last 6 months?',
-    help: 'Every credit application creates one, approved or denied.',
+    key: 'inq', short: 'Hard inquiries', label: 'Hard inquiries',
+    help: 'Credit Karma lists these under Hard Inquiries. Count the ones from the last 6 months. Every application creates one, approved or denied.',
     options: [{ v: '0-2', t: '0 to 2' }, { v: '3-5', t: '3 to 5' }, { v: '6plus', t: '6 or more' }],
   },
   {
-    key: 'inqFocus', short: 'Inquiries land on', label: 'Are those inquiries concentrated on one bureau?',
-    help: 'If you have been applying at the same few places, they often pile onto one report. Not sure is a fine answer.',
+    key: 'inqFocus', short: 'Inquiries land on', optional: true, label: 'Last one, and it is optional', 
+    help: 'Do you know which bureau your recent inquiries landed on? This is the only question Credit Karma cannot fully answer, since it shows TransUnion and Equifax but not Experian. It sharpens which lane we start you in, and "Not sure" is a perfectly good answer.',
     options: [
       { v: 'notsure', t: 'Not sure' }, { v: 'even', t: 'Spread evenly' }, { v: 'Experian', t: 'Mostly Experian' },
       { v: 'Equifax', t: 'Mostly Equifax' }, { v: 'TransUnion', t: 'Mostly TransUnion' },
     ],
-  },
-  {
-    key: 'cards24', short: 'New cards (24 mo)', label: 'How many new credit cards have you opened in the last 24 months?',
-    help: 'All banks combined. Chase auto-denies at five, so this one decides whether that door is open.',
-    options: [{ v: '0-1', t: '0 or 1' }, { v: '2-4', t: '2 to 4' }, { v: '5plus', t: '5 or more' }],
   },
 ]
 
@@ -706,7 +701,7 @@ export default function Strategy() {
   }, [token])
 
   const complete = answers.goal && answers.score && answers.accounts && answers.util && answers.lates
-    && answers.derog && answers.age && answers.inq && answers.inqFocus && answers.cards24
+    && answers.derog && answers.age && answers.inq && answers.inqFocus
 
   const plan = useMemo(() => {
     if (!built || !complete) return null
@@ -812,7 +807,7 @@ export default function Strategy() {
                 }} className="fade-up">
                   <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: 8 }}>🎯</div>
                   <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: '#67e8f9' }}>
-                    All 10 answered
+                    All {QUESTIONS.length} answered
                   </div>
                   <h2 style={{ fontSize: '1.5rem', margin: '4px 0 6px' }}>Your blueprint is ready to build</h2>
                   <p style={{ fontSize: '0.88rem', opacity: 0.9, margin: 0 }}>

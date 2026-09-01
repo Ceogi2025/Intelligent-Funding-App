@@ -257,6 +257,12 @@ function rankCapital(institutions: Institution[], bureau: Bureau, a: Answers): R
       if (p.minimum_credit_score != null) {
         if (floor >= p.minimum_credit_score) { pts += 2; why.push(`Score fit, needs ~${p.minimum_credit_score}+`) }
         else { pts -= 3; caution.push(`Published minimum ~${p.minimum_credit_score} is above your band`) }
+      } else if (p.preapproval_available !== 'Yes' && inst.soft_pull_available !== 'Yes') {
+        // No published score requirement AND no free way to check. Applying is
+        // a guess paid for with a hard pull, so say so and rank it below
+        // options the member can test for free.
+        pts -= 1
+        caution.push('No published score requirement and no free way to check, so this one is a guess')
       }
       if (p.bureau_pulled === 'All 3') { pts -= 1; caution.push('Pulls all three bureaus, spend this one wisely') }
       if (p.bureau_pulled === 'Varies by state') { pts -= 1; caution.push('Bureau varies by state, call and ask before you apply') }

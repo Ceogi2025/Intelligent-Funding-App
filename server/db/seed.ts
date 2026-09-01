@@ -976,7 +976,7 @@ const allInstitutions: InstitutionRow[] = [
     path: 'Capital Access',
     verified_date: '2026-07-05',
     products: [
-      { name: 'Upstart Personal Loan', type: 'Personal Loan', bureau_pulled: 'Not Verified', reports_to: 'Not Verified', inquiry_reuse_eligible: 'Not Verified', preapproval_available: 'Yes', minimum_credit_score: null, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', strategy_notes: 'Genuinely multi-bureau, not a single answer — an adverse action notice on myFICO showed Upstart pulling TransUnion FICO 8, TransUnion VantageScore, AND Equifax VantageScore in one application. Soft-pull rate check is OFFICIAL and repeatedly confirmed, no credit impact. Uses AI/alternative-data underwriting (income, education) alongside credit history.' },
+      { name: 'Upstart Personal Loan', type: 'Personal Loan', bureau_pulled: 'Not Verified', reports_to: 'Not Verified', inquiry_reuse_eligible: 'Not Verified', minimum_credit_score: null, deposit_amount: 'N/A', annual_fee: 'None', graduation_potential: 'N/A', graduation_timeline: 'N/A', existing_customer_required: 'No', preapproval_available: 'Yes', strategy_notes: 'Verified Sep 2026 on upstart.com. No minimum credit score is published, and that is the point: Upstart states its model looks at MORE than your credit score, weighing income and employment history too, and they market to people with insufficient credit history. Loans $1,000 to $75,000, APR 6.3% to 35.99% at time of check. CHECKING YOUR RATE IS A SOFT PULL and does not affect your score, so a thin-file or lower-score member can find out for free instead of guessing.', verified_date: '2026-09-01'},
     ],
   },
 

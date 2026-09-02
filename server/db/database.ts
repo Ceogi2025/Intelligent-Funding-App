@@ -285,6 +285,20 @@ export async function initSchema(): Promise<void> {
     )
   `)
 
+  // ── Email log ────────────────────────────────────────────────────────────
+  // One row per (member, email kind). A scheduler that double-fires, or a
+  // retry after a timeout, must never send the same member the same email
+  // twice — that reads as spam and costs trust we cannot buy back.
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS email_log (
+      id ${pk},
+      user_id INTEGER NOT NULL,
+      kind TEXT NOT NULL,
+      sent_at ${now}
+    )
+  `)
+  await p.query('CREATE UNIQUE INDEX IF NOT EXISTS email_log_user_kind ON email_log (user_id, kind)')
+
   // ── Seed version marker ──────────────────────────────────────────────────
   // The row-count check alone can't see a CORRECTION. Fixing Navy Federal's
   // graduation timeline or Citi's bureau changes no counts, so production

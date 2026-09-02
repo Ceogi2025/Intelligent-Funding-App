@@ -192,7 +192,34 @@ router.get('/metrics', async (_req: AuthRequest, res: Response) => {
     const { rows: members } = await pool.query(`
       SELECT subscription_status, COUNT(*)::int AS count FROM users GROUP BY subscription_status
     `)
-    res.json({ funnel, members })
+
+    // Drop-off report: where the intake actually loses people. Raw counts hide
+    // this — what matters is the percentage of starters still present at each
+    // question, and the single biggest one-step fall.
+    const counts: Record<string, number> = {}
+    for (const r of funnel as Array<{ event_type: string; count: number }>) counts[r.event_type] = r.count
+    const steps = [
+      { key: 'engine_start', label: 'Started' },
+      ...Array.from({ length: 9 }, (_, i) => ({ key: `engine_q${i + 1}`, label: `Question ${i + 1}` })),
+      { key: 'engine_review', label: 'Reached review' },
+      { key: 'engine_run', label: 'Built plan' },
+      { key: 'blueprint_saved', label: 'Saved blueprint' },
+    ]
+    const started = counts['engine_start'] || 0
+    let prev = started
+    let worst: { from: string; to: string; lostPct: number } | null = null
+    const dropoff = steps.map(s => {
+      const n = counts[s.key] || 0
+      const pctOfStart = started ? Math.round((n / started) * 100) : 0
+      const lost = prev > 0 ? Math.round(((prev - n) / prev) * 100) : 0
+      if (s.key !== 'engine_start' && prev > 0 && n > 0 && (!worst || lost > worst.lostPct)) {
+        worst = { from: steps[steps.findIndex(x => x.key === s.key) - 1].label, to: s.label, lostPct: lost }
+      }
+      prev = n || prev
+      return { ...s, count: n, pctOfStart, lostFromPrevPct: lost }
+    })
+
+    res.json({ funnel, members, dropoff, biggestDropoff: worst })
   } catch (err) {
     console.error('Metrics error:', err)
     res.status(500).json({ error: 'Failed to load metrics' })

@@ -7,6 +7,7 @@ import adminRoutes from './routes/admin.js'
 import publicRoutes from './routes/public.js'
 import chatRoutes from './routes/chat.js'
 import myRoutes from './routes/my.js'
+import cronRoutes from './routes/cron.js'
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/institutions', institutionRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/cron', cronRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/my', myRoutes)
 app.use('/api', publicRoutes)

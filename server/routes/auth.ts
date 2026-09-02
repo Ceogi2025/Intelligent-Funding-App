@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { sendWelcome } from '../lib/email.js'
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import { getPool } from '../db/database.js'
@@ -37,7 +38,10 @@ router.post('/signup', async (req: Request, res: Response) => {
 
   const user = { id: rows[0].id as number, email: email.toLowerCase(), role: 'customer' }
   const token = signToken(user)
+  // Respond first, then send. A slow or failing mail provider must never make
+  // a signup hang or fail.
   res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role } })
+  sendWelcome(user.email).catch(() => {})
 })
 
 router.post('/login', async (req: Request, res: Response) => {

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import SideMenu from '../components/SideMenu'
 import type { Institution, Product } from '../types'
-import { track } from '../lib/track'
+import { track, type TrackEvent } from '../lib/track'
 import type { BlueprintStep } from '../lib/blueprint'
 
 // ─── The Strategy Engine v1 ──────────────────────────────────────────────────
@@ -877,6 +877,14 @@ export default function Strategy() {
   const [savedId, setSavedId] = useState<number | null>(null)
 
   useEffect(() => { document.title = 'Strategy Engine | Intelligent Funding' }, [])
+  // Drop-off funnel: which question loses people. Once-per-session per step.
+  useEffect(() => {
+    if (built) return
+    const ACTIVE_LEN = answers.goal === 'business' ? 1 + BIZ_QUESTIONS.length : QUESTIONS.length
+    if (step === 0) track('engine_start', true)
+    else if (step >= ACTIVE_LEN) track('engine_review', true)
+    else if (step <= 9) track(`engine_q${step}` as TrackEvent, true)
+  }, [step, built, answers.goal])
   useEffect(() => {
     fetch('/api/institutions?path=all', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => (r.ok ? r.json() : Promise.reject()))
